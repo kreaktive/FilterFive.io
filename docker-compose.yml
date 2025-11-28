@@ -1,0 +1,56 @@
+services:
+  app:
+    build: .
+    container_name: filterfive_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${PORT:-3000}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - TWILIO_MESSAGING_SERVICE_SID=${TWILIO_MESSAGING_SERVICE_SID}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - SESSION_SECRET=${SESSION_SECRET}
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+    command: npm run dev
+    networks:
+      - filterfive-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: filterfive_db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - filterfive-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  filterfive-network:
+    driver: bridge

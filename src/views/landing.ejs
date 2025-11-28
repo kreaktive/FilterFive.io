@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How did we do? - <%= businessName %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="review-card">
+      <h1>Thanks for visiting!</h1>
+      <h2><%= businessName %></h2>
+      <p class="question">How did we do?</p>
+
+      <div class="stars" id="starContainer">
+        <span class="star" data-rating="1">★</span>
+        <span class="star" data-rating="2">★</span>
+        <span class="star" data-rating="3">★</span>
+        <span class="star" data-rating="4">★</span>
+        <span class="star" data-rating="5">★</span>
+      </div>
+
+      <p class="hint">Tap a star to rate</p>
+    </div>
+  </div>
+
+  <script>
+    const uuid = '<%= uuid %>';
+    const stars = document.querySelectorAll('.star');
+
+    stars.forEach(star => {
+      star.addEventListener('click', async function() {
+        const rating = parseInt(this.dataset.rating);
+
+        // Visual feedback
+        stars.forEach(s => s.classList.remove('selected'));
+        for (let i = 0; i < rating; i++) {
+          stars[i].classList.add('selected');
+        }
+
+        try {
+          const response = await fetch(`/review/${uuid}/rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating })
+          });
+
+          const data = await response.json();
+
+          if (data.action === 'redirect') {
+            window.location.href = data.url;
+          } else if (data.action === 'feedback_form') {
+            window.location.href = `/review/${uuid}/feedback`;
+          } else if (data.action === 'thank_you') {
+            window.location.href = `/review/${uuid}/thank-you`;
+          }
+        } catch (error) {
+          console.error('Error submitting rating:', error);
+          alert('Something went wrong. Please try again.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
