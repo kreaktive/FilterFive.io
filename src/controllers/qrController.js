@@ -39,7 +39,7 @@ const handleQrScan = async (req, res) => {
       return res.status(404).render('error', {
         title: 'Business Not Found',
         message: 'This QR code is invalid or the business is no longer active.',
-        statusCode: 404
+        error: { status: 404 }
       });
     }
 
@@ -71,7 +71,7 @@ const handleQrScan = async (req, res) => {
     res.status(500).render('error', {
       title: 'Something Went Wrong',
       message: 'Unable to process your request. Please try scanning the QR code again.',
-      statusCode: 500
+      error: { status: 500 }
     });
   }
 };
