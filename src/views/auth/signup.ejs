@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <% if (recaptchaSiteKey) { %>
+  <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchaSiteKey %>"></script>
+  <% } %>
   <style>
     * {
       margin: 0;
@@ -119,12 +121,6 @@
     .strength-fair { width: 50%; background: #f59e0b; }
     .strength-good { width: 75%; background: #3b82f6; }
     .strength-strong { width: 100%; background: #10b981; }
-
-    .captcha-container {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-    }
 
     .btn-signup {
       width: 100%;
@@ -242,12 +238,6 @@
           <p class="help-text">Use at least 12 characters for better security</p>
         </div>
 
-        <% if (recaptchaSiteKey) { %>
-        <div class="captcha-container">
-          <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
-        </div>
-        <% } %>
-
         <button type="submit" class="btn-signup" id="submitBtn">
           Start Free Trial
         </button>
@@ -287,13 +277,38 @@
       }
     });
 
-    // Prevent double submission
+    // Prevent double submission and execute reCAPTCHA v3
     const form = document.getElementById('signupForm');
     const submitBtn = document.getElementById('submitBtn');
 
-    form.addEventListener('submit', function() {
+    form.addEventListener('submit', function(e) {
+      <% if (recaptchaSiteKey) { %>
+      e.preventDefault(); // Prevent form submission
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
+
+      // Execute reCAPTCHA v3
+      grecaptcha.ready(function() {
+        grecaptcha.execute('<%= recaptchaSiteKey %>', {action: 'signup'}).then(function(token) {
+          // Add token to form
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'g-recaptcha-response';
+          input.value = token;
+          form.appendChild(input);
+
+          // Update button text
+          submitBtn.textContent = 'Creating Account...';
+
+          // Submit form
+          form.submit();
+        });
+      });
+      <% } else { %>
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating Account...';
+      <% } %>
     });
   </script>
 </body>
