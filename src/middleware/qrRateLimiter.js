@@ -30,7 +30,7 @@ const qrRateLimiter = rateLimit({
     res.status(429).render('error', {
       title: 'Too Many Requests',
       message: 'You\'ve already submitted feedback recently. Please try again in 30 seconds.',
-      statusCode: 429
+      error: { status: 429 }
     });
   },
 
