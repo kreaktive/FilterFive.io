@@ -1,0 +1,45 @@
+graph TD
+    subgraph External["External Entities"]
+        USER["🌐 Internet User"]
+        ZAPIER["⚡ Zapier Webhooks"]
+        TWILIO["📱 Twilio API"]
+        RESEND["📧 Resend API"]
+    end
+
+    subgraph VPS["VPS (Ubuntu 22.04 - srv1161896.hstgr.cloud)"]
+        subgraph Docker["Docker Environment"]
+            NGINX["🔒 Nginx<br/>Reverse Proxy<br/>Port 80/443"]
+            
+            subgraph Containers["Docker Containers"]
+                APP["📦 filterfive_app_prod<br/>Node.js 18 + Express<br/>Port 3000"]
+                DB["🗄️ filterfive_db_prod<br/>PostgreSQL 15<br/>Port 5432"]
+            end
+            
+            VOLUME[("💾 Docker Volume<br/>postgres_data")]
+        end
+    end
+
+    %% Incoming Traffic Flow
+    USER -->|"HTTPS :443<br/>Reviews & Dashboard"| NGINX
+    ZAPIER -->|"POST /api/zapier/ingest<br/>Customer Data"| NGINX
+    
+    %% Internal VPS Flow
+    NGINX -->|"Proxy Pass<br/>:3000"| APP
+    APP <-->|"Sequelize ORM<br/>:5432"| DB
+    DB <-->|"Data Persistence"| VOLUME
+    
+    %% Outbound API Calls
+    APP -->|"Send SMS<br/>Feedback Requests"| TWILIO
+    APP -->|"Send Email<br/>Negative Alerts"| RESEND
+
+    %% Styling
+    classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef nginx fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    classDef container fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef storage fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef vps fill:#fafafa,stroke:#424242,stroke-width:3px
+
+    class USER,ZAPIER,TWILIO,RESEND external
+    class NGINX nginx
+    class APP,DB container
+    class VOLUME storage

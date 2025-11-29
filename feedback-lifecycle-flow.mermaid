@@ -1,0 +1,70 @@
+sequenceDiagram
+    autonumber
+
+    actor CRM
+    participant API
+    participant DB
+    participant Twilio
+    actor Customer
+    participant Browser
+    participant Resend
+    actor Tenant
+
+    Note over CRM,DB: Phase 1 Ingestion
+
+    CRM->>API: POST webhook with customer data
+    API->>API: Validate and generate UUID
+    API->>DB: INSERT FeedbackRequest pending
+    DB-->>API: Return uuid
+    API-->>CRM: 201 Created
+
+    Note over API,Customer: Phase 2 SMS Distribution
+
+    API->>Twilio: Send SMS with review link
+    Twilio-->>API: Message SID
+    API->>DB: UPDATE status sent
+    Twilio->>Customer: SMS delivered
+
+    Note over Customer,API: Phase 3 The Click
+
+    Customer->>Browser: Click review link
+    Browser->>API: GET review page
+    API->>DB: SELECT FeedbackRequest
+    DB-->>API: Return data
+    API->>DB: UPDATE status clicked
+
+    Note over API,Browser: Phase 4 Render Rating
+
+    API-->>Browser: Return star rating page
+    Browser->>Customer: Show rating UI
+
+    Note over Customer,Tenant: Phase 5 The Filter
+
+    Customer->>Browser: Select rating
+    Browser->>API: POST rating
+
+    alt High Rating 4 or 5 stars
+        API->>DB: INSERT Review public true
+        DB-->>API: Created
+        API->>DB: UPDATE status rated
+        API-->>Browser: Redirect to Google
+        Browser->>Customer: Open Google Reviews
+
+    else Low Rating 1 to 3 stars
+        API->>DB: INSERT Review public false
+        DB-->>API: Created
+        API-->>Browser: Show feedback form
+        Browser->>Customer: Display text input
+        Customer->>Browser: Submit comments
+        Browser->>API: POST feedback text
+        API->>DB: UPDATE Review with text
+        DB-->>API: Updated
+        API->>DB: UPDATE status rated
+        API->>Resend: Send alert email
+        Resend-->>API: Queued
+        Resend->>Tenant: Deliver urgent alert
+        API-->>Browser: Show thank you page
+        Browser->>Customer: Display confirmation
+    end
+
+    Note over DB: Complete
