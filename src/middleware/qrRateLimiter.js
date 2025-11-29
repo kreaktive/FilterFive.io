@@ -10,10 +10,10 @@ const rateLimit = require('express-rate-limit');
 
 /**
  * QR Rate Limiter
- * Limits: 1 feedback request per 5 minutes per business per IP
+ * Limits: 1 feedback request per 30 seconds per business per IP
  */
 const qrRateLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
+  windowMs: 30 * 1000, // 30 seconds
   max: 1, // 1 request per window per key
 
   // Generate unique key combining IP + businessId
@@ -29,7 +29,7 @@ const qrRateLimiter = rateLimit({
 
     res.status(429).render('error', {
       title: 'Too Many Requests',
-      message: 'You\'ve already submitted feedback recently. Please try again in a few minutes.',
+      message: 'You\'ve already submitted feedback recently. Please try again in 30 seconds.',
       statusCode: 429
     });
   },
