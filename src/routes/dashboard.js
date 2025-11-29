@@ -8,7 +8,8 @@ const {
   logout,
   showDashboard,
   showSettings,
-  updateSettings
+  updateSettings,
+  showQrCode
 } = require('../controllers/dashboardController');
 
 // Public routes
@@ -20,5 +21,6 @@ router.get('/logout', requireAuth, logout);
 router.get('/', requireAuth, showDashboard);
 router.get('/settings', requireAuth, showSettings);
 router.post('/settings', requireAuth, updateSettings);
+router.get('/qr', requireAuth, showQrCode);
 
 module.exports = router;

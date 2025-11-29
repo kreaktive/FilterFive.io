@@ -1,5 +1,6 @@
 const { User, FeedbackRequest, Review } = require('../models');
 const { Op } = require('sequelize');
+const QRCode = require('qrcode');
 
 // GET /dashboard/login - Show login form
 const showLogin = (req, res) => {
@@ -229,11 +230,51 @@ const updateSettings = async (req, res) => {
   }
 };
 
+// GET /dashboard/qr - Show QR code page
+const showQrCode = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
+    // Generate QR code URL
+    const qrUrl = `${process.env.APP_URL}/r/${user.id}`;
+
+    // Generate QR code as base64 data URL
+    const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 2,
+      width: 400,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    res.render('dashboard/qr', {
+      title: 'My QR Code - FilterFive',
+      businessName: req.session.businessName,
+      qrCodeImage: qrCodeDataUrl,
+      qrUrl: qrUrl
+    });
+
+  } catch (error) {
+    console.error('Error in showQrCode:', error);
+    res.status(500).send('Something went wrong');
+  }
+};
+
 module.exports = {
   showLogin,
   login,
   logout,
   showDashboard,
   showSettings,
-  updateSettings
+  updateSettings,
+  showQrCode
 };
