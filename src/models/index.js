@@ -1,6 +1,7 @@
 const User = require('./User');
 const FeedbackRequest = require('./FeedbackRequest');
 const Review = require('./Review');
+const CsvUpload = require('./CsvUpload');
 
 // Define relationships
 
@@ -37,8 +38,20 @@ Review.belongsTo(FeedbackRequest, {
   as: 'feedbackRequest'
 });
 
+// User has many CsvUploads
+User.hasMany(CsvUpload, {
+  foreignKey: 'userId',
+  as: 'csvUploads'
+});
+
+CsvUpload.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'tenant'
+});
+
 module.exports = {
   User,
   FeedbackRequest,
-  Review
+  Review,
+  CsvUpload
 };

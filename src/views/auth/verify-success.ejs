@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <meta http-equiv="refresh" content="3;url=<%= dashboardUrl %>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 50px 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 500px;
+    }
+    .icon { font-size: 80px; margin-bottom: 20px; }
+    h1 { font-size: 28px; color: #1a202c; margin-bottom: 15px; }
+    p { font-size: 16px; color: #4a5568; line-height: 1.6; margin-bottom: 15px; }
+    .btn { display: inline-block; padding: 15px 32px; background: #667eea; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 20px; }
+    .btn:hover { background: #5568d3; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✅</div>
+    <h1>Welcome to FilterFive, <%= businessName %>!</h1>
+    <p>Your email has been verified successfully.</p>
+    <p>Your 14-day free trial starts now!</p>
+    <p style="font-size: 14px; color: #718096; margin-top: 25px;">
+      Redirecting to your dashboard in 3 seconds...
+    </p>
+    <a href="<%= dashboardUrl %>" class="btn">Go to Dashboard Now</a>
+  </div>
+</body>
+</html>

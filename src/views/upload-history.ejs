@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | FilterFive</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .history-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .history-table {
+      width: 100%;
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .history-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .history-table th,
+    .history-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .history-table th {
+      background: #F9FAFB;
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+    }
+    .history-table td {
+      color: #6B7280;
+      font-size: 14px;
+    }
+    .history-table tr:hover {
+      background: #F9FAFB;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-badge.completed {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    .status-badge.failed {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    .status-badge.partial {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .status-badge.processing {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6B7280;
+    }
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .upload-btn {
+      background: #7C3AED;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    .upload-btn:hover {
+      background: #6D28D9;
+    }
+    .number-badge {
+      font-weight: 600;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/header', { user }) %>
+
+  <div class="history-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h1><%= title %></h1>
+      <a href="/dashboard/upload" class="upload-btn">
+        📤 New Upload
+      </a>
+    </div>
+
+    <% if (uploads && uploads.length > 0) { %>
+      <div class="history-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Filename</th>
+              <th>Total</th>
+              <th>Success</th>
+              <th>Failed</th>
+              <th>Duplicates</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% uploads.forEach(function(upload) { %>
+              <tr>
+                <td>
+                  <%= new Date(upload.createdAt).toLocaleDateString() %><br>
+                  <small style="color: #9CA3AF;"><%= new Date(upload.createdAt).toLocaleTimeString() %></small>
+                </td>
+                <td>
+                  <strong><%= upload.filename %></strong>
+                </td>
+                <td class="number-badge"><%= upload.totalRows %></td>
+                <td>
+                  <span style="color: #10B981;">
+                    ✓ <%= upload.successCount %>
+                  </span>
+                </td>
+                <td>
+                  <% if (upload.failedCount > 0) { %>
+                    <span style="color: #EF4444;">
+                      ✗ <%= upload.failedCount %>
+                    </span>
+                  <% } else { %>
+                    <span style="color: #9CA3AF;">-</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (upload.duplicateCount > 0) { %>
+                    <span style="color: #F59E0B;">
+                      ⚠ <%= upload.duplicateCount %>
+                    </span>
+                  <% } else { %>
+                    <span style="color: #9CA3AF;">-</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="status-badge <%= upload.status %>">
+                    <%= upload.status %>
+                  </span>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center;">
+        <p style="color: #6B7280; font-size: 14px;">
+          Showing last 50 uploads
+        </p>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <div class="empty-state-icon">📄</div>
+        <h2>No Uploads Yet</h2>
+        <p>You haven't uploaded any CSV files yet.</p>
+        <a href="/dashboard/upload" class="upload-btn">
+          Upload Your First File
+        </a>
+      </div>
+    <% } %>
+
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="/dashboard" style="color: #7C3AED; text-decoration: underline;">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+</body>
+</html>

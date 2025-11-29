@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 50px 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #1a202c;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .email-highlight {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .info-box {
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 25px 0;
+      border-radius: 5px;
+      text-align: left;
+    }
+
+    .info-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #1e40af;
+    }
+
+    .resend-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .resend-section p {
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .btn-resend {
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-resend:hover {
+      background: #5568d3;
+    }
+
+    .btn-resend:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 40px 25px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .icon {
+        font-size: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="icon">📧</div>
+      <h1>Check Your Email</h1>
+
+      <p>
+        We've sent a verification email to<br>
+        <span class="email-highlight"><%= email %></span>
+      </p>
+
+      <p>
+        Click the link in the email to verify your account and start your 14-day free trial.
+      </p>
+
+      <div class="info-box">
+        <p>
+          <strong>💡 Tip:</strong> Check your spam folder if you don't see the email within a few minutes.
+        </p>
+      </div>
+
+      <% if (locals.emailError) { %>
+        <div class="error-message">
+          There was an issue sending your verification email. Please try resending it below.
+        </div>
+      <% } %>
+
+      <div class="resend-section">
+        <p>Didn't receive the email?</p>
+        <button class="btn-resend" id="resendBtn" onclick="resendVerification()">
+          Resend Verification Email
+        </button>
+        <div class="success-message" id="successMessage">
+          ✓ Verification email sent successfully!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let resendTimeout = null;
+
+    function resendVerification() {
+      const btn = document.getElementById('resendBtn');
+      const successMsg = document.getElementById('successMessage');
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      fetch('/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: '<%= email %>' })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          successMsg.style.display = 'block';
+          btn.textContent = 'Email Sent!';
+
+          setTimeout(() => {
+            successMsg.style.display = 'none';
+            btn.textContent = 'Resend Verification Email';
+            btn.disabled = false;
+          }, 5000);
+        } else {
+          alert(data.message || 'Failed to resend email. Please try again.');
+          btn.textContent = 'Resend Verification Email';
+          btn.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        btn.textContent = 'Resend Verification Email';
+        btn.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>

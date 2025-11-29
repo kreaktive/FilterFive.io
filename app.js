@@ -50,14 +50,19 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
+const authRoutes = require('./src/routes/auth');
 const ingestRoutes = require('./src/routes/ingest');
 const reviewRoutes = require('./src/routes/review');
 const dashboardRoutes = require('./src/routes/dashboard');
 const adminRoutes = require('./src/routes/admin');
+const uploadRoutes = require('./src/routes/uploadRoutes');
 
 app.get('/', (req, res) => {
   res.send('FilterFive API - Server is running');
 });
+
+// Auth Routes (Public signup, verification, password reset)
+app.use('/', authRoutes);
 
 // API Routes
 app.use('/api/v1/hooks', ingestRoutes);
@@ -67,6 +72,9 @@ app.use('/review', reviewRoutes);
 
 // Dashboard Routes (Tenant-facing)
 app.use('/dashboard', dashboardRoutes);
+
+// Upload Routes (CSV upload - Tenant-facing)
+app.use('/dashboard', uploadRoutes);
 
 // Admin Routes (Super Admin only)
 app.use('/admin', adminRoutes);

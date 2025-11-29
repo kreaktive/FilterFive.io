@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, redirectIfAuthenticated } = require('../middleware/auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
 const {
   showLogin,
   login,
@@ -12,7 +13,7 @@ const {
 
 // Public routes
 router.get('/login', redirectIfAuthenticated, showLogin);
-router.post('/login', redirectIfAuthenticated, login);
+router.post('/login', redirectIfAuthenticated, loginLimiter, login);
 
 // Protected routes
 router.get('/logout', requireAuth, logout);

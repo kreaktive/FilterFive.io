@@ -114,6 +114,78 @@
       transform: translateY(0);
     }
 
+    .forgot-password {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .forgot-password a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .divider span {
+      background: white;
+      padding: 0 15px;
+      position: relative;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .signup-cta {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .signup-cta p {
+      margin: 0 0 15px 0;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .btn-signup {
+      display: inline-block;
+      padding: 12px 24px;
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-signup:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
     @media (max-width: 480px) {
       .login-card {
         padding: 30px 20px;
@@ -168,6 +240,19 @@
           Sign In
         </button>
       </form>
+
+      <div class="forgot-password">
+        <a href="/forgot-password">Forgot your password?</a>
+      </div>
+
+      <div class="divider">
+        <span>New to FilterFive?</span>
+      </div>
+
+      <div class="signup-cta">
+        <p><strong>Start your 14-day free trial today</strong></p>
+        <a href="/signup" class="btn-signup">Create Free Account</a>
+      </div>
     </div>
   </div>
 </body>

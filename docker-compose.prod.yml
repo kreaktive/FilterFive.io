@@ -28,6 +28,8 @@ services:
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
       - APP_URL=${APP_URL}
       - SESSION_SECRET=${SESSION_SECRET}
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
     depends_on:
       db:
         condition: service_healthy

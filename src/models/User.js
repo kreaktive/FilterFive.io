@@ -64,6 +64,44 @@ const User = sequelize.define('User', {
     defaultValue: true,
     field: 'is_active'
   },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    field: 'is_verified'
+  },
+  verificationToken: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+    field: 'verification_token'
+  },
+  verificationTokenExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'verification_token_expires'
+  },
+  trialStartsAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'trial_starts_at'
+  },
+  trialEndsAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'trial_ends_at'
+  },
+  resetPasswordToken: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+    field: 'reset_password_token'
+  },
+  resetPasswordTokenExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'reset_password_token_expires'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

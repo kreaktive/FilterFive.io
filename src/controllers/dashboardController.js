@@ -39,6 +39,14 @@ const login = async (req, res) => {
       });
     }
 
+    // Check if user is verified (only for non-super-admins)
+    if (!user.isVerified && user.role !== 'super_admin') {
+      return res.render('dashboard/login', {
+        title: 'Login - FilterFive',
+        error: 'Please verify your email address before logging in. Check your inbox for the verification link.'
+      });
+    }
+
     // Set session
     req.session.userId = user.id;
     req.session.userEmail = user.email;

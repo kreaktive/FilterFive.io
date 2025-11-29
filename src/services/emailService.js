@@ -196,6 +196,169 @@ const sendNegativeFeedbackAlert = async (tenantEmail, customerName, rating, comm
   }
 };
 
+/**
+ * Send Email Verification
+ */
+const sendVerificationEmail = async (email, businessName, verificationToken) => {
+  try {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('Resend API key not configured');
+    }
+
+    const templates = require('./emailTemplates');
+    const verificationUrl = `${process.env.APP_URL}/verify/${verificationToken}`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Verify your FilterFive account',
+      html: templates.verificationEmail(businessName, verificationUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    console.log(`✓ Verification email sent to ${email} - Email ID: ${emailId}`);
+
+    return { success: true, emailId };
+  } catch (error) {
+    console.error('✗ Verification email failed:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Send Welcome Email (After verification)
+ */
+const sendWelcomeEmail = async (email, businessName) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: '🚀 Welcome to FilterFive - Your trial has started!',
+      html: templates.welcomeEmail(businessName, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    console.log(`✓ Welcome email sent to ${email} - Email ID: ${emailId}`);
+
+    return { success: true, emailId };
+  } catch (error) {
+    console.error('✗ Welcome email failed:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Send Password Reset Email
+ */
+const sendPasswordResetEmail = async (email, businessName, resetToken) => {
+  try {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('Resend API key not configured');
+    }
+
+    const templates = require('./emailTemplates');
+    const resetUrl = `${process.env.APP_URL}/reset-password/${resetToken}`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Reset your FilterFive password',
+      html: templates.passwordResetEmail(businessName, resetUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    console.log(`✓ Password reset email sent to ${email} - Email ID: ${emailId}`);
+
+    return { success: true, emailId };
+  } catch (error) {
+    console.error('✗ Password reset email failed:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Send Trial Ending Reminder (3 days before)
+ */
+const sendTrialEndingEmail = async (email, businessName, trialEndsAt) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+    const trialEndsDate = new Date(trialEndsAt).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: '⏰ Your FilterFive trial ends in 3 days',
+      html: templates.trialEndingEmail(businessName, dashboardUrl, trialEndsDate)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    console.log(`✓ Trial ending email sent to ${email} - Email ID: ${emailId}`);
+
+    return { success: true, emailId };
+  } catch (error) {
+    console.error('✗ Trial ending email failed:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Send Trial Expired Email
+ */
+const sendTrialExpiredEmail = async (email, businessName) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Your FilterFive trial has ended',
+      html: templates.trialExpiredEmail(businessName, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    console.log(`✓ Trial expired email sent to ${email} - Email ID: ${emailId}`);
+
+    return { success: true, emailId };
+  } catch (error) {
+    console.error('✗ Trial expired email failed:', error.message);
+    throw error;
+  }
+};
+
 module.exports = {
-  sendNegativeFeedbackAlert
+  sendNegativeFeedbackAlert,
+  sendVerificationEmail,
+  sendWelcomeEmail,
+  sendPasswordResetEmail,
+  sendTrialEndingEmail,
+  sendTrialExpiredEmail
 };

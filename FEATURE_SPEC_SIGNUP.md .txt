@@ -1,0 +1,69 @@
+1. Context & Objective
+Current State: The application currently relies on "Concierge Onboarding" (Super Admin manually creates tenants). New Objective: Implement a secure, self-service "Product-Led Growth" signup flow. Goal: Allow a new user to register via /signup, verify their email address via Resend, and automatically enter a 14-day free trial on the dashboard without human intervention.
+
+2. Technical Stack
+Backend: Node.js, Express.
+Database: PostgreSQL (via Sequelize/Knex - check existing implementation).
+Frontend: EJS Templating (Server-side rendering).
+Email: Resend API.
+Styling: CSS (Mobile-first).
+3. Database Schema Changes (The Foundation)
+Action: Create a migration to modify the Users (or Tenants) table. New Columns Required:
+is_verified (BOOLEAN): Default false.
+verification_token (STRING/UUID): Nullable. Stores the unique hash for the email link.
+verification_expires (TIMESTAMP): Nullable. Token validity limit (e.g., 24 hours).
+trial_ends_at (TIMESTAMP): Default NOW() + 14 days.
+stripe_customer_id (STRING): Nullable (Reserved for future billing integration).
+4. User Experience (UX) Flow
+Step A: The Entry (Login/Signup Split)
+Modify /dashboard/login.
+Add a clear "New here?" section with a "Start Free Trial" button linking to /signup.
+Step B: The Registration Form (GET /signup)
+Fields: Business Name, Email, Password.
+UX Requirement:
+Real-time validation (Password min length).
+Clear error states (e.g., "Email already taken").
+Clean, centered card layout matching the existing Login design.
+Step C: Post-Registration (The "Pending" State)
+Upon submission, do not log the user in.
+Create the DB record with is_verified: false.
+Trigger the Resend Email Service.
+Redirect to a "Check Your Inbox" page (clean UI, instructing user to verify).
+Step D: Verification (GET /verify/:token)
+User clicks link in email.
+Logic:
+Find user by token.
+Check if token is expired.
+Update DB: is_verified: true, verification_token: null.
+Auto-Login: Initialize the session immediately (do not force them to login again).
+Redirect to /dashboard with a "Welcome to FilterFive" flash message.
+5. Implementation Tasks
+Task 1: Database Migration
+Create the migration script to add the columns listed in Section 3.
+Task 2: Service Layer Updates (src/services/emailService.js)
+Create function sendVerificationEmail(email, token).
+Content:
+Subject: "Verify your FilterFive account"
+Body: HTML template. "Welcome to FilterFive. Click the button below to verify your account."
+Button URL: ${process.env.BASE_URL}/verify/${token}.
+Task 3: Auth Controller (src/controllers/authController.js)
+signupPage: Renders the form.
+signup:
+Validates input.
+Hashes password.
+Generates crypto.randomBytes token.
+Creates User.
+Calls emailService.
+verifyEmail:
+Handles the token lookup and status update.
+Sets req.session.user.
+Task 4: Route Definitions (src/routes/auth.js)
+Define GET /signup, POST /signup, GET /verify/:token.
+Exclude these routes from requireAuth middleware.
+Task 5: Security Update (src/controllers/dashboardController.js)
+Update the existing login function.
+Constraint: If user.is_verified is false, block login and throw error: "Account pending verification. Please check your email."
+6. UX/UI Requirements
+Mobile First: Forms must be touch-friendly.
+Feedback: Use Flash messages for success/error states.
+Resilience: If a user tries to sign up with an existing email, show a generic "If an account exists, we sent a reset link" or a specific error (depending on security preference—let's go with specific error "Email already in use" for this MVP phase).
