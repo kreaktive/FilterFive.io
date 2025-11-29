@@ -10,7 +10,9 @@
 Businesses struggle with negative public reviews damaging their reputation. FilterFive intercepts feedback BEFORE it goes public, routing 4-5 star reviews to Google/Facebook while capturing 1-3 star feedback privately for resolution.
 
 **How It Works:**
-Zapier Webhook → Database → SMS to Customer → Customer Rates → Smart Filter (High=Public Review, Low=Private Feedback+Alert)
+Two feedback collection methods:
+1. **SMS Flow:** Zapier Webhook → Database → SMS to Customer → Customer Rates → Smart Filter
+2. **QR Code Flow:** Customer Scans QR → Anonymous Feedback → Smart Filter (No phone required)
 
 ---
 
@@ -36,6 +38,7 @@ Zapier Webhook → Database → SMS to Customer → Customer Rates → Smart Fil
 - **Email Delivery:** Resend (transactional email API)
 - **Payments:** Stripe (planned - integration incomplete)
 - **Automation:** Zapier (webhook ingestion endpoint)
+- **QR Code Generation:** qrcode 1.5.4 (base64 image generation)
 
 ### Security & Middleware
 - **Helmet:** Security headers
@@ -77,7 +80,7 @@ METHODS:
 ```
 
 ### Table: `feedback_requests`
-**Purpose:** Tracks each SMS sent to a customer requesting feedback
+**Purpose:** Tracks each feedback request (SMS or QR code scan)
 
 ```
 feedback_requests
@@ -85,13 +88,15 @@ feedback_requests
 ├── uuid (UUID, UNIQUE, NOT NULL, DEFAULT: UUIDv4) [PUBLIC LINK IDENTIFIER]
 ├── user_id (INTEGER, FK → users.id, NOT NULL)
 ├── customer_name (STRING, NULLABLE)
-├── customer_phone (STRING(20), NOT NULL)
+├── customer_phone (STRING(20), NULLABLE) [NULL for QR visitors]
 ├── customer_email (STRING, NULLABLE)
 ├── status (ENUM: pending|sent|clicked|rated|expired, DEFAULT: pending)
 ├── sms_sent_at (TIMESTAMP, NULLABLE)
 ├── link_clicked_at (TIMESTAMP, NULLABLE)
 ├── twilio_message_sid (STRING, NULLABLE) [Twilio tracking ID]
 ├── source (ENUM: zapier|csv_upload|manual, DEFAULT: manual)
+├── delivery_method (ENUM: sms|qr, DEFAULT: sms) [How feedback was requested]
+├── ip_address (STRING(45), NULLABLE) [Customer IP for QR rate limiting]
 ├── created_at (TIMESTAMP, DEFAULT: NOW)
 └── updated_at (TIMESTAMP, DEFAULT: NOW)
 
@@ -180,7 +185,45 @@ feedback_requests (1) ──< reviews (1)
 
 ---
 
-### C. THE FILTER FLOW (Customer Response → Smart Routing)
+### C. QR CODE FLOW (In-Person → Anonymous Feedback)
+**Route:** `GET /r/:businessId`
+
+**Steps:**
+1. Tenant visits `/dashboard/qr` and downloads their QR code
+2. QR code printed/displayed at physical location (checkout counter, table, receipt)
+3. Customer scans QR code with phone camera
+4. Redirect to `https://filterfive.io/r/:businessId`
+5. Rate limiter checks IP address (max 1 scan per 30 seconds per business per IP)
+6. `qrController.js` creates `FeedbackRequest`:
+   ```
+   {
+     userId: businessId,
+     uuid: auto-generated,
+     customerPhone: NULL,          // Anonymous!
+     customerName: NULL,
+     deliveryMethod: 'qr',
+     ipAddress: req.ip,
+     status: 'clicked',
+     linkClickedAt: NOW()
+   }
+   ```
+7. Redirect to `/review/:uuid` (same star rating page as SMS flow)
+8. Customer rates experience without providing phone number
+
+**Key Files:**
+- `src/routes/qr.js`
+- `src/controllers/qrController.js`
+- `src/middleware/qrRateLimiter.js`
+- `src/views/dashboard/qr.ejs` (tenant QR code page)
+
+**Rate Limiting:**
+- 30 second window per IP per business
+- Prevents spam/abuse while allowing quick retries
+- Key format: `qr_{businessId}_{ipAddress}`
+
+---
+
+### D. THE FILTER FLOW (Customer Response → Smart Routing)
 **Endpoint:** `GET /review/:uuid` (Frontend) → `POST /review/:uuid` (Form Submit)
 
 **Frontend Logic (reviewController.js):**
@@ -275,16 +318,19 @@ filterfive/
 │   ├── controllers/
 │   │   ├── ingestController.js # Zapier webhook handler
 │   │   ├── reviewController.js # Customer-facing review flow
-│   │   ├── dashboardController.js # Tenant dashboard + auth
-│   │   └── adminController.js  # Super admin panel
+│   │   ├── dashboardController.js # Tenant dashboard + auth + QR page
+│   │   ├── adminController.js  # Super admin panel + QR generation
+│   │   └── qrController.js     # QR code scan handler
 │   ├── routes/
 │   │   ├── ingest.js           # POST /api/v1/hooks/*
 │   │   ├── review.js           # GET/POST /review/:uuid
-│   │   ├── dashboard.js        # Tenant portal routes
-│   │   └── admin.js            # Super admin routes
+│   │   ├── dashboard.js        # Tenant portal routes + /qr
+│   │   ├── admin.js            # Super admin routes + /qr/:userId
+│   │   └── qr.js               # GET /r/:businessId (public QR scans)
 │   ├── middleware/
 │   │   ├── auth.js             # requireAuth, redirectIfAuthenticated
-│   │   └── superAuth.js        # requireSuperAdmin
+│   │   ├── superAuth.js        # requireSuperAdmin
+│   │   └── qrRateLimiter.js    # IP-based rate limiting for QR
 │   ├── services/
 │   │   ├── smsService.js       # Twilio integration
 │   │   └── emailService.js     # Resend integration
@@ -292,10 +338,12 @@ filterfive/
 │   │   ├── landing_marketing.ejs # Public homepage
 │   │   ├── review.ejs          # Customer rating page
 │   │   ├── thankyou.ejs        # Post-submission
+│   │   ├── error.ejs           # Error pages (404, 429, 500)
 │   │   ├── dashboard/
 │   │   │   ├── login.ejs
 │   │   │   ├── index.ejs       # Main tenant dashboard
-│   │   │   └── settings.ejs
+│   │   │   ├── settings.ejs
+│   │   │   └── qr.ejs          # QR code download page
 │   │   └── admin/
 │   │       ├── dashboard.ejs   # Tenant list
 │   │       └── create.ejs      # Create new tenant
@@ -457,6 +505,7 @@ docker exec filterfive_app_prod npm run set:superadmin # Promote user ID 1
 - No CSV import for bulk feedback requests
 - No analytics dashboard (conversion rates, response times)
 - No white-label branding (all emails/SMS say "FilterFive")
+- No bulk QR code generation/download for multiple locations
 
 ### Planned Features
 1. **Automated SMS Triggers**
@@ -476,6 +525,13 @@ docker exec filterfive_app_prod npm run set:superadmin # Promote user ID 1
    - Response rate tracking
    - Average rating over time
    - Conversion funnel (sent → clicked → rated)
+   - SMS vs QR performance comparison
+
+5. **QR Code Enhancements**
+   - Custom QR code colors/branding
+   - Bulk QR generation for multi-location businesses
+   - QR analytics (scans per location, time of day patterns)
+   - Printable templates (table tents, stickers, receipts)
 
 ---
 
@@ -551,8 +607,11 @@ Before going live:
 ### Internal Endpoints
 - **Public Landing:** https://filterfive.io
 - **Tenant Login:** https://filterfive.io/dashboard/login
+- **Tenant QR Page:** https://filterfive.io/dashboard/qr
 - **Super Admin:** https://filterfive.io/admin
+- **Admin QR Generation:** https://filterfive.io/admin/qr/:userId
 - **Review Page:** https://filterfive.io/review/:uuid
+- **QR Scan Entry:** https://filterfive.io/r/:businessId
 - **Zapier Webhook:** https://filterfive.io/api/v1/hooks/feedback-request/:userId
 
 ---
@@ -592,5 +651,12 @@ docker exec filterfive_db_prod psql -U filterfive_prod_user -d filterfive_prod -
 ---
 
 **Last Updated:** November 29, 2025
-**Version:** 1.0.0 (Production MVP)
+**Version:** 1.1.0 (QR Code Feature Added)
 **Status:** ✅ Deployed and operational at https://filterfive.io
+
+**Recent Updates:**
+- ✅ QR Code Feedback System (v1.1.0 - Nov 29, 2025)
+  - Anonymous feedback collection via QR codes
+  - Tenant dashboard QR page with download/print
+  - IP-based rate limiting (30s window)
+  - Admin QR generation endpoint
