@@ -14,6 +14,9 @@ const models = require('./src/models');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (required when behind nginx/reverse proxy)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false // Disable for development, configure properly for production
