@@ -30,7 +30,7 @@ const FeedbackRequest = sequelize.define('FeedbackRequest', {
   },
   customerPhone: {
     type: DataTypes.STRING(20),
-    allowNull: false,
+    allowNull: true,  // Nullable for QR visitors
     field: 'customer_phone'
   },
   customerEmail: {
@@ -60,6 +60,19 @@ const FeedbackRequest = sequelize.define('FeedbackRequest', {
   source: {
     type: DataTypes.ENUM('zapier', 'csv_upload', 'manual'),
     defaultValue: 'manual'
+  },
+  deliveryMethod: {
+    type: DataTypes.ENUM('sms', 'qr'),
+    defaultValue: 'sms',
+    allowNull: false,
+    field: 'delivery_method',
+    comment: 'How feedback request was delivered: SMS link or QR code'
+  },
+  ipAddress: {
+    type: DataTypes.STRING(45),
+    allowNull: true,
+    field: 'ip_address',
+    comment: 'Customer IP for rate limiting (QR visitors only)'
   },
   createdAt: {
     type: DataTypes.DATE,

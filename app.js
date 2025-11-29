@@ -54,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 const authRoutes = require('./src/routes/auth');
+const qrRoutes = require('./src/routes/qr');
 const ingestRoutes = require('./src/routes/ingest');
 const reviewRoutes = require('./src/routes/review');
 const dashboardRoutes = require('./src/routes/dashboard');
@@ -66,6 +67,9 @@ app.get('/', (req, res) => {
 
 // Auth Routes (Public signup, verification, password reset)
 app.use('/', authRoutes);
+
+// QR Code Routes (Public QR code feedback)
+app.use('/', qrRoutes);
 
 // API Routes
 app.use('/api/v1/hooks', ingestRoutes);

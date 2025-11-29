@@ -1,5 +1,6 @@
 const { User } = require('../models');
 const { Op } = require('sequelize');
+const QRCode = require('qrcode');
 
 // GET /admin - Show list of all tenants
 const showAdminDashboard = async (req, res) => {
@@ -95,8 +96,65 @@ const createTenant = async (req, res) => {
   }
 };
 
+/**
+ * Generate QR Code for Business
+ * GET /admin/qr/:userId
+ *
+ * Returns QR code as base64 data URL for display
+ */
+const generateQrCode = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Get business info
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business not found'
+      });
+    }
+
+    // Generate QR code URL
+    const qrUrl = `${process.env.APP_URL}/r/${user.id}`;
+
+    // Generate QR code image as base64 data URL
+    const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 2,
+      width: 400,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    console.log(`✓ QR code generated for: ${user.businessName} (ID: ${user.id})`);
+
+    // Return QR code data
+    res.json({
+      success: true,
+      qrUrl: qrUrl,
+      qrCodeImage: qrCodeDataUrl,
+      businessName: user.businessName,
+      businessId: user.id
+    });
+
+  } catch (error) {
+    console.error('❌ QR generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate QR code'
+    });
+  }
+};
+
 module.exports = {
   showAdminDashboard,
   showCreateTenant,
-  createTenant
+  createTenant,
+  generateQrCode
 };
