@@ -14,10 +14,11 @@
 
 - **🎯 Smart Feedback Filtering** - 4-5 star reviews go public (Google/Facebook), 1-3 stars stay private
 - **📱 SMS Automation** - Twilio-powered SMS delivery with A2P 10DLC compliance
+- **📱 QR Code Feedback** - Anonymous in-person feedback via scannable QR codes
 - **⚡ Real-Time Email Alerts** - Instant notifications for negative feedback via Resend
 - **🏢 Multi-Tenant Architecture** - Isolated data per business with role-based access control
 - **🔗 Zapier Integration** - Ingest customer contacts from 5,000+ apps via webhook
-- **📊 Tenant Dashboard** - View all feedback requests, reviews, and analytics
+- **📊 Tenant Dashboard** - View all feedback requests, reviews, and analytics with QR code access
 - **🔒 Secure by Design** - UUID-based review links, password hashing, session management
 - **🐳 Docker Ready** - Fully containerized for easy development and deployment
 
@@ -49,6 +50,7 @@
 - **PostgreSQL 15** - Relational database
 - **Sequelize 6.35.2** - ORM for database operations
 - **EJS 3.1.9** - Server-side templating
+- **QRCode 1.5.4** - QR code generation
 
 ### Infrastructure
 - **Docker + Docker Compose** - Containerization
@@ -530,11 +532,13 @@ Need help? Here are your options:
 
 ## 🗺 Roadmap
 
-### Current Version: v1.0.0 (MVP)
+### Current Version: v1.1.0
 
 **✅ Completed Features:**
 - Multi-tenant authentication system
 - SMS feedback request delivery (Twilio)
+- QR code feedback system (anonymous in-person reviews)
+- Tenant QR code dashboard page with download/print/copy functionality
 - Smart rating filter (4-5 stars → public, 1-3 stars → private)
 - Email alerts for negative feedback (Resend)
 - Tenant dashboard with statistics
@@ -545,25 +549,25 @@ Need help? Here are your options:
 
 ### Planned Features:
 
-**v1.1.0 - Stripe Integration**
+**v1.2.0 - Stripe Integration**
 - [ ] Subscription payment processing
 - [ ] Self-service tenant registration with trial period
 - [ ] Automatic subscription status updates
 - [ ] Invoice generation and payment history
 
-**v1.2.0 - CSV Upload**
+**v1.3.0 - CSV Upload**
 - [ ] Bulk customer import via CSV
 - [ ] Validation and duplicate detection
 - [ ] Batch SMS sending with rate limiting
 - [ ] Import history and error logs
 
-**v1.3.0 - Analytics Dashboard**
+**v1.4.0 - Analytics Dashboard**
 - [ ] Response rate metrics
 - [ ] Average rating trends
 - [ ] Customer feedback sentiment analysis
 - [ ] Export reports (PDF/CSV)
 
-**v1.4.0 - AI-Powered Insights**
+**v1.5.0 - AI-Powered Insights**
 - [ ] Natural language processing for feedback categorization
 - [ ] Automated response suggestions for negative reviews
 - [ ] Predictive analytics for customer satisfaction

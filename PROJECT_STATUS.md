@@ -1,7 +1,7 @@
 # FilterFive Project Status
 
-> **Last Updated:** January 28, 2025
-> **Current Phase:** MVP v1.0.0 - Production Deployed ✅
+> **Last Updated:** November 29, 2025
+> **Current Phase:** v1.1.0 - QR Code Feature Deployed ✅
 > **Status:** 🟢 Live and Operational
 
 ---
@@ -260,6 +260,52 @@
 
 ---
 
+### Phase 5: QR Code Feature (v1.1.0) ✅
+
+#### Backend Implementation
+- [x] Installed `qrcode` npm package (v1.5.4)
+- [x] Created `src/controllers/qrController.js` for QR request handling
+- [x] Created `src/routes/qr.js` with rate limiting
+- [x] Added QR code generation to `dashboardController.js`
+- [x] Updated database schema (nullable `customerPhone`, `deliveryMethod` enum, `ipAddress`)
+- [x] Created IP-based rate limiter middleware (`qrRateLimiter.js`)
+
+#### Frontend Implementation
+- [x] Created `src/views/dashboard/qr.ejs` - Tenant QR code page
+- [x] Download QR code functionality (PNG with business name)
+- [x] Copy URL to clipboard functionality
+- [x] Print-friendly CSS styling
+- [x] Mobile responsive design
+- [x] Usage instructions for tenants
+- [x] Success feedback messages
+
+#### Routing & Integration
+- [x] Registered QR routes in `app.js`
+- [x] Added `/dashboard/qr` route with authentication
+- [x] Implemented `/r/:businessId` public QR scan endpoint
+- [x] Updated dashboard navigation to include "My QR Code" link
+
+#### Database Updates
+- [x] Made `customerPhone` nullable in FeedbackRequests
+- [x] Added `deliveryMethod` enum field ('sms', 'qr', 'csv')
+- [x] Added `ipAddress` field for anonymous tracking
+- [x] Updated model validations
+
+#### Production Deployment
+- [x] Deployed QR feature to production via git bundle
+- [x] Rebuilt Docker containers with new code
+- [x] Tested QR generation at `/dashboard/qr`
+- [x] Verified QR scan flow at `/r/:businessId`
+- [x] Confirmed rate limiting works correctly
+
+#### Documentation
+- [x] Updated AI_CONTEXT.md with QR code flow
+- [x] Updated README.md with QR feature
+- [x] Updated PROJECT_STATUS.md to v1.1.0
+- [x] Updated roadmap in all documentation
+
+---
+
 ## 🔄 Current State
 
 ### What's Working Right Now
@@ -270,7 +316,9 @@
 ✅ **Super Admin:** Can access `/admin` to manage tenants manually
 ✅ **Zapier Integration:** Webhook endpoint accepting customer contacts
 ✅ **SMS Delivery:** Twilio sending review request SMS to customers
-✅ **Review Capture:** Customers can submit ratings via unique links
+✅ **QR Code System:** Tenants can access, download, and print QR codes at `/dashboard/qr`
+✅ **QR Code Scanning:** Anonymous feedback via `/r/:businessId` with IP-based rate limiting
+✅ **Review Capture:** Customers can submit ratings via unique links (SMS or QR)
 ✅ **Smart Filtering:** 4-5 stars → public, 1-3 stars → private (working)
 ✅ **Email Alerts:** Resend sending negative feedback alerts to tenants
 ✅ **Dashboard:** Tenants can view feedback requests and reviews
@@ -280,9 +328,9 @@
 
 ### Known Limitations (Intentional MVP Scope)
 
-⚠️ **No Stripe Integration** - Payment processing not implemented (v1.1 planned)
-⚠️ **No CSV Upload** - Bulk customer import not available (v1.2 planned)
-⚠️ **Limited Analytics** - Basic stats only, no advanced reporting (v1.3 planned)
+⚠️ **No Stripe Integration** - Payment processing not implemented (v1.2 planned)
+⚠️ **No CSV Upload** - Bulk customer import not available (v1.3 planned)
+⚠️ **Limited Analytics** - Basic stats only, no advanced reporting (v1.4 planned)
 ⚠️ **Manual Onboarding** - Super admin must create tenants manually
 ⚠️ **No Email Templates for Positive Reviews** - Only negative alerts implemented
 ⚠️ **No SMS Templates Customization** - Fixed SMS message template
@@ -292,7 +340,7 @@
 
 ## 📋 TODO: Next Steps
 
-### Immediate Priority (v1.1 - Stripe Integration)
+### Immediate Priority (v1.2 - Stripe Integration)
 
 #### Stripe Account Setup
 - [ ] Create Stripe account (production)
@@ -369,7 +417,7 @@
 
 ---
 
-### Medium Priority (v1.2 - CSV Upload)
+### Medium Priority (v1.3 - CSV Upload)
 
 #### CSV Upload Feature
 - [ ] Install `csv-parser` npm package
@@ -397,7 +445,7 @@
 
 ---
 
-### Lower Priority (v1.3 - Analytics Dashboard)
+### Lower Priority (v1.4 - Analytics Dashboard)
 
 #### Advanced Analytics
 - [ ] Create `src/controllers/analyticsController.js`
@@ -418,7 +466,7 @@
 
 ---
 
-### Future Enhancements (v1.4+)
+### Future Enhancements (v1.5+)
 
 #### AI-Powered Features
 - [ ] Natural Language Processing for feedback categorization
@@ -663,30 +711,31 @@ Refer to the **TODO: Next Steps** section above for prioritized tasks. Start wit
 
 ## 🏁 Conclusion
 
-**FilterFive MVP v1.0.0 is complete and successfully deployed to production.**
+**FilterFive v1.1.0 is complete and successfully deployed to production.**
 
 The application is fully functional, documented, and operational at https://filterfive.io. All core features work as intended:
 - ✅ Customer contact ingestion (Zapier)
 - ✅ SMS delivery (Twilio)
+- ✅ QR code feedback system (anonymous in-person reviews)
 - ✅ Review capture (UUID links)
 - ✅ Smart filtering (4-5 public, 1-3 private)
 - ✅ Email alerts (negative feedback)
-- ✅ Tenant dashboard
+- ✅ Tenant dashboard with QR code access
 - ✅ Super admin interface
 
-**Next critical step:** Implement Stripe integration (v1.1) to enable self-service registration and begin generating revenue.
+**Next critical step:** Implement Stripe integration (v1.2) to enable self-service registration and begin generating revenue.
 
 **Timeline Recommendation:**
 - **Week 1-2:** Stripe integration (subscription, checkout, webhooks)
 - **Week 3:** Testing and bug fixes
 - **Week 4:** Go-to-market (marketing, outreach, first customers)
-- **Month 2:** CSV upload feature (v1.2)
-- **Month 3:** Analytics dashboard (v1.3)
+- **Month 2:** CSV upload feature (v1.3)
+- **Month 3:** Analytics dashboard (v1.4)
 
 ---
 
 **Document Maintained By:** FilterFive Development Team
 **Created:** January 28, 2025
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 For questions or updates to this document, contact: dev@filterfive.io
