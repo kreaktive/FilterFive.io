@@ -35,3 +35,12 @@ coverage/
 
 # Docker volumes
 postgres_data/
+
+# Deployment packages (contain sensitive config)
+*.tar
+*.tar.gz
+*.tgz
+
+# Stripe data exports (may contain test keys)
+stripe_*.csv
+prices-stripe-*.csv

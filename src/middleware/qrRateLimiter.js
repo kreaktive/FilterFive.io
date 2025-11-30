@@ -16,8 +16,11 @@ const qrRateLimiter = rateLimit({
   windowMs: 30 * 1000, // 30 seconds
   max: 1, // 1 request per window per key
 
+  // Disable strict validation for custom key generator
+  validate: { xForwardedForHeader: false },
+
   // Generate unique key combining IP + businessId
-  keyGenerator: (req) => {
+  keyGenerator: (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || 'unknown';
     const businessId = req.params.businessId || 'unknown';
     return `qr_${businessId}_${ip}`;

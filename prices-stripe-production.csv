@@ -1,0 +1,4 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior
+price_1SZ1NJClBF0BgGFcGDUK175r,prod_TW3Uf9ooc0uurr,JustForRealTesting,,txcd_10000000,,2025-11-30 03:32,1.00,usd,month,1,licensed,,per_unit,,unspecified
+price_1SZ1MjClBF0BgGFc8tNsxSIY,prod_TW3Tf5nlCYOkyO,A Year of Review Building,,txcd_10000000,,2025-11-30 03:32,770.00,usd,year,1,licensed,,per_unit,,unspecified
+price_1SZ1M3ClBF0BgGFcOeNhJwKk,prod_TW3SgC3k4DG7I8,A Month of Review Building,,txcd_10000000,,2025-11-30 03:31,77.00,usd,month,1,licensed,,per_unit,,unspecified

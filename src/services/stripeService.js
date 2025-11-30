@@ -84,7 +84,21 @@ class StripeService {
       return session;
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      throw new Error('Failed to create checkout session');
+      console.error('Stripe error details:', {
+        message: error.message,
+        type: error.type,
+        code: error.code,
+        param: error.param,
+        statusCode: error.statusCode
+      });
+      console.error('Request details:', {
+        userId: user.id,
+        plan: plan,
+        priceId: priceId,
+        customerId: user.stripeCustomerId,
+        appUrl: process.env.APP_URL
+      });
+      throw error; // Re-throw the original error instead of a generic one
     }
   }
 

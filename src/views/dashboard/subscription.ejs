@@ -410,7 +410,7 @@
             <li>Cancel anytime</li>
           </ul>
 
-          <button class="btn-subscribe" onclick="checkout('monthly')">
+          <button class="btn-subscribe" onclick="checkout('monthly', event)">
             Subscribe Monthly
           </button>
         </div>
@@ -434,7 +434,7 @@
             <li>Priority support</li>
           </ul>
 
-          <button class="btn-subscribe" onclick="checkout('annual')">
+          <button class="btn-subscribe" onclick="checkout('annual', event)">
             Subscribe Annually
           </button>
         </div>
@@ -466,7 +466,7 @@
   <script>
     const stripe = Stripe('<%= stripePubKey %>');
 
-    async function checkout(plan) {
+    async function checkout(plan, event) {
       const button = event.target;
       button.disabled = true;
       button.textContent = 'Processing...';

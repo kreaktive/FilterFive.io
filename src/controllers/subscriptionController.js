@@ -91,9 +91,16 @@ const createCheckout = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating checkout:', error);
+    console.error('Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
-      error: 'Failed to create checkout session'
+      error: 'Failed to create checkout session',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
