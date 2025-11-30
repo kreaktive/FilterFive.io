@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f7fafc;
+      color: #2d3748;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .header-nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .header-nav a:hover {
+      opacity: 0.8;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      padding-bottom: 60px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 30px;
+    }
+
+    .page-header h2 {
+      font-size: 28px;
+      color: #2d3748;
+      margin-bottom: 5px;
+    }
+
+    .page-header p {
+      color: #718096;
+      font-size: 16px;
+    }
+
+    /* Alert Box */
+    .alert {
+      background: white;
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: none;
+      align-items: center;
+      gap: 15px;
+      animation: slideDown 0.3s ease;
+    }
+
+    .alert.show {
+      display: flex;
+    }
+
+    .alert.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .alert.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .alert-icon {
+      font-size: 24px;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .alert-message {
+      font-size: 14px;
+      color: #718096;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #718096;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Filters Bar */
+    .filters-bar {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .filters-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      white-space: nowrap;
+    }
+
+    .filter-select {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      background: white;
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .filter-input {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #4a5568;
+      background: white;
+      min-width: 250px;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      border: none;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .filter-btn.secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .filter-btn.secondary:hover {
+      background: #f7fafc;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    /* Bulk Actions Bar */
+    .bulk-actions {
+      background: white;
+      border-radius: 12px;
+      padding: 15px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 15px;
+      animation: slideDown 0.3s ease;
+    }
+
+    .bulk-actions.show {
+      display: flex;
+    }
+
+    .bulk-count {
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .bulk-actions-buttons {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .bulk-btn {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bulk-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    /* Table Section */
+    .table-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .feedback-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .feedback-table th {
+      text-align: left;
+      padding: 16px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #4a5568;
+      font-weight: 600;
+      font-size: 14px;
+      background: #f7fafc;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .feedback-table th:hover {
+      background: #edf2f7;
+    }
+
+    .feedback-table th.sortable::after {
+      content: ' ⇅';
+      opacity: 0.3;
+      font-size: 12px;
+    }
+
+    .feedback-table th.sorted-asc::after {
+      content: ' ↑';
+      opacity: 1;
+      color: #667eea;
+    }
+
+    .feedback-table th.sorted-desc::after {
+      content: ' ↓';
+      opacity: 1;
+      color: #667eea;
+    }
+
+    .feedback-table td {
+      padding: 16px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+
+    .feedback-table tr {
+      transition: background-color 0.2s;
+    }
+
+    .feedback-table tbody tr:hover {
+      background: #f7fafc;
+    }
+
+    /* Row color-coding based on rating */
+    .feedback-table tbody tr.rating-1,
+    .feedback-table tbody tr.rating-2 {
+      background-color: #fee2e2;
+    }
+
+    .feedback-table tbody tr.rating-1:hover,
+    .feedback-table tbody tr.rating-2:hover {
+      background-color: #fecaca;
+    }
+
+    .feedback-table tbody tr.rating-3 {
+      background-color: #fed7aa;
+    }
+
+    .feedback-table tbody tr.rating-3:hover {
+      background-color: #fdba74;
+    }
+
+    .feedback-table tbody tr.rating-4,
+    .feedback-table tbody tr.rating-5 {
+      background-color: #d1fae5;
+    }
+
+    .feedback-table tbody tr.rating-4:hover,
+    .feedback-table tbody tr.rating-5:hover {
+      background-color: #a7f3d0;
+    }
+
+    /* Stars */
+    .stars {
+      color: #fbbf24;
+      white-space: nowrap;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-new {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-viewed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-responded {
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .status-resolved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Feedback Text */
+    .feedback-text {
+      max-width: 300px;
+      cursor: pointer;
+    }
+
+    .feedback-text.truncated {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .feedback-text.expanded {
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    .feedback-text.no-feedback {
+      color: #a0aec0;
+      font-style: italic;
+    }
+
+    .feedback-text.clickable:hover {
+      color: #667eea;
+      text-decoration: underline;
+    }
+
+    /* Actions Dropdown */
+    .actions-dropdown {
+      position: relative;
+    }
+
+    .actions-btn {
+      padding: 6px 12px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .actions-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .actions-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 5px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 180px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .actions-menu.show {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .actions-menu-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 14px;
+      color: #4a5568;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .actions-menu-item:first-child {
+      border-radius: 8px 8px 0 0;
+    }
+
+    .actions-menu-item:last-child {
+      border-radius: 0 0 8px 8px;
+    }
+
+    .actions-menu-item:hover {
+      background: #f7fafc;
+      color: #667eea;
+    }
+
+    /* Pagination */
+    .pagination-container {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .pagination-info {
+      font-size: 14px;
+      color: #718096;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .per-page-select {
+      padding: 8px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+
+    .empty-message {
+      color: #a0aec0;
+      font-size: 16px;
+    }
+
+    /* Word Cloud Section */
+    .word-cloud-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-top: 30px;
+    }
+
+    .word-cloud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .word-cloud-header h3 {
+      font-size: 20px;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .collapse-icon {
+      font-size: 20px;
+      transition: transform 0.3s;
+    }
+
+    .collapse-icon.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .word-cloud-content {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .word-cloud-content.collapsed {
+      display: none;
+    }
+
+    #wordCloudCanvas {
+      width: 100%;
+      height: 400px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+
+    .word-cloud-loading {
+      text-align: center;
+      padding: 100px 20px;
+      color: #718096;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: scaleIn 0.2s ease;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 25px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #718096;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #f7fafc;
+    }
+
+    .modal-body {
+      padding: 25px;
+    }
+
+    .modal-footer {
+      padding: 20px 25px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .modal-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .modal-btn.primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .modal-btn.secondary {
+      background: white;
+      color: #4a5568;
+      border: 2px solid #e2e8f0;
+    }
+
+    .modal-btn.secondary:hover {
+      background: #f7fafc;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #2d3748;
+      background: white;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: #718096;
+      margin-top: 5px;
+    }
+
+    .character-count {
+      font-size: 12px;
+      color: #718096;
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    .character-count.warning {
+      color: #f59e0b;
+    }
+
+    .character-count.error {
+      color: #ef4444;
+    }
+
+    .info-box {
+      background: #f7fafc;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-box-title {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 5px;
+    }
+
+    .info-box-content {
+      font-size: 14px;
+      color: #718096;
+    }
+
+    .template-suggestions {
+      margin-top: 15px;
+    }
+
+    .template-btn {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: left;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .template-btn:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .notes-history {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      background: #f7fafc;
+    }
+
+    .note-item {
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 3px solid #667eea;
+    }
+
+    .note-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .note-timestamp {
+      font-size: 12px;
+      color: #718096;
+      margin-bottom: 5px;
+    }
+
+    .note-content {
+      font-size: 14px;
+      color: #2d3748;
+      white-space: pre-wrap;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-select,
+      .filter-input {
+        min-width: 100%;
+      }
+
+      .feedback-table {
+        font-size: 12px;
+      }
+
+      .feedback-table th,
+      .feedback-table td {
+        padding: 10px 8px;
+      }
+
+      .feedback-text {
+        max-width: 150px;
+      }
+
+      .pagination-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .modal {
+        width: 95%;
+        max-height: 95vh;
+      }
+
+      .actions-menu {
+        right: auto;
+        left: 0;
+      }
+
+      .bulk-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .bulk-actions-buttons {
+        margin-left: 0;
+        flex-direction: column;
+      }
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <h1>🎯 FilterFive</h1>
+      <nav class="header-nav">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/dashboard/feedback">Feedback</a>
+        <a href="/dashboard/settings">Settings</a>
+        <a href="/dashboard/subscription">Subscription</a>
+        <a href="/dashboard/logout">Logout</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h2>💬 Feedback Management</h2>
+      <p>Manage and respond to customer feedback</p>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert">
+      <span class="alert-icon" id="alertIcon"></span>
+      <div class="alert-content">
+        <div class="alert-title" id="alertTitle"></div>
+        <div class="alert-message" id="alertMessage"></div>
+      </div>
+      <button class="alert-close" onclick="hideAlert()">×</button>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <div class="filters-row">
+        <div class="filter-group">
+          <span class="filter-label">Rating:</span>
+          <select class="filter-select" id="ratingFilter" onchange="applyFilters()">
+            <option value="all" <%= filters.rating === 'all' ? 'selected' : '' %>>All Ratings</option>
+            <option value="1" <%= filters.rating === '1' ? 'selected' : '' %>>1 ★</option>
+            <option value="2" <%= filters.rating === '2' ? 'selected' : '' %>>2 ★</option>
+            <option value="3" <%= filters.rating === '3' ? 'selected' : '' %>>3 ★</option>
+            <option value="4" <%= filters.rating === '4' ? 'selected' : '' %>>4 ★</option>
+            <option value="5" <%= filters.rating === '5' ? 'selected' : '' %>>5 ★</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Status:</span>
+          <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+            <option value="new" <%= filters.status === 'new' ? 'selected' : '' %>>New</option>
+            <option value="viewed" <%= filters.status === 'viewed' ? 'selected' : '' %>>Viewed</option>
+            <option value="responded" <%= filters.status === 'responded' ? 'selected' : '' %>>Responded</option>
+            <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Date Range:</span>
+          <select class="filter-select" id="dateRangeFilter" onchange="applyFilters()">
+            <option value="7" <%= filters.dateRange === 7 ? 'selected' : '' %>>Last 7 Days</option>
+            <option value="30" <%= filters.dateRange === 30 ? 'selected' : '' %>>Last 30 Days</option>
+            <option value="90" <%= filters.dateRange === 90 ? 'selected' : '' %>>Last 90 Days</option>
+            <option value="365" <%= filters.dateRange === 365 ? 'selected' : '' %>>Last Year</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Has Feedback:</span>
+          <select class="filter-select" id="hasFeedbackFilter" onchange="applyFilters()">
+            <option value="all" <%= filters.hasFeedback === 'all' ? 'selected' : '' %>>All</option>
+            <option value="true" <%= filters.hasFeedback === 'true' ? 'selected' : '' %>>Yes</option>
+            <option value="false" <%= filters.hasFeedback === 'false' ? 'selected' : '' %>>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-group" style="flex: 1;">
+          <span class="filter-label">Search:</span>
+          <input type="text" class="filter-input" id="searchFilter" placeholder="Search feedback text..." value="<%= filters.search %>" onkeyup="handleSearchKeyup(event)">
+        </div>
+        <button class="filter-btn secondary" onclick="exportFeedback()">📊 Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Bulk Actions Bar -->
+    <div id="bulkActionsBar" class="bulk-actions">
+      <span class="bulk-count"><span id="selectedCount">0</span> selected</span>
+      <div class="bulk-actions-buttons">
+        <button class="bulk-btn" onclick="bulkUpdateStatus('viewed')">Mark as Viewed</button>
+        <button class="bulk-btn" onclick="bulkUpdateStatus('resolved')">Mark as Resolved</button>
+        <button class="bulk-btn" onclick="clearSelection()">Clear Selection</button>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+      <div class="table-container">
+        <% if (feedbackList.length > 0) { %>
+          <table class="feedback-table" id="feedbackTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" title="Select all">
+                </th>
+                <th class="sortable" data-column="date" onclick="sortTable('date')">Date/Time</th>
+                <th class="sortable" data-column="customer" onclick="sortTable('customer')">Customer</th>
+                <th class="sortable" data-column="phone" onclick="sortTable('phone')">Phone</th>
+                <th class="sortable" data-column="rating" onclick="sortTable('rating')">Rating</th>
+                <th style="min-width: 250px;">Feedback</th>
+                <th class="sortable" data-column="status" onclick="sortTable('status')">Status</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="feedbackTableBody">
+              <% feedbackList.forEach(request => { %>
+                <% const review = request.review; %>
+                <% const rating = review ? review.rating : 0; %>
+                <tr class="rating-<%= rating %>" data-review-id="<%= review ? review.id : '' %>">
+                  <td>
+                    <% if (review) { %>
+                      <input type="checkbox" class="row-checkbox" data-review-id="<%= review.id %>" onchange="updateBulkActions()">
+                    <% } %>
+                  </td>
+                  <td data-sort="<%= new Date(request.createdAt).getTime() %>">
+                    <%= new Date(request.createdAt).toLocaleDateString() %><br>
+                    <small style="color: #718096;"><%= new Date(request.createdAt).toLocaleTimeString() %></small>
+                  </td>
+                  <td data-sort="<%= request.customerName || 'zzz' %>"><%= request.customerName || 'Anonymous' %></td>
+                  <td data-sort="<%= request.customerPhone || '' %>"><%= request.customerPhone || '-' %></td>
+                  <td data-sort="<%= rating %>">
+                    <% if (review) { %>
+                      <span class="stars"><%= '★'.repeat(review.rating) %></span>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (review && review.feedbackText) { %>
+                      <div class="feedback-text truncated clickable" onclick="toggleFeedback(this, <%= review.id %>)" data-full="<%= review.feedbackText.replace(/"/g, '&quot;') %>">
+                        <%= review.feedbackText.length > 100 ? review.feedbackText.substring(0, 100) + '...' : review.feedbackText %>
+                      </div>
+                    <% } else { %>
+                      <div class="feedback-text no-feedback">No feedback</div>
+                    <% } %>
+                  </td>
+                  <td data-sort="<%= review ? review.feedbackStatus : 'zzz' %>">
+                    <% if (review) { %>
+                      <span class="status-badge status-<%= review.feedbackStatus %>">
+                        <%= review.feedbackStatus %>
+                      </span>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (review) { %>
+                      <div class="actions-dropdown">
+                        <button class="actions-btn" onclick="toggleActionsMenu(event, this)">Actions ▼</button>
+                        <div class="actions-menu">
+                          <div class="actions-menu-item" onclick="openRespondModal(<%= review.id %>, '<%= request.customerName || 'Customer' %>', '<%= request.customerPhone %>', `<%= (review.feedbackText || '').replace(/`/g, '\\`').replace(/\n/g, ' ') %>`)">
+                            💬 Respond via SMS
+                          </div>
+                          <div class="actions-menu-item" onclick="openNotesModal(<%= review.id %>, `<%= (review.internalNotes || '').replace(/`/g, '\\`') %>`)">
+                            📝 Add Note
+                          </div>
+                          <div class="actions-menu-item" onclick="updateSingleStatus(<%= review.id %>, 'resolved')">
+                            ✅ Mark Resolved
+                          </div>
+                        </div>
+                      </div>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">No Feedback Found</div>
+            <div class="empty-message">Try adjusting your filters to see more results</div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (feedbackList.length > 0) { %>
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Showing <%= ((pagination.currentPage - 1) * pagination.limit) + 1 %>-<%= Math.min(pagination.currentPage * pagination.limit, pagination.totalItems) %> of <%= pagination.totalItems %> items
+          </div>
+          <div class="pagination-controls">
+            <span class="filter-label">Per page:</span>
+            <select class="per-page-select" id="limitSelect" onchange="changeLimit()">
+              <option value="10" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
+              <option value="25" <%= pagination.limit === 25 ? 'selected' : '' %>>25</option>
+              <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+              <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100</option>
+            </select>
+            <button class="pagination-btn" onclick="changePage(<%= pagination.currentPage - 1 %>)" <%= pagination.hasPrev ? '' : 'disabled' %>>← Prev</button>
+            <span style="color: #718096; font-weight: 600;">Page <%= pagination.currentPage %> of <%= pagination.totalPages %></span>
+            <button class="pagination-btn" onclick="changePage(<%= pagination.currentPage + 1 %>)" <%= pagination.hasNext ? '' : 'disabled' %>>Next →</button>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Word Cloud Section -->
+    <div class="word-cloud-section">
+      <div class="word-cloud-header" onclick="toggleWordCloud()">
+        <h3>
+          <span class="collapse-icon" id="wordCloudIcon">▼</span>
+          Word Cloud Analysis
+        </h3>
+        <span class="filter-label" style="cursor: pointer;">Click to expand/collapse</span>
+      </div>
+      <div class="word-cloud-content" id="wordCloudContent">
+        <div class="word-cloud-loading" id="wordCloudLoading">Loading word cloud...</div>
+        <canvas id="wordCloudCanvas" style="display: none;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Respond Modal -->
+  <div id="respondModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">📱 Respond via SMS</h3>
+        <button class="modal-close" onclick="closeModal('respondModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-box">
+          <div class="info-box-title" id="respondCustomerName">Customer</div>
+          <div class="info-box-content">
+            <strong>Phone:</strong> <span id="respondCustomerPhone"></span><br>
+            <strong>Original Feedback:</strong><br>
+            <em id="respondOriginalFeedback"></em>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your Message</label>
+          <textarea class="form-textarea" id="respondMessage" placeholder="Type your response..." maxlength="320" oninput="updateCharCount()"></textarea>
+          <div class="character-count" id="charCount">0 / 320 characters (2 SMS)</div>
+        </div>
+
+        <div class="template-suggestions">
+          <label class="form-label">Template Suggestions</label>
+          <button class="template-btn" onclick="useTemplate('Thank you for your feedback! We truly appreciate hearing from you and would love the opportunity to make things right. Please call us at [YOUR_PHONE] at your convenience.')">
+            🙏 Thank you & make it right
+          </button>
+          <button class="template-btn" onclick="useTemplate('We\'re sorry to hear about your experience. Your feedback is important to us. Could you please reach out to us directly so we can resolve this? [YOUR_PHONE]')">
+            💔 Apologize & invite contact
+          </button>
+          <button class="template-btn" onclick="useTemplate('Hi! We noticed your feedback and want to ensure you had a great experience. Please let us know if there\'s anything we can do to help!')">
+            👋 Follow-up check-in
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" onclick="closeModal('respondModal')">Cancel</button>
+        <button class="modal-btn primary" id="sendSmsBtn" onclick="sendResponse()">
+          <span id="sendBtnText">Send SMS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Modal -->
+  <div id="notesModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">📝 Internal Notes</h3>
+        <button class="modal-close" onclick="closeModal('notesModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Note History</label>
+          <div class="notes-history" id="notesHistory">
+            <div style="text-align: center; color: #a0aec0; padding: 20px;">
+              No notes yet
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Add New Note</label>
+          <textarea class="form-textarea" id="newNoteText" placeholder="Add a private note about this feedback..."></textarea>
+          <div class="form-hint">Notes are private and only visible to your team</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" onclick="closeModal('notesModal')">Close</button>
+        <button class="modal-btn primary" onclick="addNote()">Add Note</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let currentReviewId = null;
+    let currentSortColumn = null;
+    let currentSortDirection = 'asc';
+    let wordCloudCollapsed = false;
+
+    // Alert functions
+    function showAlert(type, title, message) {
+      const alertBox = document.getElementById('alertBox');
+      const alertIcon = document.getElementById('alertIcon');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+
+      alertBox.className = 'alert show ' + type;
+      alertIcon.textContent = type === 'success' ? '✅' : '❌';
+      alertTitle.textContent = title;
+      alertMessage.textContent = message;
+
+      // Auto-hide after 5 seconds
+      setTimeout(hideAlert, 5000);
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').classList.remove('show');
+    }
+
+    // Filter functions
+    function applyFilters() {
+      const rating = document.getElementById('ratingFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const dateRange = document.getElementById('dateRangeFilter').value;
+      const hasFeedback = document.getElementById('hasFeedbackFilter').value;
+      const search = document.getElementById('searchFilter').value;
+
+      const params = new URLSearchParams({
+        rating,
+        status,
+        dateRange,
+        hasFeedback,
+        search,
+        page: 1 // Reset to page 1 when filters change
+      });
+
+      window.location.href = `/dashboard/feedback?${params.toString()}`;
+    }
+
+    function handleSearchKeyup(event) {
+      if (event.key === 'Enter') {
+        applyFilters();
+      }
+    }
+
+    // Pagination functions
+    function changePage(page) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', page);
+      window.location.href = url.toString();
+    }
+
+    function changeLimit() {
+      const limit = document.getElementById('limitSelect').value;
+      const url = new URL(window.location.href);
+      url.searchParams.set('limit', limit);
+      url.searchParams.set('page', 1); // Reset to page 1
+      window.location.href = url.toString();
+    }
+
+    // Sorting functions
+    function sortTable(column) {
+      const table = document.getElementById('feedbackTable');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      // Toggle sort direction
+      if (currentSortColumn === column) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortColumn = column;
+        currentSortDirection = 'asc';
+      }
+
+      // Update header styling
+      table.querySelectorAll('th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+      });
+      const header = table.querySelector(`th[data-column="${column}"]`);
+      header.classList.add(currentSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+      // Sort rows
+      const columnIndex = {
+        date: 1,
+        customer: 2,
+        phone: 3,
+        rating: 4,
+        status: 6
+      }[column];
+
+      rows.sort((a, b) => {
+        const aValue = a.cells[columnIndex].getAttribute('data-sort') || a.cells[columnIndex].textContent.trim();
+        const bValue = b.cells[columnIndex].getAttribute('data-sort') || b.cells[columnIndex].textContent.trim();
+
+        if (column === 'date' || column === 'rating') {
+          return currentSortDirection === 'asc'
+            ? parseFloat(aValue) - parseFloat(bValue)
+            : parseFloat(bValue) - parseFloat(aValue);
+        } else {
+          return currentSortDirection === 'asc'
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
+      });
+
+      // Re-append sorted rows
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Feedback text expansion
+    function toggleFeedback(element, reviewId) {
+      if (element.classList.contains('no-feedback')) return;
+
+      const isExpanded = element.classList.contains('expanded');
+
+      if (isExpanded) {
+        // Collapse
+        const fullText = element.getAttribute('data-full');
+        element.textContent = fullText.length > 100 ? fullText.substring(0, 100) + '...' : fullText;
+        element.classList.remove('expanded');
+        element.classList.add('truncated');
+      } else {
+        // Expand and mark as viewed
+        const fullText = element.getAttribute('data-full');
+        element.textContent = fullText;
+        element.classList.remove('truncated');
+        element.classList.add('expanded');
+
+        // Mark as viewed
+        markAsViewed(reviewId);
+      }
+    }
+
+    // Mark as viewed
+    async function markAsViewed(reviewId) {
+      try {
+        const response = await fetch(`/dashboard/feedback/${reviewId}/view`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Update status badge in the row
+          const row = document.querySelector(`tr[data-review-id="${reviewId}"]`);
+          if (row && data.status === 'viewed') {
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge && statusBadge.textContent.trim() === 'new') {
+              statusBadge.textContent = 'viewed';
+              statusBadge.className = 'status-badge status-viewed';
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to mark as viewed:', error);
+      }
+    }
+
+    // Actions dropdown
+    function toggleActionsMenu(event, button) {
+      event.stopPropagation();
+
+      // Close all other menus
+      document.querySelectorAll('.actions-menu').forEach(menu => {
+        if (menu !== button.nextElementSibling) {
+          menu.classList.remove('show');
+        }
+      });
+
+      // Toggle this menu
+      const menu = button.nextElementSibling;
+      menu.classList.toggle('show');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.actions-menu').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    });
+
+    // Bulk actions
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateBulkActions();
+    }
+
+    function updateBulkActions() {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      const count = checkboxes.length;
+      const bulkBar = document.getElementById('bulkActionsBar');
+      const selectedCount = document.getElementById('selectedCount');
+
+      selectedCount.textContent = count;
+
+      if (count > 0) {
+        bulkBar.classList.add('show');
+      } else {
+        bulkBar.classList.remove('show');
+      }
+
+      // Update "select all" checkbox
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      const selectAll = document.getElementById('selectAll');
+      selectAll.checked = count === allCheckboxes.length && count > 0;
+    }
+
+    function clearSelection() {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('selectAll').checked = false;
+      updateBulkActions();
+    }
+
+    async function bulkUpdateStatus(status) {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      const reviewIds = Array.from(checkboxes).map(cb => parseInt(cb.dataset.reviewId));
+
+      if (reviewIds.length === 0) {
+        showAlert('error', 'Error', 'No feedback items selected');
+        return;
+      }
+
+      if (!confirm(`Mark ${reviewIds.length} feedback item(s) as ${status}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/dashboard/feedback/bulk-update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewIds, status })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('success', 'Success', data.message);
+
+          // Update status badges in the table
+          reviewIds.forEach(id => {
+            const row = document.querySelector(`tr[data-review-id="${id}"]`);
+            if (row) {
+              const statusBadge = row.querySelector('.status-badge');
+              statusBadge.textContent = status;
+              statusBadge.className = `status-badge status-${status}`;
+            }
+          });
+
+          clearSelection();
+        } else {
+          showAlert('error', 'Error', data.error || 'Failed to update status');
+        }
+      } catch (error) {
+        showAlert('error', 'Error', 'Failed to update status');
+      }
+    }
+
+    // Update single status
+    async function updateSingleStatus(reviewId, status) {
+      try {
+        const response = await fetch(`/dashboard/feedback/${reviewId}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('success', 'Success', data.message);
+
+          // Update status badge
+          const row = document.querySelector(`tr[data-review-id="${reviewId}"]`);
+          if (row) {
+            const statusBadge = row.querySelector('.status-badge');
+            statusBadge.textContent = status;
+            statusBadge.className = `status-badge status-${status}`;
+          }
+        } else {
+          showAlert('error', 'Error', data.error || 'Failed to update status');
+        }
+      } catch (error) {
+        showAlert('error', 'Error', 'Failed to update status');
+      }
+    }
+
+    // Respond Modal
+    function openRespondModal(reviewId, customerName, customerPhone, feedbackText) {
+      currentReviewId = reviewId;
+
+      document.getElementById('respondCustomerName').textContent = customerName;
+      document.getElementById('respondCustomerPhone').textContent = customerPhone;
+      document.getElementById('respondOriginalFeedback').textContent = feedbackText || 'No feedback text';
+      document.getElementById('respondMessage').value = '';
+      updateCharCount();
+
+      document.getElementById('respondModal').classList.add('show');
+    }
+
+    function updateCharCount() {
+      const textarea = document.getElementById('respondMessage');
+      const charCount = document.getElementById('charCount');
+      const length = textarea.value.length;
+      const smsCount = Math.ceil(length / 160) || 1;
+
+      charCount.textContent = `${length} / 320 characters (${smsCount} SMS)`;
+
+      if (length > 320) {
+        charCount.classList.add('error');
+        charCount.classList.remove('warning');
+      } else if (length > 270) {
+        charCount.classList.add('warning');
+        charCount.classList.remove('error');
+      } else {
+        charCount.classList.remove('warning', 'error');
+      }
+    }
+
+    function useTemplate(text) {
+      document.getElementById('respondMessage').value = text;
+      updateCharCount();
+    }
+
+    async function sendResponse() {
+      const message = document.getElementById('respondMessage').value.trim();
+
+      if (!message) {
+        showAlert('error', 'Error', 'Please enter a message');
+        return;
+      }
+
+      if (message.length > 320) {
+        showAlert('error', 'Error', 'Message is too long (max 320 characters)');
+        return;
+      }
+
+      const sendBtn = document.getElementById('sendSmsBtn');
+      const btnText = document.getElementById('sendBtnText');
+      sendBtn.disabled = true;
+      btnText.innerHTML = '<span class="loading-spinner"></span> Sending...';
+
+      try {
+        const response = await fetch(`/dashboard/feedback/${currentReviewId}/respond`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('success', 'Success', 'SMS sent successfully!');
+          closeModal('respondModal');
+
+          // Update status badge
+          const row = document.querySelector(`tr[data-review-id="${currentReviewId}"]`);
+          if (row) {
+            const statusBadge = row.querySelector('.status-badge');
+            statusBadge.textContent = 'responded';
+            statusBadge.className = 'status-badge status-responded';
+          }
+        } else {
+          showAlert('error', 'Error', data.error || 'Failed to send SMS');
+        }
+      } catch (error) {
+        showAlert('error', 'Error', 'Failed to send SMS');
+      } finally {
+        sendBtn.disabled = false;
+        btnText.textContent = 'Send SMS';
+      }
+    }
+
+    // Notes Modal
+    function openNotesModal(reviewId, notesText) {
+      currentReviewId = reviewId;
+
+      const notesHistory = document.getElementById('notesHistory');
+
+      if (notesText && notesText.trim()) {
+        const notes = notesText.split('\n\n').filter(n => n.trim());
+        notesHistory.innerHTML = notes.map(note => {
+          const match = note.match(/\[(.*?)\] (.*)/s);
+          if (match) {
+            return `
+              <div class="note-item">
+                <div class="note-timestamp">${new Date(match[1]).toLocaleString()}</div>
+                <div class="note-content">${match[2]}</div>
+              </div>
+            `;
+          }
+          return `<div class="note-item"><div class="note-content">${note}</div></div>`;
+        }).join('');
+      } else {
+        notesHistory.innerHTML = '<div style="text-align: center; color: #a0aec0; padding: 20px;">No notes yet</div>';
+      }
+
+      document.getElementById('newNoteText').value = '';
+      document.getElementById('notesModal').classList.add('show');
+    }
+
+    async function addNote() {
+      const note = document.getElementById('newNoteText').value.trim();
+
+      if (!note) {
+        showAlert('error', 'Error', 'Please enter a note');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/dashboard/feedback/${currentReviewId}/note`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('success', 'Success', 'Note added successfully');
+          closeModal('notesModal');
+        } else {
+          showAlert('error', 'Error', data.error || 'Failed to add note');
+        }
+      } catch (error) {
+        showAlert('error', 'Error', 'Failed to add note');
+      }
+    }
+
+    // Modal controls
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+      currentReviewId = null;
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('show');
+        }
+      });
+    });
+
+    // Export CSV
+    function exportFeedback() {
+      const url = new URL('/dashboard/feedback/export', window.location.origin);
+
+      // Add current filters to export
+      const params = new URL(window.location.href).searchParams;
+      ['rating', 'status', 'dateRange', 'search'].forEach(param => {
+        const value = params.get(param);
+        if (value) url.searchParams.set(param, value);
+      });
+
+      window.location.href = url.toString();
+    }
+
+    // Word Cloud
+    let wordCloudData = null;
+
+    function toggleWordCloud() {
+      wordCloudCollapsed = !wordCloudCollapsed;
+      const content = document.getElementById('wordCloudContent');
+      const icon = document.getElementById('wordCloudIcon');
+
+      if (wordCloudCollapsed) {
+        content.classList.add('collapsed');
+        icon.classList.add('collapsed');
+      } else {
+        content.classList.remove('collapsed');
+        icon.classList.remove('collapsed');
+
+        // Load word cloud if not already loaded
+        if (!wordCloudData) {
+          loadWordCloud();
+        }
+      }
+    }
+
+    async function loadWordCloud() {
+      try {
+        const dateRange = document.getElementById('dateRangeFilter').value;
+        const response = await fetch(`/dashboard/feedback/word-cloud?dateRange=${dateRange}`);
+        const data = await response.json();
+
+        if (response.ok && data.words && data.words.length > 0) {
+          wordCloudData = data.words;
+          renderWordCloud(data.words);
+        } else {
+          document.getElementById('wordCloudLoading').textContent = 'No feedback text available for word cloud';
+        }
+      } catch (error) {
+        document.getElementById('wordCloudLoading').textContent = 'Failed to load word cloud';
+      }
+    }
+
+    function renderWordCloud(words) {
+      const canvas = document.getElementById('wordCloudCanvas');
+      const loading = document.getElementById('wordCloudLoading');
+
+      canvas.style.display = 'block';
+      loading.style.display = 'none';
+
+      // Convert to WordCloud2 format
+      const list = words.map(w => [w.text, w.value * 10]); // Multiply for better visualization
+
+      WordCloud(canvas, {
+        list: list,
+        gridSize: 8,
+        weightFactor: 3,
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        color: () => {
+          const colors = ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444'];
+          return colors[Math.floor(Math.random() * colors.length)];
+        },
+        rotateRatio: 0.3,
+        rotationSteps: 2,
+        backgroundColor: '#ffffff'
+      });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateBulkActions();
+
+      // Load word cloud collapsed by default
+      wordCloudCollapsed = true;
+      document.getElementById('wordCloudContent').classList.add('collapsed');
+      document.getElementById('wordCloudIcon').classList.add('collapsed');
+    });
+  </script>
+</body>
+</html>

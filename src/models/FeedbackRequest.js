@@ -74,6 +74,12 @@ const FeedbackRequest = sequelize.define('FeedbackRequest', {
     field: 'ip_address',
     comment: 'Customer IP for rate limiting (QR visitors only)'
   },
+  location: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    field: 'location',
+    comment: 'Business location (e.g., "Main Street" or "Downtown") for multi-location tracking'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

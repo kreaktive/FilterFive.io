@@ -3,31 +3,173 @@ const { FeedbackRequest } = require('../models');
 const { Op} = require('sequelize');
 
 /**
- * Validate a CSV row
+ * Clean phone number - remove all formatting except leading +
+ * @param {string} input - Raw phone number from CSV
+ * @returns {string} - Cleaned phone number (digits only, possibly with leading +)
+ */
+const cleanPhoneNumber = (input) => {
+  if (!input) return '';
+
+  let cleaned = input.trim().replace(/\s/g, '');
+
+  // If starts with +, keep it and remove all non-digits after
+  if (cleaned.startsWith('+')) {
+    return '+' + cleaned.substring(1).replace(/\D/g, '');
+  }
+
+  // Remove all non-digits
+  cleaned = cleaned.replace(/\D/g, '');
+
+  // Handle international prefixes
+  if (cleaned.startsWith('00')) {
+    return '+' + cleaned.substring(2);
+  } else if (cleaned.startsWith('011')) {
+    return '+' + cleaned.substring(3);
+  }
+
+  return cleaned;
+};
+
+/**
+ * Detect country and format phone number with confidence level
+ * @param {string} cleaned - Cleaned phone number (digits only)
+ * @param {string} userDefaultCountry - User's default country code (default: 'US')
+ * @returns {Object} - {formatted, confidence, detected, warning}
+ */
+const detectAndFormat = (cleaned, userDefaultCountry = 'US') => {
+  // Already E.164 format
+  if (cleaned.startsWith('+')) {
+    const digitCount = cleaned.substring(1).length;
+
+    // Validate length for E.164
+    if (digitCount >= 10 && digitCount <= 15) {
+      return {
+        formatted: cleaned,
+        confidence: 'high',
+        detected: 'E.164 format',
+        warning: null,
+        original: cleaned
+      };
+    } else {
+      return {
+        formatted: cleaned,
+        confidence: 'low',
+        detected: 'E.164 but unusual length',
+        warning: 'Phone number length unusual',
+        original: cleaned
+      };
+    }
+  }
+
+  const digitCount = cleaned.length;
+
+  // 10 digits = US/Canada
+  if (digitCount === 10) {
+    return {
+      formatted: '+1' + cleaned,
+      confidence: 'high',
+      detected: 'US/Canada',
+      warning: null,
+      original: cleaned
+    };
+  }
+
+  // 11 digits starting with 1 = US/Canada with country code
+  if (digitCount === 11 && cleaned.startsWith('1')) {
+    return {
+      formatted: '+' + cleaned,
+      confidence: 'high',
+      detected: 'US/Canada (with code)',
+      warning: null,
+      original: cleaned
+    };
+  }
+
+  // 11 digits NOT starting with 1 = Could be international
+  if (digitCount === 11) {
+    return {
+      formatted: '+' + cleaned,
+      confidence: 'medium',
+      detected: 'International (guessed)',
+      warning: 'Verify country code is correct',
+      original: cleaned
+    };
+  }
+
+  // 12-15 digits = Likely international with country code
+  if (digitCount >= 12 && digitCount <= 15) {
+    return {
+      formatted: '+' + cleaned,
+      confidence: 'medium',
+      detected: 'International',
+      warning: 'Verify country code is correct',
+      original: cleaned
+    };
+  }
+
+  // Too short or too long
+  if (digitCount < 10) {
+    return {
+      formatted: null,
+      confidence: 'invalid',
+      detected: 'Too short',
+      warning: 'Phone number too short (minimum 10 digits)',
+      original: cleaned
+    };
+  }
+
+  if (digitCount > 15) {
+    return {
+      formatted: null,
+      confidence: 'invalid',
+      detected: 'Too long',
+      warning: 'Phone number too long (maximum 15 digits)',
+      original: cleaned
+    };
+  }
+
+  // Fallback: Use user's default country
+  const countryCodes = { US: '1', UK: '44', CA: '1', AU: '61', MX: '52' };
+  const code = countryCodes[userDefaultCountry] || '1';
+
+  return {
+    formatted: '+' + code + cleaned,
+    confidence: 'low',
+    detected: `Assumed ${userDefaultCountry}`,
+    warning: `Could not auto-detect - using default country (${userDefaultCountry})`,
+    original: cleaned
+  };
+};
+
+/**
+ * Validate a CSV row with smart phone formatting
  * @param {Object} row - CSV row with name, phone, email fields
- * @returns {Object} - {isValid: boolean, errors: array}
+ * @returns {Object} - {isValid: boolean, errors: array, warnings: array, phoneFormatted: object}
  */
 const validateRow = (row) => {
   const errors = [];
+  const warnings = [];
 
-  // Validate name (required, 2-100 chars)
-  if (!row.name || row.name.trim().length === 0) {
-    errors.push('Name is required');
-  } else if (row.name.length < 2) {
-    errors.push('Name must be at least 2 characters');
-  } else if (row.name.length > 100) {
+  // Validate name (optional, max 100 chars)
+  // Name can be empty, single word, or full name
+  if (row.name && row.name.length > 100) {
     errors.push('Name must be less than 100 characters');
   }
 
-  // Validate phone (required, E.164 format)
+  // Validate phone with smart formatting
+  let phoneFormatted = null;
   if (!row.phone || row.phone.trim().length === 0) {
     errors.push('Phone number is required');
-  } else if (!row.phone.startsWith('+')) {
-    errors.push('Phone must start with + (E.164 format, e.g., +1234567890)');
-  } else if (row.phone.length < 10 || row.phone.length > 15) {
-    errors.push('Phone number length invalid (must be 10-15 digits including +)');
-  } else if (!/^\+[0-9]+$/.test(row.phone)) {
-    errors.push('Phone must contain only + and digits');
+  } else {
+    const cleaned = cleanPhoneNumber(row.phone);
+    phoneFormatted = detectAndFormat(cleaned);
+
+    // Check confidence level
+    if (phoneFormatted.confidence === 'invalid') {
+      errors.push(phoneFormatted.warning);
+    } else if (phoneFormatted.confidence === 'low' || phoneFormatted.confidence === 'medium') {
+      warnings.push(phoneFormatted.warning);
+    }
   }
 
   // Validate email (optional, basic format check)
@@ -40,7 +182,9 @@ const validateRow = (row) => {
 
   return {
     isValid: errors.length === 0,
-    errors: errors
+    errors: errors,
+    warnings: warnings,
+    phoneFormatted: phoneFormatted
   };
 };
 

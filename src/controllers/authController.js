@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const emailService = require('../services/emailService');
 const validation = require('../services/validationService');
+const stripeService = require('../services/stripeService');
 
 /**
  * GET /signup
@@ -86,6 +87,16 @@ const signup = async (req, res) => {
       trialStartsAt: trialStartsAt,
       trialEndsAt: trialEndsAt
     });
+
+    // Create Stripe customer (Phase 2: Subscription management)
+    try {
+      const stripeCustomer = await stripeService.createCustomer(newUser);
+      await newUser.update({ stripeCustomerId: stripeCustomer.id });
+      console.log(`✓ Stripe customer created: ${stripeCustomer.id} for user ${newUser.id}`);
+    } catch (stripeError) {
+      console.error('Stripe customer creation failed:', stripeError);
+      // Don't block signup if Stripe fails - user can still use trial
+    }
 
     // Send verification email
     try {

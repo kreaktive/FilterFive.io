@@ -43,6 +43,12 @@ const handleQrScan = async (req, res) => {
       });
     }
 
+    // Start trial on first QR page view (Phase 2 requirement)
+    if (!business.trialStartsAt && business.subscriptionStatus === 'trial') {
+      await business.startTrial();
+      console.log(`✓ Trial started for ${business.businessName} (ID: ${business.id}) - First QR scan`);
+    }
+
     // Generate unique UUID for this feedback request
     const uuid = uuidv4();
 

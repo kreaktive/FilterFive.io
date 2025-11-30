@@ -1,26 +1,44 @@
 # FilterFive.io
 
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-production-success.svg)
 
-**FilterFive** is a B2B SaaS platform that helps businesses protect and enhance their online reputation by intelligently filtering customer feedback. It intercepts all customer reviews via SMS before they reach public platforms like Google or Facebook, automatically directing 4-5 star reviews to public sites while privately capturing 1-3 star feedback for internal resolution—preventing negative reviews from ever appearing online.
+**FilterFive** is a B2B SaaS platform that helps businesses protect and enhance their online reputation by intelligently filtering customer feedback. It intercepts all customer reviews via SMS and QR codes before they reach public platforms like Google or Facebook, automatically directing 4-5 star reviews to public sites while privately capturing 1-3 star feedback for internal resolution—preventing negative reviews from ever appearing online.
+
+> **Version 2.0.0** - Production Live with Analytics Dashboard (80% Complete)
 
 ---
 
 ## ✨ Features
 
+### Core Functionality
+
 - **🎯 Smart Feedback Filtering** - 4-5 star reviews go public (Google/Facebook), 1-3 stars stay private
 - **📱 SMS Automation** - Twilio-powered SMS delivery with A2P 10DLC compliance
 - **📱 QR Code Feedback** - Anonymous in-person feedback via scannable QR codes
+- **📤 CSV Bulk Upload** - Import hundreds of customers at once with validation and batch SMS sending
+- **💬 Feedback Management** - Comprehensive dashboard to view, respond, and manage all feedback
+- **⚡ Activity Feed (Pulse)** - Real-time feed of last 20 customer interactions with status tracking and review details
+
+### Business Features
+
+- **💳 Stripe Integration** - Monthly ($77) and Annual ($770) subscription plans with 14-day trial
+- **📊 Analytics Dashboard** - ROI calculator, performance trends, location tracking, and timing heatmaps
 - **⚡ Real-Time Email Alerts** - Instant notifications for negative feedback via Resend
-- **🏢 Multi-Tenant Architecture** - Isolated data per business with role-based access control
 - **🔗 Zapier Integration** - Ingest customer contacts from 5,000+ apps via webhook
-- **📊 Tenant Dashboard** - View all feedback requests, reviews, and analytics with QR code access
-- **🔒 Secure by Design** - UUID-based review links, password hashing, session management
+- **📧 Email Verification** - Secure account activation with verified email addresses
+
+### Technical Features
+
+- **🏢 Multi-Tenant Architecture** - Isolated data per business with role-based access control
+- **🔒 Secure by Design** - UUID-based review links, bcrypt password hashing, session management
+- **📈 Usage Tracking** - SMS limits enforced (10 trial, 1000 paid), subscription management
 - **🐳 Docker Ready** - Fully containerized for easy development and deployment
+- **🔄 Automated Backups** - Daily database backups with Google Drive sync
 
 ---
 
@@ -60,7 +78,7 @@
 ### External Services
 - **Twilio** - SMS delivery (Messaging Service for A2P 10DLC)
 - **Resend** - Transactional email delivery
-- **Stripe** _(Planned)_ - Subscription payment processing
+- **Stripe** - Subscription payment processing (Live in production)
 
 ### Security & Authentication
 - **bcryptjs** - Password hashing
@@ -139,107 +157,150 @@ FilterFive.io/
 ├── package.json                    # Dependencies and npm scripts
 ├── docker-compose.yml              # Development Docker configuration
 ├── docker-compose.prod.yml         # Production Docker configuration
-├── Dockerfile                      # Development container definition
-├── Dockerfile.production           # Optimized production build
-├── .env.example                    # Environment variables template
-├── .gitignore                      # Git ignore rules
-├── .dockerignore                   # Docker ignore rules
-├── deploy.sh                       # Automated production deployment script
-├── DEPLOYMENT.md                   # Comprehensive deployment guide
-├── AI_CONTEXT.md                   # Technical documentation for AI/developers
 ├── README.md                       # This file
+│
+├── docs/                           # Documentation
+│   ├── PROJECT.md                  # AI agent onboarding guide (primary reference)
+│   ├── README.md                   # Documentation index
+│   ├── API-SUBSCRIPTION-ENDPOINTS.md  # Stripe API reference
+│   ├── TESTING-COMPLETE.md         # Test results and validation
+│   └── archive/                    # Historical documentation
 │
 ├── src/
 │   ├── config/
-│   │   ├── database.js             # Sequelize connection and configuration
-│   │   └── migrations.js           # Database schema sync script
+│   │   └── database.js             # Sequelize connection
 │   │
-│   ├── models/
-│   │   ├── index.js                # Model relationships and associations
-│   │   ├── User.js                 # Tenant/Admin model (bcrypt hooks)
-│   │   ├── FeedbackRequest.js      # SMS request tracking with UUID
-│   │   └── Review.js               # Customer ratings and feedback
+│   ├── models/                     # Database models
+│   │   ├── index.js                # Model registration
+│   │   ├── User.js                 # Tenant accounts (with Stripe fields)
+│   │   ├── FeedbackRequest.js      # SMS/QR feedback tracking
+│   │   ├── Review.js               # Customer ratings
+│   │   ├── AnalyticsSnapshot.js    # Pre-calculated daily metrics
+│   │   ├── TimingPerformance.js    # Response time tracking
+│   │   └── SmsEvent.js             # SMS delivery events
 │   │
-│   ├── controllers/
-│   │   ├── authController.js       # Registration, login, logout
-│   │   ├── dashboardController.js  # Tenant dashboard with stats
-│   │   ├── reviewController.js     # Public review capture interface
-│   │   ├── zapierController.js     # Webhook for Zapier integration
-│   │   └── adminController.js      # Super admin tenant management
+│   ├── controllers/                # Request handlers
+│   │   ├── authController.js       # Signup, login, email verification
+│   │   ├── dashboardController.js  # Main tenant dashboard
+│   │   ├── subscriptionController.js  # Stripe checkout & billing
+│   │   ├── qrController.js         # QR code generation & scanning
+│   │   ├── uploadController.js     # CSV upload handling
+│   │   ├── feedbackController.js   # Public review pages
+│   │   └── analyticsController.js  # Analytics API endpoints
 │   │
-│   ├── routes/
-│   │   ├── authRoutes.js           # /register, /login, /logout
-│   │   ├── dashboardRoutes.js      # /dashboard/* (protected)
-│   │   ├── reviewRoutes.js         # /review/:uuid (public)
-│   │   ├── zapierRoutes.js         # /api/zapier/ingest (webhook)
-│   │   └── adminRoutes.js          # /admin/* (super admin only)
+│   ├── routes/                     # Route definitions
+│   │   ├── auth.js                 # Authentication routes
+│   │   ├── dashboard.js            # Tenant dashboard routes
+│   │   ├── subscription.js         # Billing routes
+│   │   ├── webhook.js              # Stripe webhooks
+│   │   ├── uploadRoutes.js         # CSV upload routes
+│   │   ├── feedbackRoutes.js       # Public feedback routes
+│   │   └── analytics.js            # Analytics API routes
 │   │
 │   ├── middleware/
-│   │   ├── auth.js                 # Session authentication check
-│   │   └── superAuth.js            # Super admin role verification
+│   │   ├── auth.js                 # requireAuth middleware
+│   │   ├── rateLimiter.js          # Rate limiting
+│   │   ├── trialManager.js         # Trial enforcement
+│   │   └── qrRateLimiter.js        # QR-specific rate limits
 │   │
-│   ├── services/
-│   │   ├── smsService.js           # Twilio SMS sending
-│   │   ├── emailService.js         # Resend email notifications
-│   │   └── ingestionEngine.js      # Process Zapier/CSV contacts
+│   ├── services/                   # Business logic
+│   │   ├── stripeService.js        # Stripe API wrapper
+│   │   ├── smsService.js           # Twilio SMS delivery
+│   │   ├── emailService.js         # Resend email delivery
+│   │   ├── validationService.js    # Phone/email validation
+│   │   ├── analyticsService.js     # Analytics data aggregation
+│   │   └── snapshotService.js      # Daily snapshot generation
 │   │
-│   ├── scripts/
-│   │   ├── testEmail.js            # Debug email integration
-│   │   ├── setSuperAdmin.js        # Promote user to super_admin
-│   │   └── seed.js                 # Create demo user/data
+│   ├── migrations/                 # Database migrations
+│   │   ├── 001-initial-schema.js
+│   │   ├── 002-add-subscription-fields.js
+│   │   ├── 003-add-analytics-fields.js
+│   │   └── ...
+│   │
+│   ├── cron/                       # Scheduled jobs
+│   │   └── daily-snapshots.js      # Analytics aggregation cron
 │   │
 │   ├── views/                      # EJS templates
-│   │   ├── landing_marketing.ejs   # Public homepage
-│   │   ├── register.ejs            # Tenant registration
-│   │   ├── login.ejs               # Login page
-│   │   ├── dashboard.ejs           # Tenant dashboard
-│   │   ├── settings.ejs            # Account settings
-│   │   ├── review-form.ejs         # Customer review capture
-│   │   ├── review-thank-you.ejs    # Post-submission page
-│   │   ├── admin/
-│   │   │   ├── dashboard.ejs       # Super admin tenant list
-│   │   │   └── create.ejs          # Create new tenant form
+│   │   ├── dashboard/
+│   │   │   ├── index.ejs           # Main dashboard (with Activity Feed)
+│   │   │   ├── subscription.ejs    # Billing page
+│   │   │   ├── qr.ejs              # QR code download
+│   │   │   ├── analytics.ejs       # Analytics dashboard
+│   │   │   ├── settings.ejs        # Account settings
+│   │   │   ├── upload.ejs          # CSV upload page
+│   │   │   └── upload-results.ejs  # Upload results
+│   │   ├── auth/
+│   │   │   ├── signup.ejs
+│   │   │   ├── login.ejs
+│   │   │   └── verify-*.ejs        # Email verification pages
+│   │   ├── feedback/
+│   │   │   ├── review.ejs          # Public rating page
+│   │   │   └── thankyou.ejs
 │   │   └── partials/
-│   │       ├── header.ejs          # Navbar component
-│   │       ├── footer.ejs          # Footer component
-│   │       └── error.ejs           # Error page template
+│   │       ├── header.ejs
+│   │       ├── footer.ejs
+│   │       └── analytics-*.ejs     # Analytics components
 │   │
 │   └── utils/
-│       └── helpers.js              # Utility functions
+│       ├── csvValidator.js         # CSV file validation
+│       └── roiCalculator.js        # ROI metrics calculator
 │
 └── public/                         # Static assets
     ├── css/
-    │   └── styles.css              # Global styles
     ├── js/
-    │   └── main.js                 # Client-side JavaScript
     └── images/
-        └── logo.png                # Brand assets
 ```
 
 ---
 
 ## 🗄 Database Setup
 
-FilterFive uses **PostgreSQL 15** with **Sequelize ORM**. The database schema includes three main tables:
+FilterFive uses **PostgreSQL 15** with **Sequelize ORM**. The database schema includes:
 
-### Users Table
-- **Purpose:** Stores tenant accounts and super admins
-- **Key Fields:** email, password (bcrypt hashed), businessName, role, subscriptionStatus
-- **Special Features:**
-  - Automatic password hashing via Sequelize `beforeCreate` hook
-  - `comparePassword()` instance method for login verification
-  - `isActive` flag for soft deletion
+### Core Tables
 
-### FeedbackRequests Table
-- **Purpose:** Tracks each SMS sent to customers
-- **Key Fields:** uuid (public link), customerName, phone, status, source
-- **Security:** Uses UUID v4 to prevent ID enumeration attacks
-- **Status Flow:** pending → sent → clicked → rated → expired
+#### users
 
-### Reviews Table
-- **Purpose:** Stores customer feedback and ratings
-- **Key Fields:** rating (1-5), comment, redirectedTo, isPublic, emailSentAt
-- **Logic:** 4-5 stars = `isPublic: true`, 1-3 stars = `isPublic: false`
+- **Purpose:** Tenant accounts with subscription management
+- **Key Fields:** email, password (bcrypt), businessName, role
+- **Subscription:** subscriptionStatus, subscriptionPlan, stripeCustomerId, stripeSubscriptionId
+- **Trial:** trialStartsAt, trialEndsAt (14-day trial period)
+- **Usage:** smsUsageCount, smsUsageLimit (10 trial, 1000 paid)
+- **Features:** analyticsEnabled, emailVerified
+
+#### feedback_requests
+
+- **Purpose:** Tracks each SMS/QR feedback request
+- **Key Fields:** uuid (public link), userId, customerName, customerPhone
+- **Delivery:** deliveryMethod (sms|qr), status (pending|sent|clicked|rated)
+- **Tracking:** location, ipAddress, clickedAt, createdAt
+- **Security:** UUID v4 prevents ID enumeration attacks
+
+#### reviews
+
+- **Purpose:** Customer feedback and ratings
+- **Key Fields:** feedbackRequestId, userId, rating (1-5), comment
+- **Logic:** isFiltered (true for 1-3 stars), redirectedTo (google|facebook|thank_you)
+- **Tracking:** emailSentAt, createdAt
+
+### Analytics Tables (Milestone 3)
+
+#### analytics_snapshots
+
+- **Purpose:** Pre-calculated daily metrics per tenant/location
+- **Metrics:** requestsSent, requestsClicked, requestsRated, reviewsPositive, reviewsNegative
+- **Calculated:** averageRating, clickRate, conversionRate, responseTime
+- **Dimensions:** userId, snapshotDate, location
+
+#### timing_performance
+
+- **Purpose:** Track customer response timing patterns
+- **Fields:** userId, hour (0-23), dayOfWeek (0-6), responseCount, avgResponseTime
+
+#### sms_events
+
+- **Purpose:** Detailed SMS delivery tracking
+- **Fields:** feedbackRequestId, eventType (queued|sent|delivered|failed), twilioSid, errorCode
 
 ### Running Migrations
 
@@ -315,10 +376,13 @@ Create a `.env` file in the root directory with the following variables:
 | `TWILIO_PHONE_NUMBER` | Twilio Phone Number | `+1XXXXXXXXXX` |
 | `TWILIO_MESSAGING_SERVICE_SID` | Messaging Service SID (Production) | `MGxxxxxxxxxxxxxxxxxxxxxxxx` |
 | `RESEND_API_KEY` | Resend API Key | `re_xxxxxxxxxxxxxxxxxxxx` |
-| `RESEND_FROM_EMAIL` | Verified sender email | `noreply@yourdomain.com` |
-| `STRIPE_SECRET_KEY` | Stripe Secret Key _(Optional)_ | `sk_test_xxxxxxxxxxxxxxxx` |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key _(Optional)_ | `pk_test_xxxxxxxxxxxxxxxx` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret _(Optional)_ | `whsec_xxxxxxxxxxxxxxxx` |
+| `RESEND_FROM_EMAIL` | Verified sender email | `info@yourdomain.com` |
+| `STRIPE_SECRET_KEY` | Stripe Secret Key | `sk_live_xxxxxxxxxxxxxxxx` |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe Publishable Key | `pk_live_xxxxxxxxxxxxxxxx` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret | `whsec_xxxxxxxxxxxxxxxx` |
+| `STRIPE_PRICE_MONTHLY` | Monthly plan price ID | `price_xxxxxxxxxxxxxxxx` |
+| `STRIPE_PRICE_ANNUAL` | Annual plan price ID | `price_xxxxxxxxxxxxxxxx` |
+| `ENABLE_CRON` | Enable analytics snapshots | `true` or `false` |
 | `TEST_EMAIL` | Email for testing | `your.email@example.com` |
 
 **Security Best Practices:**
@@ -523,60 +587,112 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Need help? Here are your options:
 
-- **Documentation:** [AI_CONTEXT.md](./AI_CONTEXT.md) - Complete technical guide
-- **Deployment Guide:** [DEPLOYMENT.md](./DEPLOYMENT.md) - Production setup
+- **Documentation:** [docs/PROJECT.md](docs/PROJECT.md) - Complete technical guide for developers and AI agents
+- **API Reference:** [docs/API-SUBSCRIPTION-ENDPOINTS.md](docs/API-SUBSCRIPTION-ENDPOINTS.md) - Stripe integration guide
+- **Test Results:** [docs/TESTING-COMPLETE.md](docs/TESTING-COMPLETE.md) - Validation and testing documentation
+- **Deployment:** [docs/archive/deployment/](docs/archive/deployment/) - Production deployment guides
 - **Issues:** [GitHub Issues](https://github.com/kreaktive/FilterFive.io/issues) - Report bugs
-- **Email:** support@filterfive.io - General inquiries
+- **Email:** <support@filterfive.io> - General inquiries
 
 ---
 
 ## 🗺 Roadmap
 
-### Current Version: v1.1.0
+### Current Version: v2.0.0
 
-**✅ Completed Features:**
-- Multi-tenant authentication system
-- SMS feedback request delivery (Twilio)
+#### ✅ Milestone 1: Authentication & Core Features (COMPLETE)
+
+- Multi-tenant authentication with email verification
+- Password reset and account recovery
+- 14-day trial period management (10 SMS free)
+- Session-based secure authentication
+- SMS feedback request delivery (Twilio A2P 10DLC)
 - QR code feedback system (anonymous in-person reviews)
-- Tenant QR code dashboard page with download/print/copy functionality
 - Smart rating filter (4-5 stars → public, 1-3 stars → private)
 - Email alerts for negative feedback (Resend)
-- Tenant dashboard with statistics
-- Super admin interface for manual tenant onboarding
-- Zapier webhook integration
-- Docker containerization
-- Production deployment infrastructure
+- Tenant dashboard with real-time statistics
+- Zapier webhook integration (5,000+ app connections)
+- Docker containerization for deployment
 
-### Planned Features:
+#### ✅ Milestone 2: Stripe Integration (COMPLETE)
 
-**v1.2.0 - Stripe Integration**
-- [ ] Subscription payment processing
-- [ ] Self-service tenant registration with trial period
-- [ ] Automatic subscription status updates
-- [ ] Invoice generation and payment history
+- Monthly ($77) and Annual ($770) subscription plans
+- Stripe Checkout session integration
+- Webhook event handling for subscription lifecycle
+- Customer billing portal access
+- Automatic subscription status updates
+- Trial-to-paid conversion automation
+- SMS usage limit enforcement (10 trial → 1000 paid)
+- Invoice generation and payment history
 
-**v1.3.0 - CSV Upload**
-- [ ] Bulk customer import via CSV
-- [ ] Validation and duplicate detection
-- [ ] Batch SMS sending with rate limiting
-- [ ] Import history and error logs
+#### ✅ Milestone 4: CSV Upload Feature (COMPLETE)
 
-**v1.4.0 - Analytics Dashboard**
-- [ ] Response rate metrics
-- [ ] Average rating trends
-- [ ] Customer feedback sentiment analysis
-- [ ] Export reports (PDF/CSV)
+- CSV file upload with drag-and-drop interface
+- Phone number validation (E.164 format)
+- Duplicate detection (within file and against database)
+- Preview interface with row selection/deselection
+- Batch SMS sending with rate limiting (5 SMS/sec)
+- Upload history tracking with success/failure reporting
+- Retry failed sends individually
+- SMS usage limit enforcement during upload
 
-**v1.5.0 - AI-Powered Insights**
-- [ ] Natural language processing for feedback categorization
-- [ ] Automated response suggestions for negative reviews
-- [ ] Predictive analytics for customer satisfaction
+#### 🚧 Milestone 3: Analytics Dashboard (80% COMPLETE)
 
-**v2.0.0 - Mobile App**
+##### Completed
+
+- Database schema (analytics_snapshots, timing_performance, sms_events)
+- Backend services (analyticsService, snapshotService, roiCalculator)
+- 8 API endpoints for analytics data
+- Daily snapshot cron job (aggregates metrics at midnight)
+- Analytics dashboard UI with ROI calculator
+- KPI cards with sparkline trend charts
+- Date range filters (7d, 30d, 90d, All Time)
+- Location-based filtering for multi-location businesses
+- Timing heatmap visualization (7x24 hour grid)
+- Activity Feed (Pulse) with real-time status tracking for last 20 interactions
+- Review detail modal with customer info, ratings, and comments
+
+##### In Progress (20% remaining)
+
+- [ ] Period comparison widget (vs previous period)
+- [ ] SMS event metrics display (delivery success rates)
+- [ ] Custom date range picker (calendar interface)
+- [ ] Export to CSV/PDF functionality
+- [ ] Real-time alert configuration (threshold-based notifications)
+
+### Future Milestones
+
+#### v2.1.0 - Advanced Analytics
+
+- [ ] Sentiment analysis for feedback comments
+- [ ] Customer segmentation by rating patterns
+- [ ] Predictive analytics for review trends
+- [ ] A/B testing for SMS messaging
+- [ ] Multi-location comparison dashboard
+
+#### v2.2.0 - Team Collaboration
+
+- [ ] Multi-user access per tenant
+- [ ] Role-based permissions (owner, manager, viewer)
+- [ ] Internal notes on feedback
+- [ ] Assignment and workflow management
+- [ ] Activity audit logs
+
+#### v2.3.0 - Automated Responses
+
+- [ ] AI-powered response suggestions for negative feedback
+- [ ] Template library for common issues
+- [ ] Automated thank-you messages for positive reviews
+- [ ] Follow-up campaign automation
+- [ ] Integration with CRM systems
+
+#### v3.0.0 - Mobile App
+
 - [ ] Native iOS and Android apps
 - [ ] Push notifications for new feedback
-- [ ] Quick response templates
-- [ ] Offline mode
+- [ ] Quick response from mobile
+- [ ] Photo/video response capability
+- [ ] Offline mode with sync
 
 ---
 

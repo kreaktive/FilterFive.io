@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | FilterFive</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f7fafc;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    .preview-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .summary-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .summary-card.valid {
+      border-left: 4px solid #10B981;
+    }
+
+    .summary-card.invalid {
+      border-left: 4px solid #EF4444;
+    }
+
+    .summary-card.duplicate {
+      border-left: 4px solid #F59E0B;
+    }
+
+    .summary-number {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    .summary-label {
+      color: #6B7280;
+      font-size: 14px;
+    }
+
+    .selection-controls {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .selection-buttons button {
+      padding: 8px 16px;
+      border: 1px solid #D1D5DB;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    .selection-buttons button:hover {
+      background: #F3F4F6;
+    }
+
+    .selected-count {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .preview-table {
+      width: 100%;
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .preview-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .preview-table th,
+    .preview-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .preview-table th {
+      background: #F9FAFB;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .preview-table tr:hover {
+      background: #F9FAFB;
+    }
+
+    .preview-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .confidence-high {
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .confidence-medium {
+      color: #F59E0B;
+      font-weight: 600;
+    }
+
+    .confidence-low {
+      color: #DC2626;
+      font-weight: 600;
+    }
+
+    .phone-original {
+      color: #9CA3AF;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .phone-formatted {
+      font-family: monospace;
+      font-weight: 500;
+    }
+
+    .warning-badge {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 5px;
+    }
+
+    .detected-badge {
+      display: inline-block;
+      background: #D1FAE5;
+      color: #065F46;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 5px;
+    }
+
+    .checkbox-cell {
+      width: 40px;
+      text-align: center;
+    }
+
+    .checkbox-cell input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .error-message {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .submit-section {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 30px;
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .submit-btn {
+      background: #10B981;
+      color: white;
+      padding: 16px 48px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #059669;
+    }
+
+    .submit-btn:disabled {
+      background: #9CA3AF;
+      cursor: not-allowed;
+    }
+
+    .cancel-btn {
+      background: white;
+      color: #6B7280;
+      padding: 16px 48px;
+      border: 1px solid #D1D5DB;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 20px;
+      transition: background 0.2s;
+    }
+
+    .cancel-btn:hover {
+      background: #F3F4F6;
+    }
+
+    .cost-estimate {
+      margin-top: 15px;
+      color: #6B7280;
+      font-size: 14px;
+    }
+
+    .error-table {
+      background: #FEF2F2;
+    }
+
+    .error-row td {
+      color: #991B1B;
+      font-size: 14px;
+    }
+
+    .collapsible-section {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .collapsible-header {
+      padding: 20px;
+      cursor: pointer;
+      background: #F9FAFB;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .collapsible-header:hover {
+      background: #F3F4F6;
+    }
+
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .collapsible-content.open {
+      max-height: 2000px;
+    }
+
+    @media (max-width: 768px) {
+      .preview-table {
+        overflow-x: auto;
+      }
+
+      .selection-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .selection-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .submit-section {
+        padding: 20px;
+      }
+
+      .submit-btn,
+      .cancel-btn {
+        width: 100%;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/header', { user }) %>
+
+  <div class="preview-container">
+    <h1><%= title %></h1>
+    <p style="color: #6B7280; margin-bottom: 20px;">Review and select customers to send SMS review requests.</p>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error-message">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card valid">
+        <div class="summary-label">Valid Customers</div>
+        <div class="summary-number"><%= preview.validRows.length %></div>
+      </div>
+      <div class="summary-card invalid">
+        <div class="summary-label">Invalid Rows</div>
+        <div class="summary-number"><%= preview.invalidRows.length %></div>
+      </div>
+      <div class="summary-card duplicate">
+        <div class="summary-label">Duplicates</div>
+        <div class="summary-number"><%= preview.duplicateRows.length %></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total Rows</div>
+        <div class="summary-number"><%= preview.totalRows %></div>
+      </div>
+    </div>
+
+    <% if (preview.validRows.length > 0) { %>
+    <form id="sendForm" action="/dashboard/upload/send" method="POST">
+      <!-- Selection Controls -->
+      <div class="selection-controls">
+        <div>
+          <span class="selected-count">Selected: <strong id="selectedCount">0</strong> of <%= preview.validRows.length %></span>
+        </div>
+        <div class="selection-buttons">
+          <button type="button" onclick="selectAll()">✓ Select All</button>
+          <button type="button" onclick="deselectAll()">✗ Deselect All</button>
+        </div>
+      </div>
+
+      <!-- Valid Customers Table -->
+      <div class="preview-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="checkbox-cell">
+                <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)">
+              </th>
+              <th>Row #</th>
+              <th>Name</th>
+              <th>Phone Number</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% preview.validRows.forEach(row => { %>
+            <tr>
+              <td class="checkbox-cell">
+                <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox" onchange="updateCount()">
+              </td>
+              <td><%= row.rowNumber %></td>
+              <td><%= row.name || '-' %></td>
+              <td>
+                <% if (row.phoneFormatted) { %>
+                  <div>
+                    <% if (row.phoneFormatted.confidence === 'high') { %>
+                      <span class="confidence-high" title="High confidence">✓</span>
+                    <% } else if (row.phoneFormatted.confidence === 'medium') { %>
+                      <span class="confidence-medium" title="Medium confidence - please verify">⚠</span>
+                    <% } else if (row.phoneFormatted.confidence === 'low') { %>
+                      <span class="confidence-low" title="Low confidence - please verify">!</span>
+                    <% } %>
+                    <span class="phone-formatted"><%= row.phone %></span>
+                    <% if (row.phoneFormatted.detected) { %>
+                      <span class="detected-badge"><%= row.phoneFormatted.detected %></span>
+                    <% } %>
+                  </div>
+                  <% if (row.phoneOriginal !== row.phone) { %>
+                    <div class="phone-original">Original: <%= row.phoneOriginal %></div>
+                  <% } %>
+                  <% if (row.warnings && row.warnings.length > 0) { %>
+                    <div>
+                      <% row.warnings.forEach(warning => { %>
+                        <span class="warning-badge"><%= warning %></span>
+                      <% }); %>
+                    </div>
+                  <% } %>
+                <% } else { %>
+                  <%= row.phone %>
+                <% } %>
+              </td>
+              <td><%= row.email || '-' %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submit Section -->
+      <div class="submit-section">
+        <a href="/dashboard/upload" class="cancel-btn">← Cancel</a>
+        <button type="submit" class="submit-btn" id="submitBtn" disabled>
+          📤 Send SMS to Selected
+        </button>
+        <div class="cost-estimate" id="costEstimate">
+          Select customers to see estimated cost
+        </div>
+      </div>
+    </form>
+    <% } else { %>
+      <div style="text-align: center; padding: 40px; background: white; border-radius: 8px;">
+        <p style="color: #6B7280; margin-bottom: 20px;">No valid customers to send SMS.</p>
+        <a href="/dashboard/upload" class="cancel-btn">← Upload New File</a>
+      </div>
+    <% } %>
+
+    <!-- Invalid Rows Section (Collapsible) -->
+    <% if (preview.invalidRows.length > 0 || preview.duplicateRows.length > 0) { %>
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <strong>⚠️ Skipped Rows (<%= preview.invalidRows.length + preview.duplicateRows.length %>)</strong>
+        <span>▼</span>
+      </div>
+      <div class="collapsible-content">
+        <div class="preview-table error-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Row #</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% [...preview.invalidRows, ...preview.duplicateRows].forEach(row => { %>
+              <tr class="error-row">
+                <td><%= preview.errors.find(e => e.phone === row.phone)?.row || '-' %></td>
+                <td><%= row.name || '-' %></td>
+                <td><%= row.phone || '-' %></td>
+                <td><%= row.error %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <script>
+    const SMS_COST_PER_MESSAGE = 0.0079; // Twilio cost per SMS
+
+    function updateCount() {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      const count = checkboxes.length;
+
+      document.getElementById('selectedCount').textContent = count;
+      document.getElementById('submitBtn').disabled = count === 0;
+
+      // Update select all checkbox
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+      selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
+      selectAllCheckbox.indeterminate = count > 0 && count < allCheckboxes.length;
+
+      // Update cost estimate
+      const estimatedCost = (count * SMS_COST_PER_MESSAGE).toFixed(2);
+      document.getElementById('costEstimate').textContent =
+        count > 0
+          ? `Estimated cost: $${estimatedCost} (${count} × $${SMS_COST_PER_MESSAGE.toFixed(4)})`
+          : 'Select customers to see estimated cost';
+    }
+
+    function selectAll() {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = true);
+      updateCount();
+    }
+
+    function deselectAll() {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      updateCount();
+    }
+
+    function toggleAll(checkbox) {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checkbox.checked);
+      updateCount();
+    }
+
+    function toggleCollapsible(header) {
+      const content = header.nextElementSibling;
+      const arrow = header.querySelector('span');
+
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        arrow.textContent = '▼';
+      } else {
+        content.classList.add('open');
+        arrow.textContent = '▲';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('sendForm')?.addEventListener('submit', function(e) {
+      const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
+
+      if (selectedCount === 0) {
+        e.preventDefault();
+        alert('Please select at least one customer to send SMS.');
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to send SMS to ${selectedCount} customer(s)? This will cost approximately $${(selectedCount * SMS_COST_PER_MESSAGE).toFixed(2)}.`)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Disable submit button and show loading
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitBtn').textContent = '📤 Sending...';
+    });
+
+    // Initialize count on page load
+    updateCount();
+  </script>
+</body>
+</html>

@@ -39,7 +39,7 @@ const Review = sequelize.define('Review', {
     field: 'feedback_text'
   },
   redirectedTo: {
-    type: DataTypes.ENUM('google', 'facebook', 'thank_you'),
+    type: DataTypes.ENUM('google', 'facebook', 'thank_you', 'pending'),
     allowNull: true,
     field: 'redirected_to'
   },
@@ -54,6 +54,49 @@ const Review = sequelize.define('Review', {
     defaultValue: false,
     field: 'email_sent_to_tenant',
     comment: 'True if low rating email was sent to tenant'
+  },
+  redirectBlocked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'redirect_blocked',
+    comment: 'True if review was captured but redirect was blocked due to lock'
+  },
+  blockedReason: {
+    type: DataTypes.ENUM('trial_expired', 'payment_required', 'grace_period', 'hard_locked'),
+    allowNull: true,
+    field: 'blocked_reason',
+    comment: 'Reason why redirect was blocked'
+  },
+  feedbackStatus: {
+    type: DataTypes.ENUM('new', 'viewed', 'responded', 'resolved'),
+    defaultValue: 'new',
+    allowNull: false,
+    field: 'feedback_status',
+    comment: 'Status of tenant response to feedback'
+  },
+  viewedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'viewed_at',
+    comment: 'When tenant first viewed this feedback'
+  },
+  respondedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'responded_at',
+    comment: 'When tenant responded to customer via SMS'
+  },
+  resolvedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'resolved_at',
+    comment: 'When tenant marked this feedback as resolved'
+  },
+  internalNotes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'internal_notes',
+    comment: 'Private notes from tenant about this feedback'
   },
   createdAt: {
     type: DataTypes.DATE,

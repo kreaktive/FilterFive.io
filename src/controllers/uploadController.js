@@ -27,9 +27,17 @@ const upload = multer({
 // GET /dashboard/upload - Show upload form
 const showUploadPage = async (req, res) => {
   try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
     res.render('upload', {
       title: 'Upload Customers',
-      user: req.user
+      user: user
     });
   } catch (error) {
     console.error('Upload page error:', error);
@@ -41,18 +49,25 @@ const showUploadPage = async (req, res) => {
   }
 };
 
-// POST /dashboard/upload - Process CSV
+// POST /dashboard/upload - Parse CSV and show preview
 const processUpload = async (req, res) => {
-  const startTime = Date.now();
-  let uploadRecord = null;
   let uploadedFilePath = null;
 
   try {
+    // Load user from session
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
     // Get uploaded file
     if (!req.file) {
       return res.status(400).render('upload', {
         title: 'Upload Customers',
-        user: req.user,
+        user: user,
         error: 'No file uploaded. Please select a CSV file.'
       });
     }
@@ -60,7 +75,7 @@ const processUpload = async (req, res) => {
     uploadedFilePath = req.file.path;
     const filename = req.file.originalname;
 
-    console.log(`Processing CSV upload: ${filename} for user ${req.user.id}`);
+    console.log(`📄 Parsing CSV upload: ${filename} for user ${user.id}`);
 
     // Parse CSV
     const rows = [];
@@ -85,7 +100,7 @@ const processUpload = async (req, res) => {
       fs.unlinkSync(uploadedFilePath); // Clean up
       return res.status(400).render('upload', {
         title: 'Upload Customers',
-        user: req.user,
+        user: user,
         error: 'CSV file is empty. Please upload a file with customer data.'
       });
     }
@@ -94,14 +109,14 @@ const processUpload = async (req, res) => {
       fs.unlinkSync(uploadedFilePath); // Clean up
       return res.status(400).render('upload', {
         title: 'Upload Customers',
-        user: req.user,
+        user: user,
         error: `Too many rows (${rows.length}). Maximum 500 rows allowed per upload.`
       });
     }
 
     // Create upload record
     uploadRecord = await CsvUpload.create({
-      userId: req.user.id,
+      userId: user.id,
       filename: filename,
       totalRows: rows.length,
       status: 'processing'
@@ -117,10 +132,13 @@ const processUpload = async (req, res) => {
       const row = rows[i];
       const rowNumber = i + 1;
 
-      // Validate row
+      // Validate row with smart phone formatting
       const validation = validateRow(row);
       if (!validation.isValid) {
-        invalidRows.push(row);
+        invalidRows.push({
+          ...row,
+          rowNumber: rowNumber
+        });
         errors.push({
           row: rowNumber,
           name: row.name,
@@ -130,10 +148,17 @@ const processUpload = async (req, res) => {
         continue;
       }
 
+      // Use formatted phone number for duplicate check
+      const formattedPhone = validation.phoneFormatted?.formatted || row.phone;
+
       // Check for duplicates
-      const isDuplicate = await isDuplicatePhone(req.user.id, row.phone);
+      const isDuplicate = await isDuplicatePhone(user.id, formattedPhone);
       if (isDuplicate) {
-        duplicateRows.push(row);
+        duplicateRows.push({
+          ...row,
+          rowNumber: rowNumber,
+          phoneFormatted: validation.phoneFormatted
+        });
         errors.push({
           row: rowNumber,
           name: row.name,
@@ -143,55 +168,244 @@ const processUpload = async (req, res) => {
         continue;
       }
 
-      validRows.push({ ...row, rowNumber });
+      // Add to valid rows with formatted phone and confidence data
+      validRows.push({
+        ...row,
+        rowNumber,
+        phoneOriginal: row.phone,
+        phone: formattedPhone, // Use formatted phone
+        phoneFormatted: validation.phoneFormatted, // Keep format metadata
+        warnings: validation.warnings // Keep warnings
+      });
     }
 
-    // Bulk create FeedbackRequests
-    const feedbackRequests = validRows.map(row => ({
-      user_id: req.user.id,
+    // Clean up uploaded file
+    fs.unlinkSync(uploadedFilePath);
+
+    console.log(`✅ Parsed ${rows.length} rows: ${validRows.length} valid, ${invalidRows.length} invalid, ${duplicateRows.length} duplicates`);
+
+    // Store parsed data in session for preview
+    req.session.csvPreview = {
+      filename: filename,
+      validRows: validRows,
+      invalidRows: invalidRows.map((row, i) => ({
+        ...row,
+        error: errors.find(e => e.phone === row.phone)?.error || 'Invalid data'
+      })),
+      duplicateRows: duplicateRows.map((row, i) => ({
+        ...row,
+        error: errors.find(e => e.phone === row.phone)?.error || 'Duplicate'
+      })),
+      errors: errors,
+      totalRows: rows.length,
+      uploadedAt: new Date()
+    };
+
+    // Save session before redirecting to ensure data persists
+    console.log('💾 Saving session data - Session ID:', req.sessionID);
+    console.log('💾 Data to save:', {
+      filename: req.session.csvPreview.filename,
+      validRows: req.session.csvPreview.validRows.length,
+      totalRows: req.session.csvPreview.totalRows
+    });
+
+    req.session.save((err) => {
+      if (err) {
+        console.error('❌ Session save error:', err);
+        return res.status(500).render('upload', {
+          title: 'Upload Customers',
+          user: user,
+          error: 'Failed to save upload data. Please try again.'
+        });
+      }
+      console.log('✅ Session saved successfully - redirecting to preview');
+      // Redirect to preview page
+      res.redirect('/dashboard/upload/preview');
+    });
+
+  } catch (error) {
+    console.error('CSV parsing error:', error);
+
+    // Clean up file
+    if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
+      fs.unlinkSync(uploadedFilePath);
+    }
+
+    // Re-load user for error render
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    res.status(500).render('upload', {
+      title: 'Upload Customers',
+      user: user,
+      error: `Upload failed: ${error.message}`
+    });
+  }
+};
+
+// GET /dashboard/upload/preview - Show CSV preview with checkboxes
+const showPreview = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
+    // Get preview data from session
+    const previewData = req.session.csvPreview;
+    console.log('🔍 Preview page - Session ID:', req.sessionID);
+    console.log('🔍 Preview page - Has preview data:', !!previewData);
+    if (previewData) {
+      console.log('🔍 Preview data found:', {
+        filename: previewData.filename,
+        validRows: previewData.validRows?.length,
+        totalRows: previewData.totalRows
+      });
+    }
+
+    if (!previewData) {
+      console.log('⚠️  No preview data in session - redirecting to upload');
+      return res.redirect('/dashboard/upload');
+    }
+
+    res.render('upload-preview', {
+      title: 'Review Upload',
+      user: user,
+      preview: previewData
+    });
+  } catch (error) {
+    console.error('Preview error:', error);
+    res.status(500).render('error', {
+      title: 'Error',
+      message: 'Failed to load preview',
+      error: { status: 500 }
+    });
+  }
+};
+
+// POST /dashboard/upload/send - Send SMS to selected customers
+const sendToSelected = async (req, res) => {
+  const startTime = Date.now();
+  let uploadRecord = null;
+
+  try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
+    // Get preview data from session
+    const previewData = req.session.csvPreview;
+
+    console.log('🔍 Send page - Session ID:', req.sessionID);
+    console.log('🔍 Send page - Has preview data:', !!previewData);
+    console.log('🔍 Send page - Session keys:', Object.keys(req.session));
+
+    if (!previewData) {
+      console.log('⚠️  Session data lost - redirecting to upload page');
+      console.log('⚠️  Full session:', JSON.stringify(req.session, null, 2));
+      return res.redirect('/dashboard/upload');
+    }
+
+    console.log(`📤 Sending SMS to selected customers from CSV: ${previewData.filename}`);
+
+    // Get selected row numbers from POST data
+    const selectedRows = req.body.selectedRows || [];
+
+    // Convert to array if single value
+    const selectedRowNumbers = Array.isArray(selectedRows)
+      ? selectedRows.map(Number)
+      : [Number(selectedRows)];
+
+    // Filter valid rows to only selected ones
+    const rowsToSend = previewData.validRows.filter(row =>
+      selectedRowNumbers.includes(row.rowNumber)
+    );
+
+    if (rowsToSend.length === 0) {
+      return res.status(400).render('upload-preview', {
+        title: 'Review Upload',
+        user: user,
+        preview: previewData,
+        error: 'Please select at least one customer to send SMS.'
+      });
+    }
+
+    console.log(`Sending SMS to ${rowsToSend.length} selected customers`);
+
+    // Create upload record
+    uploadRecord = await CsvUpload.create({
+      userId: user.id,
+      filename: previewData.filename,
+      totalRows: previewData.totalRows,
+      status: 'processing'
+    });
+
+    // Bulk create FeedbackRequests (use camelCase for Sequelize model)
+    const feedbackRequests = rowsToSend.map(row => ({
+      userId: user.id,
       uuid: uuidv4(),
-      customer_name: row.name,
-      customer_phone: row.phone,
-      customer_email: row.email || null,
+      customerName: row.name,
+      customerPhone: row.phone,
+      customerEmail: row.email || null,
       status: 'pending',
       source: 'csv_upload'
     }));
 
     const createdRequests = await FeedbackRequest.bulkCreate(feedbackRequests);
 
-    // Send SMS with rate limiting (1 per second)
-    const limit = pLimit(1); // Concurrency: 1
-    const smsDelay = 1000; // 1 second between each SMS
+    // Send SMS with rate limiting
+    const limit = pLimit(1);
+    const smsDelay = 1000;
+    const errors = [];
 
     const smsResults = await Promise.all(
       createdRequests.map((request, index) =>
         limit(async () => {
           try {
-            // Wait before sending (rate limiting)
             if (index > 0) {
               await new Promise(resolve => setTimeout(resolve, smsDelay));
             }
 
-            const result = await smsService.sendSMS(
-              request.customer_phone,
-              request.customer_name,
-              request.uuid
+            const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+            const reviewLink = `${baseUrl}/review/${request.uuid}`;
+
+            const result = await smsService.sendReviewRequest(
+              request.customerPhone,
+              request.customerName,
+              reviewLink
             );
 
-            // Update status
+            const sentAt = new Date();
             await request.update({
               status: 'sent',
-              sms_sent_at: new Date(),
-              twilio_message_sid: result.messageSid
+              smsSentAt: sentAt,
+              twilioMessageSid: result.messageSid
             });
 
-            return { success: true, requestId: request.id };
+            return {
+              success: true,
+              requestId: request.id,
+              name: request.customerName || '-',
+              phone: request.customerPhone,
+              sentAt: sentAt,
+              twilioSid: result.messageSid,
+              reviewLink: reviewLink,
+              uuid: request.uuid
+            };
           } catch (error) {
-            console.error(`SMS failed for ${request.customer_phone}:`, error);
+            console.error(`SMS failed for ${request.customerPhone}:`, error);
             errors.push({
-              row: validRows[index].rowNumber,
-              name: request.customer_name,
-              phone: request.customer_phone,
+              row: rowsToSend[index].rowNumber,
+              name: request.customerName,
+              phone: request.customerPhone,
               error: `SMS failed: ${error.message}`
             });
             return { success: false, requestId: request.id, error: error.message };
@@ -201,50 +415,51 @@ const processUpload = async (req, res) => {
     );
 
     // Calculate results
-    const successCount = smsResults.filter(r => r.success).length;
-    const smsFailedCount = smsResults.filter(r => !r.success).length;
-    const totalFailedCount = invalidRows.length + smsFailedCount;
+    const successfulSends = smsResults.filter(r => r.success);
+    const failedSends = smsResults.filter(r => !r.success);
+    const successCount = successfulSends.length;
+    const smsFailedCount = failedSends.length;
 
     // Update upload record
     const processingTime = Date.now() - startTime;
     await uploadRecord.update({
-      validRows: validRows.length,
+      validRows: rowsToSend.length,
       successCount: successCount,
-      failedCount: totalFailedCount,
-      duplicateCount: duplicateRows.length,
-      errors: errors,
+      failedCount: smsFailedCount + previewData.invalidRows.length + previewData.duplicateRows.length,
+      duplicateCount: previewData.duplicateRows.length,
+      errors: [...previewData.errors, ...errors],
       status: successCount > 0 ? 'completed' : 'failed',
       processingTimeMs: processingTime,
       completedAt: new Date()
     });
 
-    // Clean up uploaded file
-    fs.unlinkSync(uploadedFilePath);
+    // Clear session data
+    delete req.session.csvPreview;
 
     // Render results
     res.render('upload-results', {
       title: 'Upload Results',
-      user: req.user,
+      user: user,
       results: {
-        filename: filename,
-        totalRows: rows.length,
+        filename: previewData.filename,
+        totalRows: previewData.totalRows,
         successCount: successCount,
-        failedCount: totalFailedCount,
-        duplicateCount: duplicateRows.length,
-        errors: errors,
-        processingTimeSeconds: Math.round(processingTime / 1000)
+        failedCount: smsFailedCount,
+        duplicateCount: previewData.duplicateRows.length,
+        invalidCount: previewData.invalidRows.length,
+        processingTimeSeconds: Math.round(processingTime / 1000),
+
+        // Detailed arrays for tables
+        successfulSends: successfulSends,
+        failedSends: errors, // Already has row, name, phone, error
+        duplicates: previewData.duplicateRows,
+        invalidRows: previewData.invalidRows
       }
     });
 
   } catch (error) {
-    console.error('CSV upload error:', error);
+    console.error('Send SMS error:', error);
 
-    // Clean up file
-    if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
-      fs.unlinkSync(uploadedFilePath);
-    }
-
-    // Update upload record if exists
     if (uploadRecord) {
       await uploadRecord.update({
         status: 'failed',
@@ -253,10 +468,14 @@ const processUpload = async (req, res) => {
       });
     }
 
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
     res.status(500).render('upload', {
       title: 'Upload Customers',
-      user: req.user,
-      error: `Upload failed: ${error.message}`
+      user: user,
+      error: `Send failed: ${error.message}`
     });
   }
 };
@@ -264,15 +483,23 @@ const processUpload = async (req, res) => {
 // GET /dashboard/uploads - View upload history
 const showUploadHistory = async (req, res) => {
   try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
     const uploads = await CsvUpload.findAll({
-      where: { userId: req.user.id },
+      where: { userId: user.id },
       order: [['createdAt', 'DESC']],
       limit: 50
     });
 
     res.render('upload-history', {
       title: 'Upload History',
-      user: req.user,
+      user: user,
       uploads: uploads
     });
   } catch (error) {
@@ -285,9 +512,72 @@ const showUploadHistory = async (req, res) => {
   }
 };
 
+// POST /dashboard/send-single - Resend SMS to a single customer
+const sendSingleSMS = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
+    const { phone, name } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    console.log(`📤 Resending SMS to: ${name || phone}`);
+
+    // Create feedback request
+    const feedbackRequest = await FeedbackRequest.create({
+      userId: user.id,
+      uuid: uuidv4(),
+      customerName: name || '',
+      customerPhone: phone,
+      customerEmail: null,
+      status: 'pending',
+      source: 'manual_resend'
+    });
+
+    // Send SMS
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const reviewLink = `${baseUrl}/review/${feedbackRequest.uuid}`;
+
+    const result = await smsService.sendReviewRequest(
+      feedbackRequest.customerPhone,
+      feedbackRequest.customerName,
+      reviewLink
+    );
+
+    await feedbackRequest.update({
+      status: 'sent',
+      smsSentAt: new Date(),
+      twilioMessageSid: result.messageSid
+    });
+
+    console.log(`✅ SMS resent successfully to ${phone}`);
+
+    // Redirect back to previous page or dashboard
+    res.redirect('back');
+
+  } catch (error) {
+    console.error('Resend SMS error:', error);
+    res.status(500).json({
+      error: 'Failed to resend SMS',
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   upload,
   showUploadPage,
   processUpload,
-  showUploadHistory
+  showPreview,
+  sendToSelected,
+  showUploadHistory,
+  sendSingleSMS
 };

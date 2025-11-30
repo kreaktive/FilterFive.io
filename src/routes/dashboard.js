@@ -9,7 +9,8 @@ const {
   showDashboard,
   showSettings,
   updateSettings,
-  showQrCode
+  showQrCode,
+  sendTestSms
 } = require('../controllers/dashboardController');
 
 // Public routes
@@ -22,5 +23,6 @@ router.get('/', requireAuth, showDashboard);
 router.get('/settings', requireAuth, showSettings);
 router.post('/settings', requireAuth, updateSettings);
 router.get('/qr', requireAuth, showQrCode);
+router.post('/send-test-sms', requireAuth, sendTestSms);
 
 module.exports = router;

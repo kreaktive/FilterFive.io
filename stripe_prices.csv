@@ -1,0 +1,6 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior
+price_1SYrHbQcse78fteGg6jwa4u9,prod_TVt3ACxo8j2xn0,TesterMonthly,,,,2025-11-29 16:46,37.00,usd,month,1,licensed,,per_unit,,unspecified
+price_1SYpplQcse78fteGToLtVhB5,prod_TVrYWSbmrLLVXu,Annual Special Price,,,,2025-11-29 15:13,770.00,usd,year,1,licensed,,per_unit,,unspecified
+price_1SYppCQcse78fteGlvWNEDnc,prod_TVrYLhwMf4FqSp,Annual,,,,2025-11-29 15:12,970.00,usd,month,1,licensed,,per_unit,,unspecified
+price_1SYpoSQcse78fteGuTPnulTp,prod_TVrX4G6lA6aGoH,Monthly Launch Price,,,,2025-11-29 15:11,77.00,usd,month,1,licensed,,per_unit,,unspecified
+price_1SYpnvQcse78fteGlSpb636w,prod_TVrWgT9lXqsw9F,Monthly,,,,2025-11-29 15:11,97.00,usd,month,1,licensed,,per_unit,,unspecified

@@ -15,12 +15,18 @@ const isValidEmail = (email) => {
 
 /**
  * Validate Password Strength
- * Basic: Minimum 12 characters (simple, modern approach)
+ * Phase 2: Minimum 8 characters + at least 1 number
  */
 const isValidPassword = (password) => {
   if (!password || typeof password !== 'string') return false;
 
-  return password.length >= 12;
+  // Check minimum length
+  if (password.length < 8) return false;
+
+  // Check for at least one number
+  if (!/\d/.test(password)) return false;
+
+  return true;
 };
 
 /**
@@ -80,7 +86,7 @@ const validateSignup = (businessName, email, password) => {
   }
 
   if (!isValidPassword(password)) {
-    errors.push('Password must be at least 12 characters long');
+    errors.push('Password must be at least 8 characters with at least 1 number');
   }
 
   return {
@@ -112,7 +118,7 @@ const validateNewPassword = (password, confirmPassword) => {
   const errors = [];
 
   if (!isValidPassword(password)) {
-    errors.push('Password must be at least 12 characters long');
+    errors.push('Password must be at least 8 characters with at least 1 number');
   }
 
   if (password !== confirmPassword) {

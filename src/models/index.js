@@ -2,6 +2,9 @@ const User = require('./User');
 const FeedbackRequest = require('./FeedbackRequest');
 const Review = require('./Review');
 const CsvUpload = require('./CsvUpload');
+const AnalyticsSnapshot = require('./AnalyticsSnapshot');
+const TimingPerformance = require('./TimingPerformance');
+const SmsEvent = require('./SmsEvent');
 
 // Define relationships
 
@@ -49,9 +52,56 @@ CsvUpload.belongsTo(User, {
   as: 'tenant'
 });
 
+// User has many AnalyticsSnapshots
+User.hasMany(AnalyticsSnapshot, {
+  foreignKey: 'user_id',
+  as: 'analyticsSnapshots'
+});
+
+AnalyticsSnapshot.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// User has many TimingPerformance records
+User.hasMany(TimingPerformance, {
+  foreignKey: 'user_id',
+  as: 'timingPerformance'
+});
+
+TimingPerformance.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// User has many SmsEvents
+User.hasMany(SmsEvent, {
+  foreignKey: 'user_id',
+  as: 'smsEvents'
+});
+
+SmsEvent.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// FeedbackRequest has many SmsEvents
+FeedbackRequest.hasMany(SmsEvent, {
+  foreignKey: 'feedback_request_id',
+  as: 'smsEvents'
+});
+
+SmsEvent.belongsTo(FeedbackRequest, {
+  foreignKey: 'feedback_request_id',
+  as: 'feedbackRequest'
+});
+
 module.exports = {
   User,
   FeedbackRequest,
   Review,
-  CsvUpload
+  CsvUpload,
+  AnalyticsSnapshot,
+  TimingPerformance,
+  SmsEvent
 };

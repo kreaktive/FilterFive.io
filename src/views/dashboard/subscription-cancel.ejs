@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f7fafc;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .cancel-container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 50px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .cancel-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      font-size: 50px;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #718096;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .info-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .info-box p {
+      color: #92400e;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #f7fafc;
+    }
+
+    .support-note {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f7fafc;
+      border-radius: 8px;
+    }
+
+    .support-note h3 {
+      color: #2d3748;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .support-note p {
+      color: #718096;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      .cancel-container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cancel-container">
+    <div class="cancel-icon">⏸️</div>
+
+    <h1>Checkout Cancelled</h1>
+    <p class="subtitle">
+      No charges were made to your account.
+    </p>
+
+    <div class="info-box">
+      <p><strong>What happened?</strong></p>
+      <p>You closed the checkout page or clicked the back button before completing your purchase.</p>
+      <p style="margin-top: 15px;">Your trial status remains unchanged, and you can try again whenever you're ready.</p>
+    </div>
+
+    <div class="support-note">
+      <h3>Need help deciding?</h3>
+      <p>
+        We understand choosing a subscription is a big decision. Here's what FilterFive can do for your business:
+      </p>
+      <ul style="text-align: left; margin-top: 15px; color: #4a5568; line-height: 2;">
+        <li>✓ Filter negative reviews before they go public</li>
+        <li>✓ Automatically collect positive reviews on Google</li>
+        <li>✓ Send feedback requests via SMS or QR code</li>
+        <li>✓ Build trust and grow your online reputation</li>
+      </ul>
+    </div>
+
+    <div class="btn-group">
+      <a href="/dashboard/subscription" class="btn btn-primary">
+        View Plans Again
+      </a>
+      <a href="/dashboard" class="btn btn-secondary">
+        Back to Dashboard
+      </a>
+    </div>
+
+    <p style="margin-top: 30px; color: #a0aec0; font-size: 13px;">
+      Questions? Contact us at <a href="mailto:info@filterfive.io" style="color: #667eea;">info@filterfive.io</a>
+    </p>
+  </div>
+</body>
+</html>
