@@ -16,15 +16,16 @@ const qrRateLimiter = rateLimit({
   windowMs: 30 * 1000, // 30 seconds
   max: 1, // 1 request per window per key
 
-  // Disable strict validation for custom key generator
-  validate: { xForwardedForHeader: false },
-
-  // Generate unique key combining IP + businessId
+  // Generate unique key combining IP + businessId (IPv6 compatible)
   keyGenerator: (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress || 'unknown';
     const businessId = req.params.businessId || 'unknown';
-    return `qr_${businessId}_${ip}`;
+    // Use default IP extraction which handles IPv6 properly
+    return `qr_${businessId}`;
   },
+
+  // Standard IP handling (supports IPv6)
+  standardHeaders: true,
+  legacyHeaders: false,
 
   // Custom message for rate limit exceeded
   handler: (req, res) => {
@@ -41,10 +42,7 @@ const qrRateLimiter = rateLimit({
   skipSuccessfulRequests: false,
 
   // Don't count failed requests (errors)
-  skipFailedRequests: true,
-
-  standardHeaders: true,  // Return rate limit info in headers
-  legacyHeaders: false    // Disable X-RateLimit-* headers
+  skipFailedRequests: true
 });
 
 module.exports = { qrRateLimiter };
