@@ -131,12 +131,69 @@
       text-decoration: underline;
       cursor: pointer;
     }
+    .blocked-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .blocked-message {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .blocked-message .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .blocked-message h2 {
+      color: #111827;
+      margin-bottom: 15px;
+    }
+    .blocked-message p {
+      color: #6B7280;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    .blocked-message a {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    .blocked-message a:hover {
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
   <%- include('partials/header', { user }) %>
 
-  <div class="upload-container">
+  <% if (typeof blocked !== 'undefined' && blocked) { %>
+    <div class="blocked-overlay">
+      <div class="blocked-message">
+        <div class="icon">⚠️</div>
+        <h2>Setup Required</h2>
+        <p><%= message || 'You must configure your review platform URL before uploading customers.' %></p>
+        <a href="/dashboard/settings">Configure Review URL</a>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="upload-container" <%= (typeof blocked !== 'undefined' && blocked) ? 'style="filter: blur(4px); pointer-events: none;"' : '' %>>
     <h1><%= title %></h1>
     <p style="color: #6B7280; margin-bottom: 30px;">Upload a CSV file to send review requests to multiple customers at once.</p>
 

@@ -56,7 +56,9 @@ const receiveCustomerData = async (req, res) => {
       const smsResult = await sendReviewRequest(
         phone,
         name || 'there',
-        reviewLink
+        user.businessName,
+        reviewLink,
+        user.smsMessageTone || 'friendly'
       );
 
       // Update feedback request with SMS sent details

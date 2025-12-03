@@ -2,25 +2,18 @@ const express = require('express');
 const router = express.Router();
 const {
   showReviewLanding,
-  submitRating,
-  showFeedbackForm,
-  submitComment,
   showThankYou
 } = require('../controllers/reviewController');
 
-// GET /review/:uuid - Landing page with star selector
+// GET /review/:uuid - Direct redirect to review platform (Google-compliant)
 router.get('/:uuid', showReviewLanding);
-
-// POST /review/:uuid/rate - Submit star rating
-router.post('/:uuid/rate', submitRating);
-
-// GET /review/:uuid/feedback - Show feedback form
-router.get('/:uuid/feedback', showFeedbackForm);
-
-// POST /review/:uuid/comment - Submit feedback comment
-router.post('/:uuid/comment', submitComment);
 
 // GET /review/:uuid/thank-you - Thank you page
 router.get('/:uuid/thank-you', showThankYou);
+
+// REMOVED ROUTES (review gating removed):
+// - POST /review/:uuid/rate (rating collection)
+// - GET /review/:uuid/feedback (feedback form)
+// - POST /review/:uuid/comment (feedback submission)
 
 module.exports = router;

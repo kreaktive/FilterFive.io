@@ -35,6 +35,19 @@ const User = sequelize.define('User', {
     allowNull: true,
     field: 'facebook_link'
   },
+  reviewUrl: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'review_url',
+    comment: 'Universal review platform URL (Google/Yelp/Facebook/TripAdvisor/etc)'
+  },
+  smsMessageTone: {
+    type: DataTypes.ENUM('friendly', 'professional', 'grateful'),
+    defaultValue: 'friendly',
+    allowNull: false,
+    field: 'sms_message_tone',
+    comment: 'SMS message tone preference'
+  },
   subscriptionStatus: {
     type: DataTypes.ENUM('active', 'inactive', 'trial', 'cancelled', 'past_due'),
     defaultValue: 'trial',

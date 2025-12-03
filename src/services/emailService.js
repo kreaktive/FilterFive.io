@@ -4,6 +4,8 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
+// DEPRECATED: Review gating removed - negative feedback alerts no longer sent
+// Kept for backwards compatibility, but not used in new flow
 const sendNegativeFeedbackAlert = async (tenantEmail, customerName, rating, comment, phone) => {
   try {
     if (!process.env.RESEND_API_KEY) {

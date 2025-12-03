@@ -35,9 +35,14 @@ const showUploadPage = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
+    // Check if review URL is configured
+    const needsSetup = !user.reviewUrl || user.reviewUrl.trim() === '';
+
     res.render('upload', {
       title: 'Upload Customers',
-      user: user
+      user: user,
+      blocked: needsSetup,
+      message: needsSetup ? 'You must configure your review platform URL before uploading customers.' : null
     });
   } catch (error) {
     console.error('Upload page error:', error);
@@ -63,11 +68,23 @@ const processUpload = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
+    // Validate review URL is configured
+    if (!user.reviewUrl || user.reviewUrl.trim() === '') {
+      return res.status(400).render('upload', {
+        title: 'Upload Customers',
+        user: user,
+        blocked: true,
+        error: 'Review platform URL not configured. Please add your review URL in Settings first.',
+        message: 'You must configure your review platform URL before uploading customers.'
+      });
+    }
+
     // Get uploaded file
     if (!req.file) {
       return res.status(400).render('upload', {
         title: 'Upload Customers',
         user: user,
+        blocked: false,
         error: 'No file uploaded. Please select a CSV file.'
       });
     }
@@ -380,7 +397,9 @@ const sendToSelected = async (req, res) => {
             const result = await smsService.sendReviewRequest(
               request.customerPhone,
               request.customerName,
-              reviewLink
+              user.businessName,
+              reviewLink,
+              user.smsMessageTone || 'friendly'
             );
 
             const sentAt = new Date();
@@ -549,7 +568,9 @@ const sendSingleSMS = async (req, res) => {
     const result = await smsService.sendReviewRequest(
       feedbackRequest.customerPhone,
       feedbackRequest.customerName,
-      reviewLink
+      user.businessName,
+      reviewLink,
+      user.smsMessageTone || 'friendly'
     );
 
     await feedbackRequest.update({

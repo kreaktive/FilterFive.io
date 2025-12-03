@@ -130,6 +130,7 @@
       font-size: 13px;
       color: #a0aec0;
       margin-top: 5px;
+      line-height: 1.5;
     }
 
     input[type="text"],
@@ -164,6 +165,64 @@
       margin-bottom: 5px;
     }
 
+    /* Radio Button Styles */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .radio-option input[type="radio"] {
+      margin-top: 3px;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .radio-option input[type="radio"]:checked {
+      accent-color: #667eea;
+    }
+
+    .radio-option.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .radio-content {
+      flex: 1;
+    }
+
+    .radio-content strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #2d3748;
+      font-size: 15px;
+    }
+
+    .radio-content p {
+      font-size: 13px;
+      color: #718096;
+      margin: 0;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
     .btn-save {
       width: 100%;
       padding: 15px;
@@ -195,6 +254,11 @@
       .settings-card {
         padding: 20px;
       }
+
+      .radio-option {
+        flex-direction: column;
+        gap: 10px;
+      }
     }
   </style>
 </head>
@@ -215,7 +279,7 @@
   <div class="container">
     <div class="page-title">
       <h2>Settings ⚙️</h2>
-      <p>Manage your business information and review links</p>
+      <p>Manage your business information and review settings</p>
     </div>
 
     <div class="settings-card">
@@ -249,36 +313,84 @@
         </div>
 
         <div class="form-section">
-          <h3>Review Redirect Links</h3>
+          <h3>Review Platform</h3>
 
           <div class="info-box">
             <strong>💡 How it works:</strong>
-            When customers give 4-5 star ratings, they'll be redirected to leave a public review.
-            FilterFive will try Google first, then Facebook if no Google link is provided.
+            Customers who click your SMS link will go directly to your review platform.
+            Paste your review link below (works with Google, Yelp, Facebook, TripAdvisor, or any custom platform).
           </div>
 
           <div class="form-group">
-            <label for="googleReviewLink">Google Review Link (Priority #1)</label>
+            <label for="reviewUrl">Review Platform URL</label>
             <input
               type="url"
-              id="googleReviewLink"
-              name="googleReviewLink"
-              value="<%= user.googleReviewLink || '' %>"
+              id="reviewUrl"
+              name="reviewUrl"
+              value="<%= user.reviewUrl || '' %>"
               placeholder="https://g.page/r/YOUR_BUSINESS/review"
+              required
             >
-            <div class="help-text">Get this link from your Google Business Profile</div>
+            <div class="help-text">
+              <strong>Examples:</strong><br>
+              • Google: https://g.page/r/CVASdxR-ATBCEAE/review<br>
+              • Yelp: https://www.yelp.com/writeareview/biz/your-business<br>
+              • Facebook: https://facebook.com/YourBusiness/reviews<br>
+              • TripAdvisor: https://www.tripadvisor.com/UserReview-...
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>SMS Message Tone</h3>
+
+          <div class="info-box">
+            <strong>📱 Customize your message:</strong>
+            Choose the tone that best represents your brand. This affects how your SMS review requests are worded.
           </div>
 
-          <div class="form-group">
-            <label for="facebookLink">Facebook Review Link (Priority #2)</label>
-            <input
-              type="url"
-              id="facebookLink"
-              name="facebookLink"
-              value="<%= user.facebookLink || '' %>"
-              placeholder="https://www.facebook.com/YOUR_PAGE/reviews"
-            >
-            <div class="help-text">Fallback if Google link is not provided</div>
+          <div class="radio-group">
+            <label class="radio-option <%= user.smsMessageTone === 'friendly' ? 'selected' : '' %>">
+              <input
+                type="radio"
+                name="smsMessageTone"
+                value="friendly"
+                <%= user.smsMessageTone === 'friendly' || !user.smsMessageTone ? 'checked' : '' %>
+                onchange="updateRadioSelection(this)"
+              >
+              <div class="radio-content">
+                <strong>✨ Friendly & Casual</strong>
+                <p>"Hi! Thanks for visiting [Business]. Reviews help small businesses like ours thrive! Would you mind sharing your experience?"</p>
+              </div>
+            </label>
+
+            <label class="radio-option <%= user.smsMessageTone === 'professional' ? 'selected' : '' %>">
+              <input
+                type="radio"
+                name="smsMessageTone"
+                value="professional"
+                <%= user.smsMessageTone === 'professional' ? 'checked' : '' %>
+                onchange="updateRadioSelection(this)"
+              >
+              <div class="radio-content">
+                <strong>💼 Professional</strong>
+                <p>"Hello, thank you for choosing [Business]. Your feedback is valuable to us. Please take a moment to leave a review."</p>
+              </div>
+            </label>
+
+            <label class="radio-option <%= user.smsMessageTone === 'grateful' ? 'selected' : '' %>">
+              <input
+                type="radio"
+                name="smsMessageTone"
+                value="grateful"
+                <%= user.smsMessageTone === 'grateful' ? 'checked' : '' %>
+                onchange="updateRadioSelection(this)"
+              >
+              <div class="radio-content">
+                <strong>🙏 Grateful</strong>
+                <p>"We're grateful for your business at [Business]! Reviews mean the world to us. Would you share your thoughts?"</p>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -288,5 +400,19 @@
       </form>
     </div>
   </div>
+
+  <script>
+    function updateRadioSelection(radio) {
+      // Remove selected class from all options
+      document.querySelectorAll('.radio-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+
+      // Add selected class to the parent label of the checked radio
+      if (radio.checked) {
+        radio.closest('.radio-option').classList.add('selected');
+      }
+    }
+  </script>
 </body>
 </html>

@@ -12,7 +12,24 @@ const getTwilioClient = () => {
   return twilio(accountSid, authToken);
 };
 
-const sendReviewRequest = async (phone, customerName, reviewLink) => {
+/**
+ * Get SMS message based on tone preference
+ */
+const getSmsMessage = (customerName, businessName, reviewLink, tone = 'friendly') => {
+  const name = customerName || 'there';
+
+  const toneMessages = {
+    friendly: `Hi ${name}! Thanks for visiting ${businessName}. Reviews help small businesses like ours thrive! Would you mind sharing your experience? ${reviewLink}`,
+
+    professional: `Hello ${name}, thank you for choosing ${businessName}. Your feedback is valuable to us. Please take a moment to leave a review: ${reviewLink}`,
+
+    grateful: `Hi ${name}, we're grateful for your business at ${businessName}! Reviews mean the world to us. Would you share your thoughts? ${reviewLink}`
+  };
+
+  return toneMessages[tone] || toneMessages.friendly;
+};
+
+const sendReviewRequest = async (phone, customerName, businessName, reviewLink, tone = 'friendly') => {
   try {
     const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
@@ -24,7 +41,8 @@ const sendReviewRequest = async (phone, customerName, reviewLink) => {
 
     const client = getTwilioClient();
 
-    const messageBody = `Hi ${customerName || 'there'}, thanks for visiting Mike's Mechanics! How did we do? ${reviewLink}`;
+    // Generate message with tone
+    const messageBody = getSmsMessage(customerName, businessName, reviewLink, tone);
 
     const messageOptions = {
       body: messageBody,
@@ -40,7 +58,7 @@ const sendReviewRequest = async (phone, customerName, reviewLink) => {
 
     const message = await client.messages.create(messageOptions);
 
-    console.log(`✓ SMS sent successfully to ${phone} - Message SID: ${message.sid}`);
+    console.log(`✓ SMS sent successfully to ${phone} (tone: ${tone}) - Message SID: ${message.sid}`);
 
     return {
       success: true,

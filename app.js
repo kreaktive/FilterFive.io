@@ -76,7 +76,20 @@ const uploadRoutes = require('./src/routes/uploadRoutes');
 const feedbackRoutes = require('./src/routes/feedbackRoutes');
 
 app.get('/', (req, res) => {
-  res.send('FilterFive API - Server is running');
+  res.render('homepage', {
+    title: 'FilterFive - Turn Every Customer Into a 5-Star Google Review'
+  });
+});
+
+app.get('/partners', (req, res) => {
+  res.render('partners', {
+    title: 'Agency Partners - FilterFive'
+  });
+});
+
+// Redirect /login to /dashboard/login
+app.get('/login', (req, res) => {
+  res.redirect(301, '/dashboard/login');
 });
 
 // Auth Routes (Public signup, verification, password reset)

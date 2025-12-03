@@ -346,7 +346,7 @@ const showSettings = async (req, res) => {
 const updateSettings = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { businessName, googleReviewLink, facebookLink } = req.body;
+    const { businessName, reviewUrl, smsMessageTone, googleReviewLink, facebookLink } = req.body;
 
     const user = req.user || await User.findByPk(userId);
 
@@ -354,11 +354,25 @@ const updateSettings = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
+    // Validate review URL if provided
+    if (reviewUrl && reviewUrl.trim() !== '') {
+      const urlTrimmed = reviewUrl.trim();
+      // Basic URL validation
+      try {
+        new URL(urlTrimmed);
+      } catch (urlError) {
+        throw new Error('Invalid review URL. Please enter a valid URL starting with http:// or https://');
+      }
+    }
+
     // Update user settings
     await user.update({
       businessName: businessName || user.businessName,
-      googleReviewLink: googleReviewLink || null,
-      facebookLink: facebookLink || null
+      reviewUrl: reviewUrl || null,
+      smsMessageTone: smsMessageTone || user.smsMessageTone || 'friendly',
+      // Keep old fields for backwards compatibility
+      googleReviewLink: googleReviewLink || user.googleReviewLink || null,
+      facebookLink: facebookLink || user.facebookLink || null
     });
 
     // Update session
@@ -404,7 +418,7 @@ const updateSettings = async (req, res) => {
       user,
       trialStatus,
       success: null,
-      error: 'Failed to update settings. Please try again.'
+      error: error.message || 'Failed to update settings. Please try again.'
     });
   }
 };
@@ -512,8 +526,22 @@ const sendTestSms = async (req, res) => {
 
     console.log(`📤 Sending test SMS to ${phone} (${name})`);
 
+    // Validate review URL configured
+    if (!user.reviewUrl || user.reviewUrl.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'Review platform URL not configured. Please add your review URL in Settings first.'
+      });
+    }
+
     // Send SMS
-    const smsResult = await smsService.sendReviewRequest(phone, name, reviewLink);
+    const smsResult = await smsService.sendReviewRequest(
+      phone,
+      name,
+      user.businessName,
+      reviewLink,
+      user.smsMessageTone || 'friendly'
+    );
 
     if (smsResult.success) {
       // Update status
