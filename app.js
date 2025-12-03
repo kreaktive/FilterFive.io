@@ -87,6 +87,24 @@ app.get('/partners', (req, res) => {
   });
 });
 
+app.get('/terms', (req, res) => {
+  res.render('terms-of-service', {
+    title: 'Terms of Service - FilterFive'
+  });
+});
+
+app.get('/privacy', (req, res) => {
+  res.render('privacy-policy', {
+    title: 'Privacy Policy - FilterFive'
+  });
+});
+
+app.get('/sms-compliance', (req, res) => {
+  res.render('sms-compliance', {
+    title: 'SMS Compliance & Consent Information - FilterFive'
+  });
+});
+
 // Redirect /login to /dashboard/login
 app.get('/login', (req, res) => {
   res.redirect(301, '/dashboard/login');

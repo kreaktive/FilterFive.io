@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="SMS Compliance & Consent Information for FilterFive - TCPA and CTIA Compliant">
+  <title>SMS Compliance - FilterFive</title>
+  <link rel="stylesheet" href="/css/homepage.css">
+  <style>
+    /* SMS Compliance Page Styles */
+    .compliance-container {
+      min-height: 100vh;
+      background-color: var(--bg-light);
+    }
+
+    .compliance-header {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 3rem var(--spacing-sm);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .compliance-header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 1rem 0;
+      color: white;
+    }
+
+    .compliance-header .last-updated {
+      font-size: 1rem;
+      opacity: 0.95;
+      margin: 0;
+    }
+
+    .compliance-content-wrapper {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem var(--spacing-sm);
+    }
+
+    /* Table of Contents Sidebar */
+    .compliance-toc {
+      background: var(--bg-white);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .compliance-toc h3 {
+      margin: 0 0 1.5rem 0;
+      font-size: 1.1rem;
+      color: var(--text-dark);
+    }
+
+    .toc-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .toc-nav > ul > li {
+      margin-bottom: 0.2rem;
+    }
+
+    .toc-nav ul ul {
+      padding-left: 1.25rem;
+      margin-top: 0.1rem;
+    }
+
+    .toc-nav ul ul li {
+      margin-bottom: 0.1rem;
+    }
+
+    .toc-nav a {
+      display: block;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+      border-left: 2px solid transparent;
+      padding-left: 0.75rem;
+      transition: var(--transition);
+    }
+
+    .toc-nav a:hover {
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+    }
+
+    .toc-nav a.active {
+      color: var(--primary-color);
+      font-weight: 600;
+      border-left-color: var(--primary-color);
+    }
+
+    /* Main Content */
+    .compliance-content {
+      background: var(--bg-white);
+      border-radius: var(--border-radius);
+      padding: 3rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .intro-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-medium);
+      margin-bottom: 1.5rem;
+    }
+
+    .compliance-content section {
+      margin-bottom: 1rem;
+    }
+
+    .compliance-content h2 {
+      font-size: 1.5rem;
+      color: var(--text-dark);
+      margin: 1.5rem 0 0.75rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .compliance-content h3 {
+      font-size: 1.1rem;
+      color: var(--text-medium);
+      margin: 1.5rem 0 0.75rem 0;
+    }
+
+    .compliance-content h4 {
+      font-size: 1rem;
+      color: var(--text-medium);
+      margin: 1rem 0 0.5rem 0;
+    }
+
+    .compliance-content p {
+      color: var(--text-medium);
+      line-height: 1.7;
+      margin: 0.75rem 0;
+      font-size: 0.95rem;
+    }
+
+    .compliance-content ul, .compliance-content ol {
+      margin: 1rem 0;
+      padding-left: 2rem;
+      color: var(--text-medium);
+    }
+
+    .compliance-content ul li, .compliance-content ol li {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+
+    .compliance-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .compliance-content table th {
+      background-color: var(--bg-light);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dark);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .compliance-content table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-medium);
+    }
+
+    .compliance-content table tr:hover {
+      background-color: var(--bg-light);
+    }
+
+    .compliance-content code {
+      background-color: var(--bg-light);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #d63384;
+    }
+
+    .compliance-content pre {
+      background-color: #f5f5f5;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .compliance-content pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    .info-box {
+      background-color: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      color: #1e40af;
+      margin: 1.5rem 0;
+    }
+
+    .warning-box {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      color: #92400e;
+      margin: 1.5rem 0;
+    }
+
+    .compliance-content a {
+      color: var(--primary-color);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .compliance-content a:hover {
+      border-bottom-color: var(--primary-color);
+      text-decoration: underline;
+    }
+
+    .compliance-footer {
+      background-color: var(--bg-light);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      margin-top: 3rem;
+      border-top: 2px solid var(--border-color);
+    }
+
+    .compliance-footer p {
+      color: var(--text-medium);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 968px) {
+      .compliance-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 1rem var(--spacing-sm);
+      }
+
+      .compliance-toc {
+        position: static;
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 2rem;
+      }
+
+      .compliance-header h1 {
+        font-size: 2rem;
+      }
+
+      .compliance-content {
+        padding: 2rem;
+      }
+
+      .compliance-content h2 {
+        font-size: 1.25rem;
+      }
+
+      .compliance-content h3 {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .compliance-container {
+        background-color: var(--bg-white);
+      }
+
+      .compliance-header {
+        padding: 2rem 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .compliance-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .compliance-header .last-updated {
+        font-size: 0.9rem;
+      }
+
+      .compliance-content-wrapper {
+        padding: 0.5rem;
+      }
+
+      .compliance-toc {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .toc-nav a {
+        font-size: 0.9rem;
+      }
+
+      .compliance-content {
+        padding: 1.5rem;
+        border-radius: 4px;
+      }
+
+      .compliance-content h2 {
+        font-size: 1.1rem;
+        margin: 1.5rem 0 0.75rem 0;
+      }
+
+      .compliance-content h3 {
+        font-size: 0.95rem;
+      }
+
+      .compliance-content p {
+        font-size: 0.9rem;
+      }
+
+      .info-box, .warning-box {
+        padding: 1rem;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      .compliance-header {
+        background: var(--bg-white);
+        color: var(--text-dark);
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .compliance-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 0;
+        max-width: 100%;
+      }
+
+      .compliance-toc {
+        display: none;
+      }
+
+      .compliance-content {
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .compliance-content section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <span class="logo-text">FilterFive</span>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#benefits">Benefits</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="/partners">Become a Partner</a>
+        <a href="/login" class="nav-login">Login</a>
+        <a href="/signup" class="btn-primary-nav">Start Free Trial</a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="compliance-container">
+    <div class="compliance-header">
+      <h1>SMS Compliance & Consent Information</h1>
+      <p class="last-updated">Last Updated: December 2, 2025</p>
+    </div>
+
+    <div class="compliance-content-wrapper">
+      <!-- Table of Contents -->
+      <aside class="compliance-toc">
+        <h3>Contents</h3>
+        <nav class="toc-nav">
+          <ul>
+            <li><a href="#about-filterfive">About FilterFive SMS</a></li>
+            <li><a href="#message-details">Message Details</a></li>
+            <li><a href="#sample-message">Sample Message</a></li>
+            <li><a href="#how-to-opt-out">How to Opt Out</a></li>
+            <li><a href="#how-to-get-help">How to Get Help</a></li>
+            <li><a href="#consent-requirements">Consent Requirements</a>
+              <ul>
+                <li><a href="#required-elements">Required Elements</a></li>
+                <li><a href="#digital-consent">Digital Consent Language</a></li>
+                <li><a href="#paper-consent">Paper Consent Form</a></li>
+                <li><a href="#consent-records">Consent Records</a></li>
+              </ul>
+            </li>
+            <li><a href="#compliance-verification">Compliance Verification</a></li>
+            <li><a href="#platform-policies">Platform Policies</a></li>
+            <li><a href="#contact-information">Contact Information</a></li>
+            <li><a href="#regulatory-compliance">Regulatory Compliance</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="compliance-content">
+
+        <p class="intro-text"><strong>This page provides information about FilterFive's SMS messaging practices and consent requirements for compliance with the Telephone Consumer Protection Act (TCPA), Cellular Telecommunications Industry Association (CTIA) guidelines, and carrier requirements.</strong></p>
+
+        <!-- Section 1 -->
+        <section id="about-filterfive">
+          <h2>About FilterFive SMS Messages</h2>
+          <p>FilterFive is a business-to-business platform that helps local businesses request customer reviews via SMS. When you receive an SMS from a FilterFive-powered business, it means:</p>
+          <ol>
+            <li>You recently visited or did business with a local business</li>
+            <li>That business uses FilterFive to request customer feedback</li>
+            <li>You provided your phone number and consent to receive a review request</li>
+          </ol>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="message-details">
+          <h2>Message Details</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Message Type</strong></td>
+                <td>One-time transactional review request</td>
+              </tr>
+              <tr>
+                <td><strong>Frequency</strong></td>
+                <td>Maximum ONE message per 30-day period per business</td>
+              </tr>
+              <tr>
+                <td><strong>Content</strong></td>
+                <td>Brief thank-you message with a link to leave a Google review</td>
+              </tr>
+              <tr>
+                <td><strong>Cost</strong></td>
+                <td>Message and data rates may apply based on your carrier plan</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="sample-message">
+          <h2>Sample Message</h2>
+          <p>Here is an example of messages sent through FilterFive:</p>
+          <pre><code>Hi [Name]! Thanks for visiting [Business Name]. We'd love your feedback:
+https://g.page/r/xxxxx/review Msg&data rates may apply. Reply STOP to opt out.</code></pre>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="how-to-opt-out">
+          <h2>How to Opt Out</h2>
+          <p>You can stop receiving messages at any time by replying with any of these keywords:</p>
+          <ul>
+            <li><strong>STOP</strong></li>
+            <li><strong>UNSUBSCRIBE</strong></li>
+            <li><strong>CANCEL</strong></li>
+            <li><strong>END</strong></li>
+            <li><strong>QUIT</strong></li>
+          </ul>
+          <p>Opt-out requests are processed <strong>immediately and automatically</strong>. Once you opt out, you will not receive any further messages.</p>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="how-to-get-help">
+          <h2>How to Get Help</h2>
+          <p>Reply <strong>HELP</strong> to any message to receive:</p>
+          <pre><code>FilterFive sends review requests on behalf of local businesses.
+For help, contact info@filterfive.io or visit filterfive.io/sms-compliance.
+Reply STOP to opt out.</code></pre>
+          <p>You can also contact us directly at <strong><a href="mailto:info@filterfive.io">info@filterfive.io</a></strong>.</p>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="consent-requirements">
+          <h2>Consent Requirements for Businesses</h2>
+          <p>FilterFive requires all subscribing businesses to obtain <strong>prior express written consent</strong> before submitting any customer phone numbers. This section documents our consent requirements.</p>
+
+          <h3 id="required-elements">Required Consent Elements</h3>
+          <p>All consent collection must include:</p>
+          <ol>
+            <li><strong>Business Identification</strong> — Clear identification of the business name</li>
+            <li><strong>Message Description</strong> — Clear statement that the customer will receive an SMS review request</li>
+            <li><strong>Frequency Disclosure</strong> — Statement that this is a one-time message</li>
+            <li><strong>Rate Disclosure</strong> — "Message and data rates may apply"</li>
+            <li><strong>Opt-Out Instructions</strong> — "Reply STOP to opt out"</li>
+            <li><strong>Policy Links</strong> — References to terms of service and privacy policy</li>
+          </ol>
+
+          <h3 id="digital-consent">Approved Digital Consent Language</h3>
+          <p>Businesses must use consent language substantially similar to:</p>
+
+          <h4>Standard Checkbox Consent</h4>
+          <p><strong>For web forms, booking systems, and digital intake forms:</strong></p>
+          <pre><code>☐ I agree to receive a one-time SMS review request from [Business Name].
+  Message and data rates may apply. Reply STOP to opt out.
+  Terms: [link] | Privacy: [link]</code></pre>
+
+          <h4>Expanded Consent Language</h4>
+          <p><strong>For businesses preferring more detailed disclosure:</strong></p>
+          <pre><code>☐ SMS Consent: By checking this box, I consent to receive a one-time
+  text message from [Business Name] requesting feedback about my visit.
+  Message frequency: 1 message. Message and data rates may apply.
+  Reply STOP to cancel. View our Terms of Service and Privacy Policy.</code></pre>
+
+          <h3 id="paper-consent">Approved Paper Consent Form</h3>
+          <p><strong>For businesses collecting consent via paper forms:</strong></p>
+
+          <div class="info-box" style="background-color: #f3f4f6; color: #374151; border-left-color: #6b7280; font-size: 0.95rem; line-height: 1.8;">
+            <strong style="display: block; margin-bottom: 1rem; font-size: 1.1rem;">CUSTOMER FEEDBACK CONSENT FORM</strong>
+
+            <p><strong>Business Name:</strong> ____________________________</p>
+
+            <p style="margin-top: 1rem;"><strong>Customer Information:</strong></p>
+            <p style="margin-top: 0.5rem;">Name: ____________________________</p>
+            <p style="margin-top: 0.5rem;">Phone Number: ____________________________</p>
+            <p style="margin-top: 0.5rem;">Email (optional): ____________________________</p>
+
+            <p style="margin-top: 1rem;"><strong>SMS Consent:</strong></p>
+            <p style="margin-top: 0.5rem;">☐ <strong>I agree to receive a one-time SMS text message</strong> from the business named above requesting feedback about my experience.</p>
+
+            <ul style="margin-top: 1rem; margin-left: 0; padding-left: 1.5rem;">
+              <li><strong>Message Frequency:</strong> One (1) message</li>
+              <li style="margin-top: 0.5rem;"><strong>Message & Data Rates:</strong> Standard messaging and data rates from your wireless carrier may apply</li>
+              <li style="margin-top: 0.5rem;"><strong>Opt-Out:</strong> Reply STOP to any message to unsubscribe</li>
+              <li style="margin-top: 0.5rem;"><strong>Help:</strong> Reply HELP for assistance or contact the business directly</li>
+              <li style="margin-top: 0.5rem;"><strong>Terms & Privacy:</strong> Available at the business location or online</li>
+            </ul>
+
+            <p style="margin-top: 1rem;"><strong>Customer Signature:</strong> ____________________________</p>
+            <p style="margin-top: 0.5rem;"><strong>Date:</strong> ____________________________</p>
+          </div>
+
+          <h3 id="consent-records">Consent Record Requirements</h3>
+          <p>Businesses must maintain records of consent including:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Required Element</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Timestamp</strong></td>
+                <td>Date and time consent was obtained</td>
+              </tr>
+              <tr>
+                <td><strong>Method</strong></td>
+                <td>How consent was collected (web form, paper, etc.)</td>
+              </tr>
+              <tr>
+                <td><strong>Consent Text</strong></td>
+                <td>The exact language shown to the customer</td>
+              </tr>
+              <tr>
+                <td><strong>Acknowledgment</strong></td>
+                <td>Proof of customer action (checkbox selected, signature, etc.)</td>
+              </tr>
+              <tr>
+                <td><strong>Retention</strong></td>
+                <td>Records must be kept for minimum 4 years</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="compliance-verification">
+          <h2>Compliance Verification</h2>
+          <p>FilterFive enforces compliance through:</p>
+          <ol>
+            <li><strong>Contractual Obligation</strong> — Businesses agree to consent requirements in our <a href="/terms">Terms of Service</a></li>
+            <li><strong>30-Day Frequency Limit</strong> — System prevents messages to the same number within 30 days</li>
+            <li><strong>Automatic Opt-Out Processing</strong> — STOP requests are honored immediately across all businesses</li>
+            <li><strong>Audit Rights</strong> — FilterFive may request consent documentation from businesses</li>
+          </ol>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="platform-policies">
+          <h2>Platform Policies</h2>
+          <ul>
+            <li><a href="/terms">Terms of Service</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+          </ul>
+        </section>
+
+        <!-- Section 9 -->
+        <section id="contact-information">
+          <h2>Contact Information</h2>
+          <p><strong>Email:</strong> <a href="mailto:info@filterfive.io">info@filterfive.io</a></p>
+          <p><strong>For end customers:</strong> If you received a message and have questions, reply HELP to the message or email <a href="mailto:info@filterfive.io">info@filterfive.io</a>.</p>
+          <p><strong>For businesses:</strong> To learn more about FilterFive, visit <a href="https://filterfive.io">filterfive.io</a>.</p>
+        </section>
+
+        <!-- Section 10 -->
+        <section id="regulatory-compliance">
+          <h2>Regulatory Compliance</h2>
+          <p>FilterFive is designed to comply with:</p>
+          <ul>
+            <li><strong>Telephone Consumer Protection Act (TCPA)</strong></li>
+            <li><strong>CTIA Messaging Principles and Best Practices</strong></li>
+            <li><strong>Carrier-specific requirements</strong></li>
+            <li><strong>FTC regulations on review practices</strong></li>
+          </ul>
+          <p>This page serves as public documentation of our consent collection requirements and is available for review by carriers, regulators, and the public.</p>
+        </section>
+
+        <div class="compliance-footer">
+          <p><strong>This page is publicly accessible and does not require login to view.</strong></p>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Table of Contents Active Link Highlighting
+    const sections = document.querySelectorAll('main section');
+    const tocLinks = document.querySelectorAll('.toc-nav a');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          tocLinks.forEach((link) => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -50% 0px'
+    });
+
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+
+    // Smooth scrolling for TOC links
+    tocLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Mobile hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+
+    // Close menu when link is clicked
+    document.querySelectorAll('.nav-links a').forEach((link) => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
+  </script>
+</body>
+</html>
