@@ -105,6 +105,12 @@ app.get('/sms-compliance', (req, res) => {
   });
 });
 
+app.get('/demo', (req, res) => {
+  res.render('demo', {
+    title: 'SMS Consent Collection Demo - FilterFive'
+  });
+});
+
 // Redirect /login to /dashboard/login
 app.get('/login', (req, res) => {
   res.redirect(301, '/dashboard/login');
