@@ -1,6 +1,8 @@
 const { User } = require('../models');
 const { Op } = require('sequelize');
 const QRCode = require('qrcode');
+const logger = require('../services/logger');
+const { isValidPassword, getPasswordErrors, isValidEmail, sanitizeInput } = require('../services/validationService');
 
 // GET /admin - Show list of all tenants
 const showAdminDashboard = async (req, res) => {
@@ -19,7 +21,7 @@ const showAdminDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in showAdminDashboard:', error);
+    logger.error('Error in showAdminDashboard', { error: error.message });
     res.status(500).render('error', {
       title: 'Server Error',
       message: 'Failed to load tenant list.',
@@ -42,8 +44,12 @@ const createTenant = async (req, res) => {
   try {
     const { businessName, email, phone, password } = req.body;
 
+    // SECURITY: Sanitize inputs
+    const sanitizedBusinessName = sanitizeInput(businessName);
+    const sanitizedEmail = email ? email.trim().toLowerCase() : '';
+
     // Validation
-    if (!businessName || !email || !password) {
+    if (!sanitizedBusinessName || !sanitizedEmail || !password) {
       return res.render('admin/create', {
         title: 'Super Admin - Create New Tenant',
         currentUser: req.user,
@@ -51,8 +57,27 @@ const createTenant = async (req, res) => {
       });
     }
 
+    // SECURITY: Validate email format
+    if (!isValidEmail(sanitizedEmail)) {
+      return res.render('admin/create', {
+        title: 'Super Admin - Create New Tenant',
+        currentUser: req.user,
+        error: 'Please enter a valid email address.'
+      });
+    }
+
+    // SECURITY: Validate password strength
+    if (!isValidPassword(password)) {
+      const passwordErrors = getPasswordErrors(password);
+      return res.render('admin/create', {
+        title: 'Super Admin - Create New Tenant',
+        currentUser: req.user,
+        error: 'Password requirements: ' + passwordErrors.join(', ')
+      });
+    }
+
     // Check if email already exists
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await User.findOne({ where: { email: sanitizedEmail } });
 
     if (existingUser) {
       return res.render('admin/create', {
@@ -64,21 +89,21 @@ const createTenant = async (req, res) => {
 
     // Create new tenant
     const newTenant = await User.create({
-      businessName,
-      email,
+      businessName: sanitizedBusinessName,
+      email: sanitizedEmail,
       password, // Will be hashed by beforeCreate hook
       role: 'tenant',
       subscriptionStatus: 'trial',
       isActive: true
     });
 
-    console.log(`✓ New tenant created by super admin: ${email} (ID: ${newTenant.id})`);
+    logger.info('New tenant created by super admin', { email, tenantId: newTenant.id });
 
     // Redirect to admin dashboard with success message
     res.redirect('/admin?success=Tenant created successfully');
 
   } catch (error) {
-    console.error('Error in createTenant:', error);
+    logger.error('Error in createTenant', { error: error.message });
 
     if (error.name === 'SequelizeValidationError') {
       return res.render('admin/create', {
@@ -132,7 +157,7 @@ const generateQrCode = async (req, res) => {
       }
     });
 
-    console.log(`✓ QR code generated for: ${user.businessName} (ID: ${user.id})`);
+    logger.info('QR code generated', { businessName: user.businessName, userId: user.id });
 
     // Return QR code data
     res.json({
@@ -144,7 +169,7 @@ const generateQrCode = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ QR generation error:', error);
+    logger.error('QR generation error', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to generate QR code'

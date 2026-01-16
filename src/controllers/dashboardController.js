@@ -1,44 +1,21 @@
-const { User, FeedbackRequest, Review } = require('../models');
+const { User, FeedbackRequest, Review, PosIntegration, PosLocation, PosTransaction } = require('../models');
 const { Op } = require('sequelize');
 const QRCode = require('qrcode');
 const analyticsService = require('../services/analyticsService');
-
-// Helper function: Calculate relative time
-function getTimeAgo(date) {
-  const now = new Date();
-  const past = new Date(date);
-  const diffMs = now - past;
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSecs < 60) return 'Just now';
-  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
-}
-
-// Helper function: Mask phone number
-function maskPhone(phone) {
-  if (!phone) return 'Unknown';
-  // Format: +1 555-***-1234
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    const areaCode = cleaned.slice(1, 4);
-    const last4 = cleaned.slice(-4);
-    return `+1 ${areaCode}-***-${last4}`;
-  }
-  return phone; // Return as-is if format doesn't match
-}
+const { sendSupportRequestEmail } = require('../services/emailService');
+const { buildTrialStatus } = require('../middleware/trialManager');
+const { invalidateUserSessionCache } = require('../middleware/auth');
+const { rotateToken: rotateCsrfToken } = require('../middleware/csrf');
+const { validateSmsTemplate } = require('../utils/smsTemplateValidator');
+const { getTimeAgo, maskPhone } = require('../utils/formatters');
+const logger = require('../services/logger');
+const smsLimitService = require('../services/smsLimitService');
+const shortUrlService = require('../services/shortUrlService');
 
 // GET /dashboard/login - Show login form
 const showLogin = (req, res) => {
   res.render('dashboard/login', {
-    title: 'Login - FilterFive',
+    title: 'Login - MoreStars',
     error: null
   });
 };
@@ -50,7 +27,7 @@ const login = async (req, res) => {
 
     if (!email || !password) {
       return res.render('dashboard/login', {
-        title: 'Login - FilterFive',
+        title: 'Login - MoreStars',
         error: 'Email and password are required'
       });
     }
@@ -59,7 +36,7 @@ const login = async (req, res) => {
 
     if (!user) {
       return res.render('dashboard/login', {
-        title: 'Login - FilterFive',
+        title: 'Login - MoreStars',
         error: 'Invalid email or password'
       });
     }
@@ -68,7 +45,7 @@ const login = async (req, res) => {
 
     if (!isValidPassword) {
       return res.render('dashboard/login', {
-        title: 'Login - FilterFive',
+        title: 'Login - MoreStars',
         error: 'Invalid email or password'
       });
     }
@@ -76,32 +53,66 @@ const login = async (req, res) => {
     // Check if user is verified (only for non-super-admins)
     if (!user.isVerified && user.role !== 'super_admin') {
       return res.render('dashboard/login', {
-        title: 'Login - FilterFive',
-        error: 'Please verify your email address before logging in. Check your inbox for the verification link.'
+        title: 'Login - MoreStars',
+        error: 'Please verify your email address before logging in. Check your inbox for the verification link.',
+        showResendVerification: true,
+        unverifiedEmail: user.email
       });
     }
 
-    // Set session
-    req.session.userId = user.id;
-    req.session.userEmail = user.email;
-    req.session.businessName = user.businessName;
+    // Regenerate session to prevent session fixation attacks (S1 fix)
+    // This creates a new session ID while preserving the session data
+    req.session.regenerate((err) => {
+      if (err) {
+        logger.error('Session regeneration failed', { error: err.message, userId: user.id });
+        return res.render('dashboard/login', {
+          title: 'Login - MoreStars',
+          error: 'Something went wrong. Please try again.'
+        });
+      }
 
-    res.redirect('/dashboard');
+      // Set session data AFTER regeneration
+      req.session.userId = user.id;
+      req.session.userEmail = user.email;
+      req.session.businessName = user.businessName;
+
+      // Rotate CSRF token after login to prevent session fixation attacks
+      rotateCsrfToken(req);
+
+      // Save session explicitly before redirect
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          logger.error('Session save failed', { error: saveErr.message, userId: user.id });
+          return res.render('dashboard/login', {
+            title: 'Login - MoreStars',
+            error: 'Something went wrong. Please try again.'
+          });
+        }
+        res.redirect('/dashboard');
+      });
+    });
 
   } catch (error) {
-    console.error('Error in login:', error);
+    logger.error('Login error', { error: error.message });
     res.render('dashboard/login', {
-      title: 'Login - FilterFive',
+      title: 'Login - MoreStars',
       error: 'Something went wrong. Please try again.'
     });
   }
 };
 
 // GET /dashboard/logout - Handle logout
-const logout = (req, res) => {
+const logout = async (req, res) => {
+  const userId = req.session.userId;
+
+  // Invalidate user session cache before destroying session
+  if (userId) {
+    await invalidateUserSessionCache(userId);
+  }
+
   req.session.destroy((err) => {
     if (err) {
-      console.error('Error destroying session:', err);
+      logger.error('Error destroying session', { error: err.message });
     }
     res.redirect('/dashboard/login');
   });
@@ -112,50 +123,65 @@ const showDashboard = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    // Get user and trial status (from middleware or load here)
-    const user = req.user || await User.findByPk(userId);
-    const trialStatus = req.trialStatus || {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    // Get user with full attributes including reviewUrl for setup check
+    // req.user from auth middleware only has basic attributes
+    const user = await User.findByPk(userId);
+    const trialStatus = req.trialStatus || buildTrialStatus(user);
 
-    // Get analytics counts
-    const totalSent = await FeedbackRequest.count({
-      where: {
-        userId,
-        status: {
-          [Op.in]: ['sent', 'clicked', 'rated']
+    // Run all independent queries in parallel for better performance
+    const [totalSent, totalClicked, totalRated, reviews, recentRequests, pulseActivities] = await Promise.all([
+      // Get analytics counts
+      FeedbackRequest.count({
+        where: {
+          userId,
+          status: {
+            [Op.in]: ['sent', 'clicked', 'rated']
+          }
         }
-      }
-    });
-
-    const totalClicked = await FeedbackRequest.count({
-      where: {
-        userId,
-        status: {
-          [Op.in]: ['clicked', 'rated']
+      }),
+      FeedbackRequest.count({
+        where: {
+          userId,
+          status: {
+            [Op.in]: ['clicked', 'rated']
+          }
         }
-      }
-    });
-
-    const totalRated = await FeedbackRequest.count({
-      where: {
-        userId,
-        status: 'rated'
-      }
-    });
-
-    // Get rating distribution
-    const reviews = await Review.findAll({
-      where: { userId },
-      attributes: ['rating'],
-      raw: true
-    });
+      }),
+      FeedbackRequest.count({
+        where: {
+          userId,
+          status: 'rated'
+        }
+      }),
+      // Get rating distribution
+      Review.findAll({
+        where: { userId },
+        attributes: ['rating'],
+        raw: true
+      }),
+      // Get recent feedback requests
+      FeedbackRequest.findAll({
+        where: { userId },
+        order: [['createdAt', 'DESC']],
+        limit: 10,
+        include: [{
+          model: Review,
+          as: 'review',
+          required: false
+        }]
+      }),
+      // Get last 20 activities for Pulse feed
+      FeedbackRequest.findAll({
+        where: { userId },
+        order: [['createdAt', 'DESC']],
+        limit: 20,
+        include: [{
+          model: Review,
+          as: 'review',
+          required: false
+        }]
+      })
+    ]);
 
     const ratingCounts = {
       5: 0,
@@ -172,30 +198,6 @@ const showDashboard = async (req, res) => {
     // Calculate percentages
     const clickRate = totalSent > 0 ? ((totalClicked / totalSent) * 100).toFixed(1) : 0;
     const rateRate = totalClicked > 0 ? ((totalRated / totalClicked) * 100).toFixed(1) : 0;
-
-    // Get recent feedback requests
-    const recentRequests = await FeedbackRequest.findAll({
-      where: { userId },
-      order: [['createdAt', 'DESC']],
-      limit: 10,
-      include: [{
-        model: Review,
-        as: 'review',
-        required: false
-      }]
-    });
-
-    // Get last 20 activities for Pulse feed
-    const pulseActivities = await FeedbackRequest.findAll({
-      where: { userId },
-      order: [['createdAt', 'DESC']],
-      limit: 20,
-      include: [{
-        model: Review,
-        as: 'review',
-        required: false
-      }]
-    });
 
     // Format pulse data with status, time, and customer info
     const pulseData = pulseActivities.map(activity => {
@@ -252,6 +254,24 @@ const showDashboard = async (req, res) => {
       };
     });
 
+    // Calculate trial days remaining
+    let trialDaysRemaining = null;
+    if (user.subscriptionStatus === 'trial' && user.trialEndsAt) {
+      const msRemaining = new Date(user.trialEndsAt) - new Date();
+      trialDaysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+    }
+
+    // Calculate SMS usage data
+    const smsUsage = {
+      used: user.smsUsageCount || 0,
+      limit: user.smsUsageLimit || 10,
+      remaining: (user.smsUsageLimit || 10) - (user.smsUsageCount || 0),
+      percentUsed: user.smsUsageLimit > 0 ? Math.round((user.smsUsageCount / user.smsUsageLimit) * 100) : 0
+    };
+
+    // Check if setup is incomplete (no review URL)
+    const setupIncomplete = !user.reviewUrl;
+
     // Fetch analytics data if enabled
     let analyticsData = null;
     if (user.analyticsEnabled) {
@@ -277,16 +297,19 @@ const showDashboard = async (req, res) => {
           locations: locations
         };
       } catch (error) {
-        console.error('Error fetching analytics data:', error);
+        logger.error('Error fetching analytics data', { userId, error: error.message });
         // Continue without analytics data if there's an error
       }
     }
 
     res.render('dashboard/index', {
-      title: 'Dashboard - FilterFive',
+      title: 'Dashboard - MoreStars',
       businessName: req.session.businessName,
       user,
       trialStatus,
+      trialDaysRemaining,
+      smsUsage,
+      setupIncomplete,
       analytics: {
         totalSent,
         totalClicked,
@@ -301,7 +324,7 @@ const showDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in showDashboard:', error);
+    logger.error('Error in showDashboard', { error: error.message });
     res.status(500).send('Something went wrong');
   }
 };
@@ -311,33 +334,57 @@ const showSettings = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    const user = req.user || await User.findByPk(userId);
+    // Always fetch fresh user data for settings page (don't use cached req.user)
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.redirect('/dashboard/login');
     }
 
-    const trialStatus = req.trialStatus || {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    const trialStatus = req.trialStatus || buildTrialStatus(user);
+
+    // Fetch POS integrations with locations
+    const posIntegrations = await PosIntegration.findAll({
+      where: { userId },
+      include: [{ model: PosLocation, as: 'locations' }]
+    });
+
+    const squareIntegration = posIntegrations.find(i => i.provider === 'square');
+    const shopifyIntegration = posIntegrations.find(i => i.provider === 'shopify');
+    const zapierIntegration = posIntegrations.find(i => i.provider === 'zapier');
+    const webhookIntegration = posIntegrations.find(i => i.provider === 'webhook');
+    const stripeIntegration = posIntegrations.find(i => i.provider === 'stripe_pos');
+    const woocommerceIntegration = posIntegrations.find(i => i.provider === 'woocommerce');
+    const cloverIntegration = posIntegrations.find(i => i.provider === 'clover');
+
+    // Fetch recent POS transactions
+    const recentTransactions = await PosTransaction.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      limit: 50
+    });
 
     res.render('dashboard/settings', {
-      title: 'Settings - FilterFive',
+      title: 'Settings - MoreStars',
       businessName: req.session.businessName,
       user,
       trialStatus,
       success: null,
-      error: null
+      error: null,
+      posSuccess: null,
+      posError: null,
+      squareIntegration,
+      shopifyIntegration,
+      zapierIntegration,
+      webhookIntegration,
+      stripeIntegration,
+      woocommerceIntegration,
+      cloverIntegration,
+      recentTransactions
     });
 
   } catch (error) {
-    console.error('Error in showSettings:', error);
+    logger.error('Error in showSettings', { error: error.message });
     res.status(500).send('Something went wrong');
   }
 };
@@ -346,7 +393,7 @@ const showSettings = async (req, res) => {
 const updateSettings = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { businessName, reviewUrl, smsMessageTone, googleReviewLink, facebookLink } = req.body;
+    const { businessName, reviewUrl, smsMessageTone, customSmsMessage, reviewValueEstimate } = req.body;
 
     const user = req.user || await User.findByPk(userId);
 
@@ -354,14 +401,47 @@ const updateSettings = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    // Validate review URL if provided
+    // B8 FIX: Validate review URL if provided - requires https://
     if (reviewUrl && reviewUrl.trim() !== '') {
       const urlTrimmed = reviewUrl.trim();
       // Basic URL validation
       try {
-        new URL(urlTrimmed);
+        const parsedUrl = new URL(urlTrimmed);
+        // Only allow https URLs (http is insecure for redirect)
+        if (!['https:', 'http:'].includes(parsedUrl.protocol)) {
+          throw new Error('Review URL must start with https:// or http://');
+        }
+        // Validate it's a real domain (not localhost in production)
+        if (process.env.NODE_ENV === 'production' &&
+            (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1')) {
+          throw new Error('Review URL cannot be localhost in production');
+        }
       } catch (urlError) {
-        throw new Error('Invalid review URL. Please enter a valid URL starting with http:// or https://');
+        if (urlError.message.includes('localhost') || urlError.message.includes('https')) {
+          throw urlError;
+        }
+        throw new Error('Invalid review URL. Please enter a valid URL starting with https://');
+      }
+    }
+
+    // Validate custom SMS message if tone is 'custom'
+    if (smsMessageTone === 'custom') {
+      if (!customSmsMessage || customSmsMessage.trim() === '') {
+        throw new Error('Custom message cannot be empty when using custom tone');
+      }
+      // Comprehensive template validation
+      const validation = validateSmsTemplate(customSmsMessage);
+      if (!validation.valid) {
+        throw new Error(validation.errors.join('. '));
+      }
+    }
+
+    // Validate and parse reviewValueEstimate
+    let parsedReviewValue = user.reviewValueEstimate;
+    if (reviewValueEstimate !== undefined && reviewValueEstimate !== '') {
+      const value = parseFloat(reviewValueEstimate);
+      if (!isNaN(value) && value >= 1 && value <= 10000) {
+        parsedReviewValue = value;
       }
     }
 
@@ -370,37 +450,53 @@ const updateSettings = async (req, res) => {
       businessName: businessName || user.businessName,
       reviewUrl: reviewUrl || null,
       smsMessageTone: smsMessageTone || user.smsMessageTone || 'friendly',
-      // Keep old fields for backwards compatibility
-      googleReviewLink: googleReviewLink || user.googleReviewLink || null,
-      facebookLink: facebookLink || user.facebookLink || null
+      customSmsMessage: smsMessageTone === 'custom' ? (customSmsMessage || null) : user.customSmsMessage,
+      reviewValueEstimate: parsedReviewValue
     });
+
+    // Invalidate user session cache since user data changed
+    await invalidateUserSessionCache(userId);
 
     // Update session
     req.session.businessName = user.businessName;
 
-    const trialStatus = req.trialStatus || {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    const trialStatus = req.trialStatus || buildTrialStatus(user);
+
+    // Fetch POS integrations with locations
+    const posIntegrations = await PosIntegration.findAll({
+      where: { userId },
+      include: [{ model: PosLocation, as: 'locations' }]
+    });
+
+    const squareIntegration = posIntegrations.find(i => i.provider === 'square');
+    const shopifyIntegration = posIntegrations.find(i => i.provider === 'shopify');
+
+    // Fetch recent POS transactions
+    const recentTransactions = await PosTransaction.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      limit: 50
+    });
 
     res.render('dashboard/settings', {
-      title: 'Settings - FilterFive',
+      title: 'Settings - MoreStars',
       businessName: user.businessName,
       user,
       trialStatus,
       success: 'Settings updated successfully!',
-      error: null
+      error: null,
+      posSuccess: null,
+      posError: null,
+      squareIntegration,
+      shopifyIntegration,
+      recentTransactions
     });
 
   } catch (error) {
-    console.error('Error in updateSettings:', error);
+    logger.error('Error in updateSettings', { error: error.message });
 
-    const user = req.user || await User.findByPk(req.session.userId);
+    const userId = req.session.userId;
+    const user = req.user || await User.findByPk(userId);
 
     const trialStatus = {
       isActive: user.isTrialActive(),
@@ -412,13 +508,34 @@ const updateSettings = async (req, res) => {
       subscriptionStatus: user.subscriptionStatus
     };
 
+    // Fetch POS integrations with locations
+    const posIntegrations = await PosIntegration.findAll({
+      where: { userId },
+      include: [{ model: PosLocation, as: 'locations' }]
+    });
+
+    const squareIntegration = posIntegrations.find(i => i.provider === 'square');
+    const shopifyIntegration = posIntegrations.find(i => i.provider === 'shopify');
+
+    // Fetch recent POS transactions
+    const recentTransactions = await PosTransaction.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      limit: 50
+    });
+
     res.render('dashboard/settings', {
-      title: 'Settings - FilterFive',
+      title: 'Settings - MoreStars',
       businessName: req.session.businessName,
       user,
       trialStatus,
       success: null,
-      error: error.message || 'Failed to update settings. Please try again.'
+      error: error.message || 'Failed to update settings. Please try again.',
+      posSuccess: null,
+      posError: null,
+      squareIntegration,
+      shopifyIntegration,
+      recentTransactions
     });
   }
 };
@@ -433,15 +550,7 @@ const showQrCode = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    const trialStatus = req.trialStatus || {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    const trialStatus = req.trialStatus || buildTrialStatus(user);
 
     // Generate QR code URL
     const qrUrl = `${process.env.APP_URL}/r/${user.id}`;
@@ -460,7 +569,7 @@ const showQrCode = async (req, res) => {
     });
 
     res.render('dashboard/qr', {
-      title: 'My QR Code - FilterFive',
+      title: 'My QR Code - MoreStars',
       businessName: req.session.businessName,
       user,
       trialStatus,
@@ -469,26 +578,29 @@ const showQrCode = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in showQrCode:', error);
+    logger.error('Error in showQrCode', { error: error.message });
     res.status(500).send('Something went wrong');
   }
 };
 
 // POST /dashboard/send-test-sms - Send test SMS to single number
+// D1 fix: Uses atomic SMS limit checking with row locking to prevent race conditions
 const sendTestSms = async (req, res) => {
+  logger.info('sendTestSms: Request received', {
+    body: req.body,
+    sessionId: req.session?.id?.substring(0, 8) || 'none',
+    userId: req.session?.userId
+  });
+
   try {
     const userId = req.session.userId;
+    logger.info('sendTestSms: Got userId', { userId });
+
     const smsService = require('../services/smsService');
-    const { v4: uuidv4 } = require('uuid');
 
-    // Load user
-    const user = req.user || await User.findByPk(userId);
-    if (!user) {
-      return res.status(401).json({ success: false, error: 'Not authenticated' });
-    }
-
-    // Get input
+    // Get input early for validation
     const { phone, customerName } = req.body;
+    logger.info('sendTestSms: Parsed body', { phone, customerName });
 
     // Validate phone (must be E.164 format: +15551234567)
     if (!phone || !/^\+1[0-9]{10}$/.test(phone)) {
@@ -498,78 +610,207 @@ const sendTestSms = async (req, res) => {
       });
     }
 
-    // Check SMS limit
-    if (!user.canSendSms()) {
+    // D1 fix: Reserve SMS slot with row locking before proceeding
+    // This prevents race conditions where two requests could both pass the limit check
+    logger.info('sendTestSms: About to reserve SMS slot', { userId });
+    const reservation = await smsLimitService.reserveSmsSlot(userId, 1);
+    logger.info('sendTestSms: Reservation result', { canSend: reservation.canSend, error: reservation.error });
+
+    if (!reservation.canSend) {
+      const errorMessage = reservation.error === 'Payment past due'
+        ? 'Your payment is past due. Please update your payment method to continue sending SMS.'
+        : 'SMS limit reached. Please upgrade your plan to send more messages.';
+
       return res.status(403).json({
         success: false,
-        error: 'SMS limit reached. Please upgrade your plan to send more messages.'
+        error: errorMessage
       });
     }
 
-    // Generate UUID for feedback request
-    const uuid = uuidv4();
-    const reviewLink = `${process.env.APP_URL}/review/${uuid}`;
+    // Now we have the lock - proceed with sending
+    const user = reservation.user;
+    let smsSuccess = false;
+    logger.info('sendTestSms: Got user from reservation', { userId: user.id, reviewUrl: user.reviewUrl?.substring(0, 30) || 'none' });
 
-    // Use provided name or default to "Test Customer"
-    const name = customerName?.trim() || 'Test Customer';
+    try {
+      // B5 FIX: Start trial on first SMS send (if not already started)
+      // Note: We can't call user.startTrial() because it doesn't support transactions
+      // Instead, we set the fields and they'll be committed when reservation.release() is called
+      if (!user.trialStartsAt && user.subscriptionStatus === 'trial') {
+        logger.info('sendTestSms: Starting trial');
+        const now = new Date();
+        const TRIAL_DURATION_DAYS = 14;
+        user.trialStartsAt = now;
+        user.trialEndsAt = new Date(now.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+        user.marketingStatus = 'trial_active';
+        await user.save({ transaction: reservation.transaction });
+      }
 
-    // Create FeedbackRequest
-    const feedbackRequest = await FeedbackRequest.create({
-      uuid: uuid,
-      userId: user.id,
-      customerName: name,
-      customerPhone: phone,
-      deliveryMethod: 'sms',
-      location: 'dashboard_test', // Mark as dashboard test for analytics
-      status: 'pending'
-    });
+      // Validate review URL configured
+      if (!user.reviewUrl || user.reviewUrl.trim() === '') {
+        logger.warn('sendTestSms: No review URL configured');
+        await reservation.release(false, 0); // Release without incrementing
+        return res.status(400).json({
+          success: false,
+          error: 'Review platform URL not configured. Please add your review URL in Settings first.'
+        });
+      }
 
-    console.log(`📤 Sending test SMS to ${phone} (${name})`);
+      const name = customerName?.trim() || 'Test Customer';
 
-    // Validate review URL configured
-    if (!user.reviewUrl || user.reviewUrl.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'Review platform URL not configured. Please add your review URL in Settings first.'
-      });
-    }
+      // Create FeedbackRequest with short URL WITHIN the same transaction
+      logger.info('sendTestSms: About to create FeedbackRequest with short URL', { userId: user.id, name, phone });
+      let feedbackRequest, reviewLink;
+      try {
+        const result = await shortUrlService.createFeedbackRequestWithShortUrl({
+          userId: user.id,
+          customerName: name,
+          customerPhone: phone,
+          deliveryMethod: 'sms',
+          location: 'dashboard_test',
+          status: 'pending'
+        }, { transaction: reservation.transaction });
 
-    // Send SMS
-    const smsResult = await smsService.sendReviewRequest(
-      phone,
-      name,
-      user.businessName,
-      reviewLink,
-      user.smsMessageTone || 'friendly'
-    );
+        feedbackRequest = result.feedbackRequest;
+        reviewLink = result.reviewLink;
+        logger.info('sendTestSms: Created FeedbackRequest with short URL', {
+          feedbackRequestId: feedbackRequest.id,
+          shortCode: feedbackRequest.shortCode,
+          reviewLink
+        });
+      } catch (dbError) {
+        logger.error('sendTestSms: FeedbackRequest.create failed', { error: dbError.message, stack: dbError.stack });
+        await reservation.release(false, 0);
+        return res.status(500).json({
+          success: false,
+          error: 'Database error creating feedback request.'
+        });
+      }
 
-    if (smsResult.success) {
-      // Update status
-      await feedbackRequest.update({ status: 'sent' });
+      logger.sms('sending_test', phone, { customerName: name });
+      logger.info('sendTestSms: About to call smsService.sendReviewRequest');
 
-      // Increment SMS usage count
-      await user.increment('smsUsageCount');
+      // Send SMS
+      const smsResult = await smsService.sendReviewRequest(
+        phone,
+        name,
+        user.businessName,
+        reviewLink,
+        user.smsMessageTone || 'friendly',
+        user.customSmsMessage
+      );
 
-      console.log(`✅ Test SMS sent successfully - UUID: ${uuid}`);
+      logger.info('sendTestSms: smsService result', { success: smsResult.success, error: smsResult.error });
 
-      return res.json({
-        success: true,
-        reviewLink: reviewLink,
-        uuid: uuid,
-        message: 'SMS sent successfully!'
-      });
-    } else {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to send SMS. Please try again.'
-      });
+      if (smsResult.success) {
+        smsSuccess = true;
+        await feedbackRequest.update({ status: 'sent' }, { transaction: reservation.transaction });
+        logger.info('sendTestSms: Updated FeedbackRequest to sent');
+
+        // Release lock and increment count atomically (this commits the transaction)
+        await reservation.release(true, 1);
+        logger.info('sendTestSms: Released reservation');
+
+        // Invalidate analytics cache
+        await analyticsService.invalidateCache(userId);
+
+        logger.sms('test_sent', phone, { shortCode: feedbackRequest.shortCode });
+        logger.info('sendTestSms: SUCCESS - returning response');
+
+        return res.json({
+          success: true,
+          reviewLink: reviewLink,
+          shortCode: feedbackRequest.shortCode,
+          message: 'SMS sent successfully!'
+        });
+      } else {
+        logger.warn('sendTestSms: SMS failed', { error: smsResult.error });
+        // SMS failed - release lock without incrementing
+        await reservation.release(false, 0);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to send SMS. Please try again.'
+        });
+      }
+    } catch (innerError) {
+      // Ensure lock is released on any error
+      if (!smsSuccess) {
+        await reservation.release(false, 0);
+      }
+      throw innerError;
     }
   } catch (error) {
-    console.error('Send test SMS error:', error);
+    logger.error('Send test SMS error', {
+      error: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return res.status(500).json({
       success: false,
       error: 'An error occurred while sending SMS.'
     });
+  }
+};
+
+// POST /dashboard/api-key/regenerate - Regenerate API key
+const regenerateApiKey = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const newApiKey = await user.regenerateApiKey();
+
+    return res.json({
+      success: true,
+      apiKey: newApiKey,
+      message: 'API key regenerated successfully. Update your Zapier integration with the new key.'
+    });
+  } catch (error) {
+    logger.error('Regenerate API key error', { error: error.message });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to regenerate API key. Please try again.'
+    });
+  }
+};
+
+// POST /dashboard/settings/support - Submit support request
+const submitSupportRequest = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { subject, message } = req.body;
+
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Subject and message are required' });
+    }
+
+    // Log the support request
+    logger.info('Support request received', { userId: user.id, subject });
+
+    // Send email notification to support team
+    try {
+      await sendSupportRequestEmail(user.email, user.businessName, user.id, subject, message);
+      logger.info('Support request email sent', { userId: user.id });
+    } catch (emailError) {
+      logger.error('Failed to send support email', { userId: user.id, error: emailError.message });
+      // Don't fail the request if email fails - the user still submitted their request
+    }
+
+    res.json({ success: true, message: 'Your message has been sent! We will get back to you within 24-48 hours.' });
+
+  } catch (error) {
+    logger.error('Error submitting support request', { error: error.message });
+    res.status(500).json({ error: 'Failed to submit request. Please try again.' });
   }
 };
 
@@ -581,5 +822,7 @@ module.exports = {
   showSettings,
   updateSettings,
   showQrCode,
-  sendTestSms
+  sendTestSms,
+  regenerateApiKey,
+  submitSupportRequest
 };

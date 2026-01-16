@@ -1,0 +1,12 @@
+  <!-- Analytics Helper -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  window.trackEvent = function(eventName, eventParams) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: eventName,
+      ...eventParams
+    });
+  };
+  </script>
+</body>
+</html>

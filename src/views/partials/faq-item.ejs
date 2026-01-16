@@ -1,0 +1,12 @@
+<!-- Single FAQ Item - Use within faq-accordion.ejs or standalone -->
+<div class="faq-item border-b border-gray-200 last:border-0">
+  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none group">
+    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]"><%= question %></span>
+    <div class="flex-shrink-0 ml-4">
+      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    </div>
+  </button>
+  <div class="faq-content overflow-hidden">
+    <div class="text-gray-600 leading-relaxed pb-6"><%- answer %></div>
+  </div>
+</div>

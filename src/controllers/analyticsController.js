@@ -10,6 +10,7 @@
 const analyticsService = require('../services/analyticsService');
 const snapshotService = require('../services/snapshotService');
 const { User } = require('../models');
+const logger = require('../services/logger');
 
 /**
  * Render analytics dashboard view
@@ -42,8 +43,8 @@ exports.getAnalyticsDashboard = async (req, res) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    // Get user's locations for filter dropdown
-    const locations = await analyticsService.getUserLocations(userId);
+    // Get user's locations for filter dropdown (cached)
+    const locations = await analyticsService.getUserLocationsCached(userId);
 
     res.render('dashboard/analytics', {
       title: 'Analytics Dashboard',
@@ -54,7 +55,7 @@ exports.getAnalyticsDashboard = async (req, res) => {
       defaultEndDate: endDate.toISOString().split('T')[0]
     });
   } catch (error) {
-    console.error('Error loading analytics dashboard:', error);
+    logger.error('Error loading analytics dashboard', { error: error.message });
     res.status(500).send('Error loading analytics dashboard');
   }
 };
@@ -76,15 +77,22 @@ exports.getMetrics = async (req, res) => {
       });
     }
 
-    const metrics = await analyticsService.getDashboardMetrics(userId, {
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
+    // Validate date formats
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    const metrics = await analyticsService.getDashboardMetricsCached(userId, {
+      startDate: startDateObj,
+      endDate: endDateObj,
       location: location || null
     });
 
     res.json(metrics);
   } catch (error) {
-    console.error('Error fetching metrics:', error);
+    logger.error('Error fetching metrics', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch metrics' });
   }
 };
@@ -100,11 +108,11 @@ exports.getTrends = async (req, res) => {
     const userId = req.session.userId;
     const { location } = req.query;
 
-    const trends = await analyticsService.getTrendData(userId, location || null);
+    const trends = await analyticsService.getTrendDataCached(userId, location || null);
 
     res.json(trends);
   } catch (error) {
-    console.error('Error fetching trends:', error);
+    logger.error('Error fetching trends', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch trends' });
   }
 };
@@ -120,11 +128,11 @@ exports.getTimingHeatmap = async (req, res) => {
     const userId = req.session.userId;
     const { location } = req.query;
 
-    const heatmap = await analyticsService.getTimingHeatmap(userId, location || null);
+    const heatmap = await analyticsService.getTimingHeatmapCached(userId, location || null);
 
     res.json(heatmap);
   } catch (error) {
-    console.error('Error fetching timing heatmap:', error);
+    logger.error('Error fetching timing heatmap', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch timing heatmap' });
   }
 };
@@ -146,16 +154,23 @@ exports.getComparison = async (req, res) => {
       });
     }
 
+    // Validate date formats
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
     const comparison = await analyticsService.comparePeriods(
       userId,
-      new Date(startDate),
-      new Date(endDate),
+      startDateObj,
+      endDateObj,
       location || null
     );
 
     res.json(comparison);
   } catch (error) {
-    console.error('Error fetching comparison:', error);
+    logger.error('Error fetching comparison', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch comparison' });
   }
 };
@@ -177,15 +192,22 @@ exports.getSmsEvents = async (req, res) => {
       });
     }
 
+    // Validate date formats
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
     const events = await analyticsService.getSmsEventMetrics(
       userId,
-      new Date(startDate),
-      new Date(endDate)
+      startDateObj,
+      endDateObj
     );
 
     res.json(events);
   } catch (error) {
-    console.error('Error fetching SMS events:', error);
+    logger.error('Error fetching SMS events', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch SMS events' });
   }
 };
@@ -218,7 +240,7 @@ exports.adminGenerateSnapshots = async (req, res) => {
       result
     });
   } catch (error) {
-    console.error('Error generating snapshots:', error);
+    logger.error('Error generating snapshots', { error: error.message });
     res.status(500).json({ error: 'Failed to generate snapshots' });
   }
 };
@@ -257,7 +279,7 @@ exports.adminBackfillSnapshots = async (req, res) => {
       result
     });
   } catch (error) {
-    console.error('Error backfilling snapshots:', error);
+    logger.error('Error backfilling snapshots', { error: error.message });
     res.status(500).json({ error: 'Failed to backfill snapshots' });
   }
 };

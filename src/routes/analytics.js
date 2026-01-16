@@ -10,17 +10,14 @@
 const express = require('express');
 const router = express.Router();
 const analyticsController = require('../controllers/analyticsController');
-
-// Middleware: Ensure user is authenticated
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.userId) {
-    return next();
-  }
-  res.redirect('/login');
-}
+const { requireAuth } = require('../middleware/auth');
+const { apiLimiter } = require('../middleware/rateLimiter');
 
 // Apply authentication middleware to all routes
-router.use(isAuthenticated);
+router.use(requireAuth);
+
+// Apply rate limiting to API routes
+router.use(apiLimiter);
 
 // ==========================================
 // Dashboard View Routes

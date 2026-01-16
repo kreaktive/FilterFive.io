@@ -1,0 +1,44 @@
+/* Critical CSS - Above the fold styles only */
+/* This CSS is inlined in <head> for instant rendering */
+
+:root {
+  --brand-dark: #500B42;  /* Primary brand color for text, headings, and cards */
+  --brand-gold: #FFBA49;
+  --brand-accent: #A1438E;
+  --brand-positive: #20A39E;
+  --brand-negative: #EF5B5B;
+  --bg-light: #F9F7FA;
+}
+
+/* Base body styles */
+body {
+  font-family: 'Inter Tight', sans-serif;
+  color: var(--brand-dark);
+  background-color: var(--bg-light);
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Rubik', sans-serif;
+}
+
+/* Prevent layout shift from fonts */
+.font-title { font-family: 'Rubik', sans-serif; }
+.font-sans { font-family: 'Inter Tight', sans-serif; }
+
+/* Hero section critical styles */
+.hero-content { opacity: 1; }
+.hero-visual { opacity: 1; }
+
+/* Button base styles for CTA */
+.bg-\[\#FFBA49\] { background-color: #FFBA49; }
+.text-\[\#500B42\] { color: #500B42; }
+
+/* Navbar critical height reserve */
+nav, header { min-height: 64px; }
+
+/* Prevent CLS on hero buttons */
+a[href="/signup"] {
+  display: inline-flex;
+  min-height: 56px;
+}

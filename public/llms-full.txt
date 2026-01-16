@@ -1,0 +1,153 @@
+# MoreStars - Complete Documentation
+
+> Turn every customer into a 5-star Google review. SMS and QR code review request software for local businesses.
+
+## Company Overview
+
+MoreStars is a SaaS platform that helps local businesses collect more Google reviews through automated SMS messages and QR codes. The platform is designed for simplicity - businesses connect their Google Business Profile, import customer data, and start sending review requests immediately.
+
+## Problem We Solve
+
+Local businesses struggle to get Google reviews because:
+- Customers forget to leave reviews after leaving the business
+- Asking for reviews in person feels awkward
+- The process of finding the business on Google and navigating to the review form has friction
+- There's no systematic way to request reviews from every customer
+
+## Our Solution
+
+MoreStars removes friction from the review collection process:
+1. Automated timing: SMS sent at optimal moments after transactions
+2. Direct links: One tap takes customers directly to the Google review form
+3. QR codes: Physical touchpoints for in-store review requests
+4. No awkwardness: The business doesn't have to ask verbally
+
+## Features
+
+### SMS Review Requests
+- Send personalized text messages to customers
+- Customizable message templates
+- Scheduled sending based on transaction time
+- Direct Google review links in every message
+- TCPA/SMS compliance built-in
+
+### QR Code Generation
+- Generate unique QR codes per location
+- Downloadable in multiple formats (PNG, SVG, PDF)
+- Customizable designs with business branding
+- Track scans and conversions per code
+- Perfect for receipts, table tents, counter displays
+
+### Analytics Dashboard
+- Track total review requests sent
+- Monitor open rates and click-through rates
+- See review conversion metrics
+- Compare performance across locations
+- Export data for reporting
+
+### POS Integrations
+- Square: Automatic customer sync after transactions
+- Shopify: E-commerce order integration
+- More integrations coming soon
+
+### Multi-Location Support
+- Manage multiple business locations from one account
+- Separate Google Business Profiles per location
+- Location-specific QR codes and tracking
+- Consolidated reporting across all locations
+
+## Pricing
+
+**$77/month** - Flat rate pricing includes:
+- Unlimited SMS review requests
+- Unlimited QR code generation
+- All analytics and reporting
+- All POS integrations
+- Multi-location support
+- Email support
+
+No per-message fees. No hidden costs. No long-term contracts.
+
+## Target Industries
+
+MoreStars works for any local business, but is especially effective for:
+
+### Service Businesses
+- Auto repair shops
+- Plumbers and electricians
+- HVAC contractors
+- Lawn care and landscaping
+- Home cleaning services
+- Moving companies
+
+### Health & Wellness
+- Dental practices
+- Chiropractors
+- Med spas
+- Veterinarians
+- Senior care facilities
+
+### Retail & Hospitality
+- Restaurants and cafes
+- Salons and barbershops
+- Pet groomers
+- Car washes
+- Tattoo shops
+
+### Professional Services
+- Real estate agents
+- Daycare centers
+- Online stores (for post-purchase reviews)
+
+## How Reviews Impact Local SEO
+
+Google reviews are a top ranking factor for local search results:
+- Businesses with more reviews rank higher in the "Map Pack"
+- Recent reviews signal active, trustworthy businesses
+- Review keywords help with relevance matching
+- Higher star ratings improve click-through rates
+
+## Technical Details
+
+### SMS Compliance
+- TCPA-compliant opt-in collection
+- Automatic opt-out handling
+- Message frequency limits
+- Required disclosures included
+
+### Security
+- SOC 2 compliant infrastructure
+- Encrypted data at rest and in transit
+- No credit card data stored (Stripe handles payments)
+- GDPR-ready data handling
+
+### API Access
+- REST API for custom integrations
+- Webhook support for real-time events
+- OAuth2 authentication
+
+## Getting Started
+
+1. Sign up at https://morestars.io/signup
+2. Connect your Google Business Profile
+3. Import customers or connect your POS
+4. Customize your message template
+5. Start sending review requests
+
+## Support
+
+- Email: hello@morestars.io
+- Documentation: https://morestars.io/faq
+- Blog: https://morestars.io/blog
+
+## Links
+
+- Homepage: https://morestars.io
+- Pricing: https://morestars.io/pricing
+- Features: https://morestars.io/features
+- How It Works: https://morestars.io/how-it-works
+- FAQ: https://morestars.io/faq
+- Blog: https://morestars.io/blog
+- Industries: https://morestars.io/industries
+- Sign Up: https://morestars.io/signup
+- Login: https://app.morestars.io/login

@@ -190,29 +190,98 @@ const validateRow = (row) => {
 
 /**
  * Check if phone number is a duplicate for this user
- * Duplicate = same phone sent to within last 30 days
+ * Duplicate = same phone sent to within last 30 days AND was successfully sent
+ * This allows re-sending to failed SMS recipients
  * @param {number} userId - User ID
  * @param {string} phone - Phone number to check
- * @returns {Promise<boolean>} - True if duplicate exists
+ * @returns {Promise<Object>} - { isDuplicate: boolean, lastContactedAt: Date|null }
  */
 const isDuplicatePhone = async (userId, phone) => {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+  // Only block if there's a recent request that was actually sent
+  // This allows retrying failed sends
   const existingRequest = await FeedbackRequest.findOne({
     where: {
-      user_id: userId,
-      customer_phone: phone,
-      created_at: {
+      userId: userId,
+      customerPhone: phone,
+      createdAt: {
         [Op.gte]: thirtyDaysAgo
+      },
+      // Only block if SMS was successfully sent, clicked, or rated
+      // Allow re-sending if previous attempt was pending or failed
+      status: {
+        [Op.in]: ['sent', 'clicked', 'rated']
       }
-    }
+    },
+    order: [['createdAt', 'DESC']] // Get most recent
   });
 
-  return existingRequest !== null;
+  return {
+    isDuplicate: existingRequest !== null,
+    lastContactedAt: existingRequest ? existingRequest.createdAt : null
+  };
+};
+
+/**
+ * Batch check for duplicate phone numbers (performance optimization)
+ * Uses a single IN query instead of N individual queries
+ * @param {number} userId - User ID
+ * @param {string[]} phones - Array of phone numbers to check
+ * @returns {Promise<Map>} - Map of phone -> { isDuplicate: boolean, lastContactedAt: Date|null }
+ */
+const batchCheckDuplicatePhones = async (userId, phones) => {
+  if (!phones || phones.length === 0) {
+    return new Map();
+  }
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Single query to find all duplicates
+  const existingRequests = await FeedbackRequest.findAll({
+    where: {
+      userId: userId,
+      customerPhone: {
+        [Op.in]: phones
+      },
+      createdAt: {
+        [Op.gte]: thirtyDaysAgo
+      },
+      status: {
+        [Op.in]: ['sent', 'clicked', 'rated']
+      }
+    },
+    attributes: ['customerPhone', 'createdAt'],
+    order: [['createdAt', 'DESC']],
+    raw: true
+  });
+
+  // Build a map of phone -> most recent contact date
+  const duplicateMap = new Map();
+  for (const request of existingRequests) {
+    // Only keep the most recent (first occurrence since ordered DESC)
+    if (!duplicateMap.has(request.customerPhone)) {
+      duplicateMap.set(request.customerPhone, request.createdAt);
+    }
+  }
+
+  // Return results for all phones
+  const results = new Map();
+  for (const phone of phones) {
+    const lastContactedAt = duplicateMap.get(phone) || null;
+    results.set(phone, {
+      isDuplicate: lastContactedAt !== null,
+      lastContactedAt
+    });
+  }
+
+  return results;
 };
 
 module.exports = {
   validateRow,
-  isDuplicatePhone
+  isDuplicatePhone,
+  batchCheckDuplicatePhones
 };

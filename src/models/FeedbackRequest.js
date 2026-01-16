@@ -80,6 +80,13 @@ const FeedbackRequest = sequelize.define('FeedbackRequest', {
     field: 'location',
     comment: 'Business location (e.g., "Main Street" or "Downtown") for multi-location tracking'
   },
+  shortCode: {
+    type: DataTypes.STRING(8),
+    allowNull: true,
+    unique: true,
+    field: 'short_code',
+    comment: 'Short alphanumeric code for shortened SMS URLs (e.g., "A7x9Kp2m")'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
@@ -94,6 +101,23 @@ const FeedbackRequest = sequelize.define('FeedbackRequest', {
   tableName: 'feedback_requests',
   timestamps: true,
   underscored: true,
+  indexes: [
+    // Composite index for dashboard queries (user + status filtering)
+    {
+      fields: ['user_id', 'status'],
+      name: 'feedback_requests_user_status_idx'
+    },
+    // Composite index for date range queries
+    {
+      fields: ['user_id', 'created_at'],
+      name: 'feedback_requests_user_created_idx'
+    },
+    // Index for analytics by delivery method
+    {
+      fields: ['user_id', 'delivery_method', 'created_at'],
+      name: 'feedback_requests_user_delivery_created_idx'
+    }
+  ],
   hooks: {
     beforeCreate: (feedbackRequest) => {
       if (!feedbackRequest.uuid) {

@@ -1,0 +1,1234 @@
+<%
+const faqStyles = `
+  .font-title { font-family: 'Rubik', sans-serif; }
+  html { scroll-behavior: smooth; }
+  .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+  .faq-content.open { max-height: 2000px; }
+  .faq-icon { transition: transform 0.3s ease; }
+  .faq-icon.rotate-180 { transform: rotate(180deg); }
+`;
+%>
+<%- include('partials/head', {
+  title: 'FAQ | MoreStars Review Software for Small Business',
+  description: 'Common questions about MoreStars review software. Setup, pricing, Google compliance, SMS limits, and more. Get answers before you start your free trial.',
+  ogTitle: 'FAQ | MoreStars Review Software for Small Business',
+  ogDescription: 'Common questions about MoreStars review software. Setup, pricing, Google compliance, SMS limits, and more.',
+  extraStyles: faqStyles
+}) %>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://morestars.io" },
+    { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://morestars.io/faq" }
+  ]
+}
+</script>
+
+<!-- FAQPage Schema for Google Rich Results -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does setup take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "About 5 minutes. Create your account, paste your Google review link, and you're ready to send your first request or download your QR code. No technical skills required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What exactly does MoreStars do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MoreStars sends your customers a link to your Google review page. They tap it. They leave a review. We make it effortless to ask for reviews via text message or QR code and effortless for customers to respond with one tap."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this allowed by Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Google explicitly allows businesses to ask customers for reviews. What's NOT allowed: paying for reviews, fake reviews, or review gating. MoreStars sends customers a direct link to your Google page. They choose whether to leave a review. Completely compliant."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does MoreStars cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "$77/month or $770/year (save $154). All features included: 1,000 SMS messages per month, unlimited QR codes, full analytics dashboard, multi-location support, Square and Shopify integrations, API access, and email support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I try it before paying?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. 14-day free trial. 10 SMS messages included. No credit card required. Your account pauses after 14 days if you don't upgrade. No surprise charges."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many reviews will I get?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Results vary by business. Typical SMS response rates are 25-35%. If you see 100 customers a month and send requests to all of them, you could see 25-35 new reviews monthly. Your dashboard tracks your actual numbers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I run out of SMS messages?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "At 80% usage you get a notification. At 100%, SMS sending pauses. No surprise charges. You can add 1,000 SMS for $17 instantly from your dashboard, or wait for your monthly reset. QR codes keep working regardless."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you integrate with my point-of-sale system?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We integrate directly with Square and Shopify. Connect your account and MoreStars can send review requests automatically after every sale. For other POS systems, export your customer list as CSV or connect via Zapier."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What do you do with my customer data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your customer information is used only for sending review requests. We don't sell, share, or use your data for marketing. It's yours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get help?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Email support@morestars.io. Real humans, not bots. We typically respond within 24 hours, often faster."
+      }
+    }
+  ]
+}
+</script>
+
+  <% const activePage = 'faq'; %>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="pt-24 pb-20 bg-[#F9F7FA] border-b border-gray-200">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 font-title text-[#500B42]">
+          Questions? We've Got Answers.
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Everything you need to know about getting more Google reviews with MoreStars.
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <section class="py-12 md:py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-12 gap-12">
+
+          <!-- Sidebar Navigation (Desktop) -->
+          <div class="hidden lg:block lg:col-span-3">
+            <div class="sticky top-28 space-y-8">
+
+              <!-- CTA Card -->
+              <div class="bg-[#500A42] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden group text-center">
+                <!-- Decorative element -->
+                <div class="absolute top-0 right-0 w-20 h-20 bg-[#FFBA49] rounded-full blur-2xl opacity-20 -mr-10 -mt-10"></div>
+
+                <h3 class="font-bold text-lg mb-2">Ready to start?</h3>
+                <p class="text-gray-300 text-xs mb-4 leading-relaxed">Get set up in 5 minutes. No credit card required.</p>
+                <a href="/pricing" class="block w-full py-3 rounded-full bg-[#FFBA49] text-[#500B42] text-sm font-bold hover:bg-white transition-colors">
+                  Start Free Trial
+                </a>
+              </div>
+
+              <!-- Table of Contents -->
+              <div class="space-y-1">
+                <h3 class="font-bold text-gray-400 uppercase tracking-wider text-xs mb-4 px-3">Table of Contents</h3>
+
+                <button onclick="scrollToSection('getting-started')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 bg-gray-100 text-[#500B42]" data-section="getting-started">
+                  <span class="toc-icon text-[#FFBA49]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  </span>
+                  Getting Started
+                </button>
+
+                <button onclick="scrollToSection('how-it-works')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="how-it-works">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </span>
+                  How It Works
+                </button>
+
+                <button onclick="scrollToSection('results')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="results">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                  </span>
+                  Results & Expectations
+                </button>
+
+                <button onclick="scrollToSection('compliance')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="compliance">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  </span>
+                  Google Compliance
+                </button>
+
+                <button onclick="scrollToSection('pricing')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="pricing">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </span>
+                  Pricing & Billing
+                </button>
+
+                <button onclick="scrollToSection('sms-limits')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="sms-limits">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  </span>
+                  SMS Limits & Usage
+                </button>
+
+                <button onclick="scrollToSection('technical')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="technical">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </span>
+                  Technical & Integrations
+                </button>
+
+                <button onclick="scrollToSection('data-privacy')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="data-privacy">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  </span>
+                  Data & Privacy
+                </button>
+
+                <button onclick="scrollToSection('account')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="account">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </span>
+                  Account Management
+                </button>
+
+                <button onclick="scrollToSection('support')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="support">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  </span>
+                  Support
+                </button>
+
+                <button onclick="scrollToSection('concerns')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="concerns">
+                  <span class="toc-icon text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  </span>
+                  Common Concerns
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ Content Area -->
+          <div class="lg:col-span-9 space-y-16">
+
+            <!-- Getting Started -->
+            <div class="faq-group scroll-mt-28" id="getting-started">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Getting Started</h2>
+              </div>
+              <div class="space-y-0">
+                <!-- FAQ Item -->
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How long does setup take?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">About 5 minutes. Create your account, paste your Google review link, and you're ready to send your first request or download your QR code. No technical skills required. No sales calls. No waiting for someone to "provision your account."</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do I need technical skills?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. If you can send a text message and copy-paste a link, you can use MoreStars. The dashboard is self-explanatory. Most customers never contact support because they don't need to.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What do I need to get started?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">
+                      <p class="mb-2">Three things:</p>
+                      <ol class="list-decimal pl-5 space-y-1 mb-2">
+                        <li>An email address (to create your account)</li>
+                        <li>Your Google Business Profile review link (we show you exactly where to find it)</li>
+                        <li>Either customer phone numbers OR a printer for QR codes</li>
+                      </ol>
+                      <p>That's it.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is there a setup fee?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. Never. Your only cost is $77/month (or $770/year) after your free trial ends.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I try it before paying?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. 14-day free trial. 10 SMS messages included. No credit card required. Your account pauses after 14 days if you don't upgrade. No surprise charges.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="faq-group scroll-mt-28" id="how-it-works">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">How It Works</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What exactly does MoreStars do?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">MoreStars sends your customers a link to your Google review page. They tap it. They leave a review. That's it. We make it effortless to ask for reviews (via text message or QR code) and effortless for customers to respond (one tap, they're on your Google page, ready to write).</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How does SMS review requesting work?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">You add customer phone numbers (manually, via CSV upload, or automatically through Square/Shopify). MoreStars sends them a personalized text message asking for a review. The message includes a link that takes them directly to your Google review page. They tap, they review.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How do QR codes work?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">You download your unique QR code from your dashboard. Print it. Put it at checkout, on receipts, on table tents, on invoices. Customers scan with their phone camera and land directly on your Google review page. No app needed. Unlimited scans, no extra cost.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What does the customer see?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">
+                      <p class="mb-2">A friendly text message like:</p>
+                      <blockquote class="bg-gray-100 border-l-4 border-[#A1438E] pl-4 py-2 italic mb-2 text-sm text-gray-700">
+                        "Hi Sarah, thanks for visiting Main Street Auto today! If we took good care of you, would you mind leaving us a quick review? [link]"
+                      </blockquote>
+                      <p>When they tap the link, they land directly on your Google review page. No MoreStars branding. No surveys. No intermediate pages. Just Google, ready for their review.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I customize the text message?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Write your own message or choose from templates (friendly, professional, grateful). Match your tone and brand.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">When should I send review requests?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Best practice: a few hours after service, while the experience is fresh but they've had time to get home and relax. For restaurants, same day. For auto repair or HVAC, within 24 hours. MoreStars lets you control timing based on what works for your business.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What review platforms do you support?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Google, Facebook, Yelp, TripAdvisor, Healthgrades, Vitals, and any platform with a review URL. You paste the link, we handle the rest. Most businesses focus on Google since that's where customers search.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results & Expectations -->
+            <div class="faq-group scroll-mt-28" id="results">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Results & Expectations</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How many reviews will I get?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Results vary by business. Typical SMS response rates are 25-35%. If you see 100 customers a month and send requests to all of them, you could see 25-35 new reviews monthly. Your dashboard tracks your actual numbers so you know what's working.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How quickly will I see reviews?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">First reviews typically come in within 24-48 hours of sending requests. You'll see momentum build over the first few weeks.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if customers don't respond to the text?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Not everyone will. That's normal. A 25-35% response rate means 65-75% don't respond. But here's the thing: without MoreStars, maybe 2-3% leave reviews. Even if only a quarter of your customers respond, you've multiplied your review volume by 10x.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can you guarantee results?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. And anyone who guarantees a specific number of reviews is lying or doing something against Google's rules. We make it easy to ask for reviews. We can't force customers to leave them. Your results depend on your customer volume and how consistently you use the tool.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if someone leaves a bad review?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">That can happen. MoreStars helps you get more reviews from happy customers, which means your overall rating better reflects reality. One bad review among fifty good ones has minimal impact. The goal isn't to prevent negative reviews (that's against Google's rules). It's to make sure your happy customers show up too.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Google Compliance -->
+            <div class="faq-group scroll-mt-28" id="compliance">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Google Compliance</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is this allowed by Google?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">
+                      <p class="mb-2">Yes. Google explicitly allows businesses to ask customers for reviews. You can ask via email, text, in person, on receipts, anywhere.</p>
+                      <p class="mb-2 font-bold text-gray-800">What's NOT allowed:</p>
+                      <ul class="list-disc pl-5 space-y-1 mb-2">
+                        <li>Paying for reviews or offering incentives</li>
+                        <li>Fake reviews from people who weren't customers</li>
+                        <li>Review gating (only asking happy customers)</li>
+                        <li>Being deceptive about who's leaving reviews</li>
+                      </ul>
+                      <p>MoreStars doesn't do any of that. We send customers a direct link to your Google page. They choose whether to leave a review and what to say. Completely compliant.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What is review gating? Why is it bad?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Review gating means asking customers how their experience was, then only sending happy customers to Google while directing unhappy customers elsewhere. Google banned this practice in 2018. MoreStars doesn't gate. Every customer who receives your text gets the same link to your Google page. What they write is up to them.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Will my Google Business Profile get suspended?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Not from using MoreStars. We follow Google's guidelines. The risk of suspension comes from fake reviews, incentivized reviews, or review gating. We don't do any of that.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What about Yelp? I heard they don't like businesses asking for reviews.</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yelp's recommendation algorithm filters reviews it considers suspicious, including some solicited reviews. That's why most businesses focus on Google. If you want to use MoreStars for Yelp, you can. Just know Yelp may filter some reviews.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pricing & Billing -->
+            <div class="faq-group scroll-mt-28" id="pricing">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Pricing & Billing</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How much does MoreStars cost?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">$77/month or $770/year (save $154). All features included in both plans. No tiers. No upsells.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What's included in the $77/month?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">
+                      <p class="mb-2">Everything:</p>
+                      <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> 1,000 SMS messages per month</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Unlimited QR codes</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Full analytics dashboard</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Multi-location support</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Square and Shopify integrations</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> API and Zapier access</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Custom message templates</li>
+                        <li class="flex gap-2"><span class="text-green-500">✓</span> Email support (24-hour response)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is there a contract?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. Month-to-month. Cancel from your dashboard anytime. No cancellation fees. No phone calls required. No guilt trips.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What happens after the free trial?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Your trial ends after 14 days. If you haven't upgraded, your account pauses. No automatic charges. Upgrade whenever you're ready. Your data stays intact.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What payment methods do you accept?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">All major credit cards via Stripe. No invoicing, checks, or wire transfers.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I switch from monthly to annual?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Contact support@morestars.io and we'll apply credit for your remaining monthly period toward the annual plan.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do you offer discounts?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">The annual plan saves 17% ($154/year). We don't do other discounts or negotiated pricing. But if you're a non-profit or have special circumstances, reach out. We'll see what we can do.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What's your refund policy?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Monthly plans: No refunds, but you can cancel anytime to stop future billing. Annual plans: Contact support within 30 days if you're unhappy. We'll make it right.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SMS Limits & Usage -->
+            <div class="faq-group scroll-mt-28" id="sms-limits">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">SMS Limits & Usage</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What happens if I run out of SMS messages?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">
+                      <p class="mb-2">At 80% usage (800 messages), you get an email and dashboard notification. At 100% (1,000 messages), SMS sending pauses. No surprise charges ever.</p>
+                      <p class="mb-2 font-bold text-sm text-gray-800">Your options at the limit:</p>
+                      <ol class="list-decimal pl-5 space-y-1 mb-2 text-sm">
+                        <li>Add 1,000 SMS for $17 (one click from your dashboard, available immediately)</li>
+                        <li>Wait for your monthly reset (your 1,000 refresh on your billing date)</li>
+                      </ol>
+                      <p class="text-sm">QR codes keep working regardless of SMS usage.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do unused SMS roll over?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. Your 1,000 SMS reset on your billing date each month. If you're near the limit close to your reset date, it might make sense to wait rather than buying more.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How much do additional SMS cost?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">$17 per 1,000 messages. Buy them from your dashboard whenever you need them.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if I need way more than 1,000 SMS per month?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Most businesses don't. But if you consistently need more, buy additional bundles as needed. At very high volumes, contact support and we'll discuss options.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Are you going to surprise me with charges?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Never. We don't charge without explicit action from you. At your SMS limit, sending pauses. You choose whether to buy more or wait. No automatic overage charges.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Technical & Integrations -->
+            <div class="faq-group scroll-mt-28" id="technical">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Technical & Integrations</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do you integrate with my point-of-sale system?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">We integrate directly with Square and Shopify. Connect your account and MoreStars can send review requests automatically after every sale. For other POS systems: export your customer list as a CSV and upload to MoreStars, or connect via Zapier.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How does the Zapier integration work?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Connect MoreStars to thousands of apps through Zapier. Common uses: automatically add customers from your CRM, trigger review requests after appointments, sync data with your other tools. Details in our help center after you sign up.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do you have an API?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Full API access included in all plans. Documentation available after signup. Build custom integrations if you need them.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I use MoreStars for multiple locations?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Multi-location support is included at no extra cost. Track each location separately. See which ones are generating reviews and which need attention.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Does this work on mobile?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">The dashboard works on any device with a web browser. No app to download. Your customers don't need an app either. The SMS link opens their browser, which opens Google.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data & Privacy -->
+            <div class="faq-group scroll-mt-28" id="data-privacy">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Data & Privacy</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What do you do with my customer data?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Your customer information (names, phone numbers) is used for one thing: sending review requests. We don't sell your data. We don't share it. We don't use it for marketing. We don't mine it. It's yours.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I export my data?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Export your customer list and analytics anytime from your dashboard. Your data, your control.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What happens to my data if I cancel?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">You can export everything before canceling. After cancellation, we keep your data for 30 days in case you change your mind, then delete it permanently.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is MoreStars HIPAA compliant?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">MoreStars doesn't store protected health information. We only need customer name and phone number. The review request message is generic. No mention of treatments, conditions, diagnoses, or anything covered by HIPAA. If you're a healthcare provider, the text your patients receive is something like: "Thanks for visiting Main Street Dental! If we took good care of you, would you mind leaving us a quick review?" No PHI.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is my data secure?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. Data encrypted in transit and at rest. We use Stripe for payments (we never see your full card number). Standard security practices. We're a small company that takes this seriously.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Account Management -->
+            <div class="faq-group scroll-mt-28" id="account">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Account Management</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How do I cancel?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">From your dashboard. Settings > Cancel Account. No phone call required. No cancellation fees. No retention specialists trying to talk you out of it. Click the button, you're done.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I pause my account instead of canceling?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Not currently. But since there's no contract, you can cancel and restart whenever you want. Your account data is kept for 30 days after cancellation.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if I forget my password?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Click "Forgot Password" on the login page. Reset link sent to your email. Standard stuff.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Can I have multiple users on one account?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Not currently. Single login per account. If you need multiple people accessing the dashboard, share the login. (Yes, we know this isn't ideal. It's on our roadmap.)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Support -->
+            <div class="faq-group scroll-mt-28" id="support">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Support</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">How do I get help?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Email support@morestars.io. Real humans, not bots. We typically respond within 24 hours, often faster.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Do you have phone support?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">No. Email only. We're a small team focused on keeping the product simple and the price low. Email lets us give you thoughtful answers without keeping you on hold.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is there a help center or documentation?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. After signup, you'll have access to guides covering setup, integrations, best practices, and troubleshooting. Most questions are answered there.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if something breaks?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Email us. We'll fix it. If it's urgent, say so in your subject line.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Common Concerns -->
+            <div class="faq-group scroll-mt-28" id="concerns">
+              <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="p-2 rounded-lg bg-gray-50 text-[#FFBA49]">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold font-title text-[#500B42]">Common Concerns</h2>
+              </div>
+              <div class="space-y-0">
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">I don't have time for another tool.</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Setup takes 5 minutes. After that, it runs on autopilot. Upload a customer list or put up a QR code. Reviews come in. Check your dashboard when you feel like it. This isn't another thing to manage. It's a thing that manages itself.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">I've tried asking for reviews before. It didn't work.</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Asking face-to-face is awkward. Handing out cards doesn't work. They end up in the trash. The difference with MoreStars: the ask comes later, via text, when the customer has a quiet moment. And the link goes directly to your Google page. No searching. No friction. That's why it works.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">Is $77/month worth it?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">One new customer typically pays for a year of MoreStars. For most businesses, that customer shows up in the first month. The real question: what's it costing you to let competitors collect reviews while you don't?</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">My competitor has way more reviews. Can I catch up?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Yes. It takes consistency, not magic. If you see 100 customers a month and 30% leave reviews, that's 30 new reviews monthly. In 6 months, you've added 180 reviews. That changes your competitive position.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">What if my business doesn't see that many customers?</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">MoreStars works best for businesses seeing 50+ customers per month. If you're lower volume, it still works, just takes longer to see dramatic results. QR codes (unlimited, no per-use cost) might be more cost-effective than SMS for very low volumes.</div>
+                  </div>
+                </div>
+
+                <div class="faq-item border-b border-gray-200 last:border-0">
+                  <button class="faq-toggle w-full flex justify-between items-center py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFBA49] focus-visible:ring-offset-2 rounded-lg group">
+                    <span class="text-lg font-bold group-hover:text-[#A1438E] transition-colors text-[#500B42]">I'm worried about getting negative reviews.</span>
+                    <div class="flex-shrink-0 ml-4">
+                      <svg class="faq-icon w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                  </button>
+                  <div class="faq-content overflow-hidden">
+                    <div class="text-gray-600 leading-relaxed pb-6">Unhappy customers are already leaving reviews. They don't need encouragement. MoreStars helps your happy customers match that energy. The result: your rating reflects reality instead of being skewed by the loudest complainers.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="py-24 bg-[#FFBA49]">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-8 font-title text-[#500B42]">
+          Ready to Get More Stars?
+        </h2>
+        <p class="text-lg md:text-xl font-medium mb-8 opacity-90 text-[#500B42]">
+          14-day free trial. No credit card required. Set up in 5 minutes.
+        </p>
+        <div class="flex justify-center mb-8">
+          <%- include('partials/cta-3d-button', { buttonText: 'Start Free Trial', buttonLink: '/pricing' }) %>
+        </div>
+        <p class="text-lg font-medium text-[#500B42]">
+          Still have questions? <a href="mailto:support@morestars.io" class="underline hover:opacity-80">Email us at support@morestars.io</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <%- include('partials/marketing-footer') %>
+
+  <!-- FAQ Toggle Script -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // FAQ Accordion functionality
+    document.querySelectorAll('.faq-toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const content = toggle.nextElementSibling;
+        const icon = toggle.querySelector('.faq-icon');
+        const isOpen = content.classList.contains('open');
+
+        // Close all other FAQs
+        document.querySelectorAll('.faq-content').forEach(c => {
+          if (c !== content) {
+            c.classList.remove('open');
+          }
+        });
+        document.querySelectorAll('.faq-icon').forEach(i => {
+          if (i !== icon) {
+            i.classList.remove('rotate-180');
+          }
+        });
+
+        // Toggle current FAQ
+        if (isOpen) {
+          content.classList.remove('open');
+          icon.classList.remove('rotate-180');
+        } else {
+          content.classList.add('open');
+          icon.classList.add('rotate-180');
+        }
+      });
+    });
+
+    // Scroll to section function
+    function scrollToSection(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        const offset = 100; // Account for sticky header
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        updateActiveToc(id);
+      }
+    }
+
+    // Update active TOC item
+    function updateActiveToc(activeId) {
+      document.querySelectorAll('.toc-item').forEach(item => {
+        const sectionId = item.getAttribute('data-section');
+        const icon = item.querySelector('.toc-icon');
+
+        if (sectionId === activeId) {
+          item.classList.add('bg-gray-100', 'text-[#500B42]');
+          item.classList.remove('text-gray-600');
+          if (icon) {
+            icon.classList.add('text-[#FFBA49]');
+            icon.classList.remove('text-gray-400');
+          }
+        } else {
+          item.classList.remove('bg-gray-100', 'text-[#500B42]');
+          item.classList.add('text-gray-600');
+          if (icon) {
+            icon.classList.remove('text-[#FFBA49]');
+            icon.classList.add('text-gray-400');
+          }
+        }
+      });
+    }
+
+    // Scroll spy - highlight active section in TOC
+    const sections = ['getting-started', 'how-it-works', 'results', 'compliance', 'pricing', 'sms-limits', 'technical', 'data-privacy', 'account', 'support', 'concerns'];
+
+    function handleScroll() {
+      const scrollPosition = window.scrollY + 150; // Trigger point 150px from top
+
+      let currentSectionId = sections[0];
+
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          if (element.offsetTop <= scrollPosition) {
+            currentSectionId = sectionId;
+          }
+        }
+      }
+
+      updateActiveToc(currentSectionId);
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    // Initial check on page load
+    handleScroll();
+  </script>
+
+<%- include('partials/scripts') %>

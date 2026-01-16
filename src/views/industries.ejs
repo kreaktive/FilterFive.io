@@ -1,0 +1,540 @@
+<%
+const industriesStyles = `
+  .industry-card { transition: all 0.3s ease; }
+  .industry-card:hover { transform: translateY(-4px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+  .industry-card:hover .card-icon { transform: scale(1.1); }
+  .industry-card:hover .card-arrow { transform: translateX(4px); color: #500B42; }
+`;
+%>
+<%- include('partials/head', {
+  title: title,
+  description: 'MoreStars powers review generation for auto repair, restaurants, salons, HVAC, dental, and 20+ industries. See how we fit your business.',
+  keywords: 'MoreStars industries, review software for auto repair, restaurant reviews, salon reviews, HVAC reviews, dental reviews'
+}) %>
+  <style><%= industriesStyles %></style>
+
+  <% const activePage = 'industries'; %>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 relative overflow-hidden bg-[#F9F7FA]">
+      <!-- Background Pattern -->
+      <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gray-100/50 to-transparent pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto px-4 relative z-10 text-center">
+        <span class="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-[rgba(161,67,142,0.1)] text-[#A1438E] text-sm font-bold tracking-wide uppercase mb-6">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Built for Local Business
+        </span>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 leading-tight text-brand-dark font-title">
+          Powering Reviews for <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#A1438E] to-[#A1438E]">
+            Every Industry
+          </span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+          Whether you fix cars, clean teeth, or sell houses, MoreStars is designed to fit your workflow and grow your reputation.
+        </p>
+      </div>
+    </section>
+
+    <!-- Industry Grid -->
+    <section class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          <!-- Auto Repair -->
+          <a href="/industries/auto-repair" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-red-600 bg-red-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Auto Repair</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Trust is the engine of your business. Showcase your expertise and reliability to drive new customers to your bay.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Auto Repair Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Car Wash -->
+          <a href="/industries/car-wash" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-cyan-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-cyan-600 bg-cyan-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Car Wash</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  High volume means high opportunity. Turn everyday shines into a sparkling online reputation.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Car Wash Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Chiropractors -->
+          <a href="/industries/chiropractors" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-green-600 bg-green-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Chiropractors</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Patients choose chiropractors they trust. Show them you're the expert who delivers results.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Chiropractors Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Daycare -->
+          <a href="/industries/daycare" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-yellow-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-yellow-600 bg-yellow-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Daycare</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Parents research extensively before trusting someone with their children. Make that decision easy.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Daycare Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Dental -->
+          <a href="/industries/dental" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-cyan-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-cyan-600 bg-cyan-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Dental</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Patients dread the dentist. Show them your practice is different with reviews that highlight your gentle care.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Dental Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Electricians -->
+          <a href="/industries/electricians" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-amber-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-amber-600 bg-amber-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Electricians</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  When the lights go out, people Google. Be the electrician they call first.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Electricians Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Home Cleaning -->
+          <a href="/industries/home-cleaning" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 bg-emerald-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Home Cleaning</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Homeowners need to trust someone entering their space. Reviews build that trust instantly.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Home Cleaning Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- HVAC -->
+          <a href="/industries/hvac" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-sky-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-sky-600 bg-sky-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">HVAC</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  When the AC dies in summer or the heat goes out in winter, people Google fast. Be their answer.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See HVAC Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Lawn Care -->
+          <a href="/industries/lawn-care" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-lime-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-lime-600 bg-lime-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Lawn Care</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Neighbors notice a great lawn. Make sure they know who's responsible.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Lawn Care Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Med Spas -->
+          <a href="/industries/med-spas" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-pink-600 bg-pink-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Med Spas</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Clients invest in themselves. Show them your med spa delivers results worth sharing.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Med Spas Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Moving Companies -->
+          <a href="/industries/moving-companies" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-orange-600 bg-orange-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Moving Companies</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Moving is stressful. Show potential customers you make it easy with proven 5-star service.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Moving Companies Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Online Stores -->
+          <a href="/industries/online-stores" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-violet-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-violet-600 bg-violet-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Online Stores</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Online shoppers check reviews religiously. Make sure yours shine bright.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Online Stores Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Pet Groomers -->
+          <a href="/industries/pet-groomers" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-rose-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-rose-600 bg-rose-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Pet Groomers</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Pet owners trust you with their family member. Reviews prove you deserve that trust.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Pet Groomers Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Plumbers -->
+          <a href="/industries/plumbers" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-indigo-600 bg-indigo-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Plumbers</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  When pipes burst, people Google in a panic. Be the trusted name they find.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Plumbers Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Real Estate -->
+          <a href="/industries/real-estate" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-teal-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-teal-600 bg-teal-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Real Estate</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Referrals are great, but strangers check Google before calling you.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Real Estate Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Restaurants -->
+          <a href="/industries/restaurants" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-red-600 bg-red-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Restaurants</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Dominate 'food near me' searches. Turn happy diners into your best marketing team.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Restaurants Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Salons -->
+          <a href="/industries/salons" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-fuchsia-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-fuchsia-600 bg-fuchsia-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Salons</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Your work is visual and personal. Let your 5-star reviews reflect the beauty you create.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Salons Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Senior Care -->
+          <a href="/industries/senior-care" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-purple-600 bg-purple-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Senior Care</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Families research extensively before choosing care. Reviews from other families provide peace of mind.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Senior Care Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Tattoo Shops -->
+          <a href="/industries/tattoo-shops" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-gray-600 bg-gray-100 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Tattoo Shops</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Tattoos are permanent, and so is your reputation. Make sure it's covered in 5 stars.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Tattoo Shops Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Veterinarians -->
+          <a href="/industries/veterinarians" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-green-600 bg-green-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Veterinarians</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Pet owners are protective. Show them your clinic provides compassionate, quality care.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Veterinarians Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Wedding Photographers -->
+          <a href="/industries/wedding-photographers" class="block no-underline">
+            <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+              <div class="absolute inset-0 bg-gradient-to-br from-white to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div class="relative z-10 flex flex-col h-full">
+                <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-pink-600 bg-pink-50 transition-transform duration-300">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-3 text-brand-dark">Wedding Photographers</h3>
+                <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+                  Couples spend months researching photographers. Make sure your portfolio includes glowing reviews.
+                </p>
+                <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+                  See Wedding Photographers Solution <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Strip -->
+    <section class="py-20 bg-[#F9F7FA]">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6 text-green-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-6 text-brand-dark font-title">
+          Don't See Your Industry?
+        </h2>
+        <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+          If you have customers and a Google Business Profile, MoreStars will work for you. Our system is flexible enough for any business flow.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="/pricing" class="inline-flex items-center justify-center px-10 py-5 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 bg-[#500B42] text-white no-underline">
+            Get Started Now <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+          <a href="mailto:support@morestars.io" class="inline-flex items-center justify-center px-10 py-5 rounded-full font-bold text-lg border-2 border-gray-200 hover:border-[#500B42] hover:bg-white transition-all text-[#500B42] no-underline">
+            Contact Us
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('partials/marketing-footer') %>
+
+  <!-- Mega Menu JavaScript -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        if (!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('mobile-menu-enter');
+        }
+      });
+    }
+
+    // Desktop Mega Menu
+    const megaMenuTrigger = document.getElementById('industriesTrigger');
+    const megaMenu = document.getElementById('industriesMegaMenu');
+
+    if (megaMenuTrigger && megaMenu) {
+      let menuTimeout;
+
+      megaMenuTrigger.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+        megaMenu.classList.add('open');
+        megaMenuTrigger.classList.add('active');
+      });
+
+      megaMenuTrigger.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+
+      megaMenu.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+      });
+
+      megaMenu.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+    }
+
+    // Mobile Industries Accordion
+    const mobileIndustriesTrigger = document.getElementById('mobileIndustriesTrigger');
+    const mobileIndustriesAccordion = document.getElementById('mobileIndustriesAccordion');
+    const mobileIndustriesArrow = document.getElementById('mobileIndustriesArrow');
+
+    if (mobileIndustriesTrigger && mobileIndustriesAccordion) {
+      mobileIndustriesTrigger.addEventListener('click', () => {
+        mobileIndustriesAccordion.classList.toggle('open');
+        mobileIndustriesArrow.style.transform = mobileIndustriesAccordion.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+    }
+  </script>
+
+<%- include('partials/scripts') %>

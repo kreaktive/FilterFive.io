@@ -1,0 +1,50 @@
+# MoreStars
+
+> Turn every customer into a 5-star Google review. SMS and QR code review request software for local businesses.
+
+MoreStars helps local businesses get more Google reviews through automated SMS requests and scannable QR codes. When a customer completes a transaction, they receive a text message with a direct link to leave a Google review. Businesses can also print QR codes for counters, receipts, or tables.
+
+## How It Works
+
+1. Connect your Google Business Profile
+2. Import customers via CSV or integrate with your POS system
+3. Send SMS review requests or generate QR codes
+4. Customers tap once and land directly on your Google review page
+5. Track results in your analytics dashboard
+
+## Key Features
+
+- SMS Review Requests: Automated text messages sent after transactions
+- QR Code Generation: Printable codes for physical locations
+- Google Business Integration: Direct links to your review page
+- Analytics Dashboard: Track review requests, opens, and conversions
+- POS Integrations: Connect with Square, Shopify, and more
+- Multi-location Support: Manage multiple business locations
+
+## Pricing
+
+$77/month flat rate. No per-SMS fees. Unlimited review requests.
+
+## Target Customers
+
+- Restaurants and cafes
+- Auto repair shops
+- Salons and spas
+- Dental and medical practices
+- Home service providers (plumbers, electricians, HVAC)
+- Retail stores
+- Any local business that wants more Google reviews
+
+## Contact
+
+- Website: https://morestars.io
+- Email: hello@morestars.io
+
+## Documentation
+
+- [Pricing](/pricing)
+- [Features](/features)
+- [How It Works](/how-it-works)
+- [FAQ](/faq)
+- [Blog](/blog)
+- [Industries](/industries)

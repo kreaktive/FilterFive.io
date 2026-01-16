@@ -1,0 +1,8 @@
+<%#
+  Script Nonce Helper
+
+  This partial provides a consistent way to add CSP nonce to inline scripts.
+  Usage: <script<%- include('partials/script-nonce') %>>
+
+  The nonce is only added if cspNonce is available in locals.
+%><%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>

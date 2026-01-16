@@ -1,0 +1,110 @@
+<%#
+  Spinner Component
+
+  A loading spinner for indicating async operations.
+
+  Usage:
+  <%- include('partials/spinner', { size: 'md', color: 'gold' }) %>
+
+  @param {string} size - 'sm' (16px) | 'md' (24px) | 'lg' (40px) | 'xl' (64px)
+  @param {string} color - 'gold' | 'white' | 'dark' | 'gray'
+  @param {string} className - Additional CSS classes
+  @param {string} id - Optional ID for the spinner element
+  @param {boolean} overlay - If true, shows spinner with dark overlay (for full-page loading)
+  @param {string} text - Optional loading text to display below spinner
+%>
+<%
+  const _size = typeof size !== 'undefined' ? size : 'md';
+  const _color = typeof color !== 'undefined' ? color : 'gold';
+  const _className = typeof className !== 'undefined' ? className : '';
+  const _id = typeof id !== 'undefined' ? id : '';
+  const _overlay = typeof overlay !== 'undefined' && overlay;
+  const _text = typeof text !== 'undefined' ? text : '';
+
+  const sizeMap = {
+    sm: { width: '16px', border: '2px' },
+    md: { width: '24px', border: '3px' },
+    lg: { width: '40px', border: '4px' },
+    xl: { width: '64px', border: '5px' }
+  };
+
+  const colorMap = {
+    gold: '#FFBA49',
+    white: '#FFFFFF',
+    dark: '#500B42',
+    gray: '#6B7280'
+  };
+
+  const spinnerSize = sizeMap[_size] || sizeMap.md;
+  const spinnerColor = colorMap[_color] || colorMap.gold;
+%>
+<% if (_overlay) { %>
+<div class="spinner-overlay <%= _className %>"<% if (_id) { %> id="<%= _id %>"<% } %>>
+  <div class="spinner-overlay-content">
+    <div class="spinner" style="width: <%= spinnerSize.width %>; height: <%= spinnerSize.width %>; border-width: <%= spinnerSize.border %>; border-color: rgba(<%= _color === 'white' ? '255,255,255' : (_color === 'gold' ? '255,186,73' : '35,0,30') %>, 0.2); border-top-color: <%= spinnerColor %>;"></div>
+    <% if (_text) { %>
+    <p class="spinner-text" style="color: <%= _color === 'dark' ? '#500B42' : '#FFFFFF' %>;"><%= _text %></p>
+    <% } %>
+  </div>
+</div>
+<% } else { %>
+<div class="spinner-wrapper <%= _className %>"<% if (_id) { %> id="<%= _id %>"<% } %>>
+  <div class="spinner" style="width: <%= spinnerSize.width %>; height: <%= spinnerSize.width %>; border-width: <%= spinnerSize.border %>; border-color: rgba(<%= _color === 'white' ? '255,255,255' : (_color === 'gold' ? '255,186,73' : '35,0,30') %>, 0.2); border-top-color: <%= spinnerColor %>;"></div>
+  <% if (_text) { %>
+  <span class="spinner-text"><%= _text %></span>
+  <% } %>
+</div>
+<% } %>
+
+<style>
+  /* Spinner Animation - only included once */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    border-style: solid;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .spinner-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .spinner-text {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(35, 0, 30, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+  }
+
+  .spinner-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .spinner-overlay .spinner-text {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* Utility class to hide spinner */
+  .spinner-hidden {
+    display: none !important;
+  }
+</style>

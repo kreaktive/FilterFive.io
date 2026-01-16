@@ -1,0 +1,545 @@
+<%- include('../partials/dashboard-head', { title: title }) %>
+  <style>
+    body {
+      line-height: 1.6;
+    }
+
+    .breadcrumb {
+      margin-bottom: 20px;
+    }
+
+    .breadcrumb a {
+      color: var(--brand-gold);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumb span {
+      color: #718096;
+    }
+
+    .page-title {
+      margin-bottom: 30px;
+    }
+
+    .page-title h2 {
+      font-size: 32px;
+      color: var(--brand-dark);
+      margin-bottom: 10px;
+    }
+
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: 18px;
+    }
+
+    .guide-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+    }
+
+    .guide-card h3 {
+      font-size: 22px;
+      color: #2d3748;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .guide-card h3 .step-number {
+      background: transparent;
+      color: var(--brand-dark);
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .guide-card h4 {
+      font-size: 17px;
+      color: #4a5568;
+      margin: 20px 0 12px 0;
+    }
+
+    .guide-card p {
+      color: #4a5568;
+      margin-bottom: 15px;
+    }
+
+    .guide-card ul, .guide-card ol {
+      margin-left: 25px;
+      margin-bottom: 15px;
+      color: #4a5568;
+    }
+
+    .guide-card li {
+      margin-bottom: 10px;
+    }
+
+    .provider-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .provider-tab {
+      padding: 12px 25px;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .provider-tab:hover {
+      border-color: var(--brand-gold);
+    }
+
+    .provider-tab.active {
+      background: transparent;
+      color: var(--brand-dark);
+      border-color: transparent;
+    }
+
+    .provider-content {
+      display: none;
+    }
+
+    .provider-content.active {
+      display: block;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .info-box strong {
+      color: #1e40af;
+    }
+
+    .info-box p {
+      color: #1e40af;
+      margin: 0;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .warning-box strong {
+      color: #92400e;
+    }
+
+    .warning-box p {
+      color: #92400e;
+      margin: 0;
+    }
+
+    .success-box {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .success-box strong {
+      color: #065f46;
+    }
+
+    .success-box p {
+      color: #065f46;
+      margin: 0;
+    }
+
+    .step-list {
+      counter-reset: step-counter;
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .step-list li {
+      counter-increment: step-counter;
+      padding-left: 45px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .step-list li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background: transparent;
+      color: var(--brand-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .checklist {
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .checklist li {
+      padding: 12px 15px;
+      background: #f7fafc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .checklist li::before {
+      content: "\\2713";
+      color: #10b981;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 20px 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .faq-answer {
+      color: #4a5568;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: transparent;
+      color: var(--brand-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 186, 73, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--brand-dark);
+      border: 2px solid var(--brand-gold);
+    }
+
+    .btn-secondary:hover {
+      background: transparent;
+      color: var(--brand-dark);
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 30px;
+      background: rgba(255, 186, 73, 0.1);
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .cta-section h3 {
+      margin-bottom: 15px;
+      border: none;
+      padding: 0;
+    }
+
+    .cta-section p {
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .guide-card {
+        padding: 20px;
+      }
+
+      .provider-tabs {
+        flex-direction: column;
+      }
+
+      .provider-tab {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/dashboard-header', { activePage: 'settings' }) %>
+
+  <main id="main-content" class="container">
+    <div class="breadcrumb">
+      <a href="/dashboard/settings?tab=pos">Settings</a> <span>&rarr; POS Integration Guide</span>
+    </div>
+
+    <div class="page-title">
+      <h2>POS Integration Setup Guide</h2>
+      <p>Connect your Square or Shopify POS to automatically request reviews after each sale</p>
+    </div>
+
+    <!-- Prerequisites -->
+    <div class="guide-card">
+      <h3><span class="step-number">1</span> Before You Start</h3>
+      <p>Make sure you have the following ready before connecting your POS system:</p>
+
+      <ul class="checklist">
+        <li><strong>Review Platform URL configured</strong> - Go to Settings > General and add your Google, Yelp, or other review link</li>
+        <li><strong>Square or Shopify admin access</strong> - You'll need to sign in and authorize MoreStars</li>
+        <li><strong>Active MoreStars subscription</strong> - POS SMS uses your monthly SMS allocation</li>
+      </ul>
+
+      <div class="info-box">
+        <p><strong>Tip:</strong> If you haven't set up your review link yet, <a href="/dashboard/settings?tab=general" style="color: inherit;">go to Settings</a> first. SMS messages won't be sent without a review destination.</p>
+      </div>
+    </div>
+
+    <!-- Provider Selection -->
+    <div class="guide-card">
+      <h3><span class="step-number">2</span> Connect Your POS</h3>
+
+      <div class="provider-tabs">
+        <button class="provider-tab active" data-provider="square">Square</button>
+        <button class="provider-tab" data-provider="shopify">Shopify</button>
+      </div>
+
+      <!-- Square Instructions -->
+      <div id="provider-square" class="provider-content active">
+        <h4>Connecting Square</h4>
+        <ol class="step-list">
+          <li>Go to <a href="/dashboard/settings?tab=pos">Settings > POS Integration</a></li>
+          <li>Click the <strong>"Connect Square"</strong> button</li>
+          <li>Sign in to your Square account when prompted</li>
+          <li>Review the permissions and click <strong>"Allow"</strong></li>
+          <li>You'll be redirected back to MoreStars with a success message</li>
+        </ol>
+
+        <div class="info-box">
+          <p><strong>Permissions requested:</strong> MoreStars only requests read access to payments, customers, and your merchant profile. We never modify your Square data.</p>
+        </div>
+
+        <h4>How Square Integration Works</h4>
+        <p>When a customer makes a payment at your Square terminal:</p>
+        <ol>
+          <li>Square sends a notification to MoreStars</li>
+          <li>We check if the payment has a customer profile with a phone number</li>
+          <li>If the customer hasn't received an SMS in the last 30 days, we send a review request</li>
+        </ol>
+
+        <div class="warning-box">
+          <p><strong>Important:</strong> SMS is only sent when a customer is linked to the payment. Quick-pay or cash transactions without a customer profile won't trigger SMS. Encourage your staff to add customers to payments for best results.</p>
+        </div>
+      </div>
+
+      <!-- Shopify Instructions -->
+      <div id="provider-shopify" class="provider-content">
+        <h4>Connecting Shopify</h4>
+        <ol class="step-list">
+          <li>Go to <a href="/dashboard/settings?tab=pos">Settings > POS Integration</a></li>
+          <li>Enter your Shopify store URL (e.g., <code>my-store.myshopify.com</code>)</li>
+          <li>Click <strong>"Connect"</strong></li>
+          <li>Sign in to your Shopify admin if prompted</li>
+          <li>Review the app permissions and click <strong>"Install app"</strong></li>
+          <li>You'll be redirected back to MoreStars with a success message</li>
+        </ol>
+
+        <div class="info-box">
+          <p><strong>Permissions requested:</strong> MoreStars only requests read access to orders, customers, and locations. We never modify your Shopify data.</p>
+        </div>
+
+        <h4>How Shopify Integration Works</h4>
+        <p>When a customer places an order on your Shopify store:</p>
+        <ol>
+          <li>Shopify sends an order notification to MoreStars</li>
+          <li>We check if the order includes a phone number</li>
+          <li>If the customer hasn't received an SMS in the last 30 days, we send a review request</li>
+        </ol>
+
+        <div class="warning-box">
+          <p><strong>Important:</strong> Customers must provide a phone number during checkout. Make sure phone collection is enabled in your Shopify checkout settings for best results.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configure Settings -->
+    <div class="guide-card">
+      <h3><span class="step-number">3</span> Configure Your Settings</h3>
+
+      <h4>Select Locations</h4>
+      <p>After connecting, MoreStars will sync your locations. Enable the locations where you want SMS review requests to be sent:</p>
+      <ul>
+        <li>Check the boxes next to each location you want to enable</li>
+        <li>Click "Save Locations" to apply your changes</li>
+        <li>You can update this anytime as your business grows</li>
+      </ul>
+
+      <h4>Test Mode (Recommended)</h4>
+      <p>Before going live, we recommend testing the integration:</p>
+      <ol>
+        <li>Enable <strong>Test Mode</strong> in your POS settings</li>
+        <li>Enter your personal phone number as the <strong>Test Phone Number</strong></li>
+        <li>Make a test purchase at your store</li>
+        <li>Verify you receive the SMS review request</li>
+        <li>Once confirmed, disable Test Mode to start sending to real customers</li>
+      </ol>
+
+      <div class="success-box">
+        <p><strong>Pro tip:</strong> Keep Test Mode on for a day or two to make sure everything works perfectly before going live.</p>
+      </div>
+
+      <h4>Confirm SMS Consent</h4>
+      <p>US law (TCPA) requires customer consent before sending marketing SMS. Before MoreStars sends any messages, you must confirm:</p>
+      <ul>
+        <li>You have a process for obtaining SMS consent from customers</li>
+        <li>Customers whose phone numbers are on file have agreed to receive messages</li>
+      </ul>
+      <p>Check the consent confirmation box in your POS settings to enable SMS sending.</p>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="guide-card">
+      <h3><span class="step-number">4</span> Troubleshooting & FAQs</h3>
+
+      <div class="faq-item">
+        <div class="faq-question">Why didn't my customer receive an SMS?</div>
+        <div class="faq-answer">
+          There are several reasons an SMS might not be sent:
+          <ul style="margin-top: 10px;">
+            <li><strong>No phone number</strong> - The transaction didn't include a phone number</li>
+            <li><strong>30-day cooldown</strong> - The customer received an SMS within the last 30 days</li>
+            <li><strong>International number</strong> - Only US phone numbers (+1) are supported</li>
+            <li><strong>Test mode enabled</strong> - SMS goes to your test phone instead</li>
+            <li><strong>Consent not confirmed</strong> - You need to check the consent box in settings</li>
+            <li><strong>SMS limit reached</strong> - You've used your monthly SMS allocation</li>
+            <li><strong>No review link</strong> - Set up your review URL in Settings > General</li>
+          </ul>
+          Check the <a href="/dashboard/settings?tab=transactions">POS Transactions</a> tab to see the status and skip reason for each transaction.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">How do I get more customers to have phone numbers on file?</div>
+        <div class="faq-answer">
+          <strong>For Square:</strong> Train staff to add customers to transactions. Use the "Add Customer" option at checkout and collect phone numbers. Consider loyalty programs that encourage phone registration.
+          <br><br>
+          <strong>For Shopify:</strong> Make the phone field required or prominent at checkout. You can configure this in your Shopify admin under Settings > Checkout.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Can I connect both Square and Shopify?</div>
+        <div class="faq-answer">
+          Yes! You can connect both providers simultaneously. Each will independently send SMS review requests when orders/payments come through with phone numbers.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Does this count against my SMS limit?</div>
+        <div class="faq-answer">
+          Yes, POS-triggered SMS messages count toward your monthly SMS allocation. Monitor your usage on the <a href="/dashboard">Dashboard</a> or <a href="/dashboard/subscription">Subscription</a> page.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">How quickly are SMS messages sent after a purchase?</div>
+        <div class="faq-answer">
+          SMS messages are typically sent within 1-2 minutes after the transaction is processed. There may be a slight delay during high-volume periods.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">Can I customize the SMS message?</div>
+        <div class="faq-answer">
+          Yes! Go to Settings > General and select your preferred SMS Message Tone (Friendly, Professional, or Grateful). Your business name and review link are automatically included.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">How do I disconnect a POS system?</div>
+        <div class="faq-answer">
+          Go to Settings > POS Integration and click the "Disconnect" button next to the provider you want to remove. This will revoke MoreStars' access and stop SMS messages from that source.
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="guide-card cta-section">
+      <h3>Ready to Get Started?</h3>
+      <p>Head to your settings to connect your POS system and start collecting more reviews automatically.</p>
+      <a href="/dashboard/settings?tab=pos" class="btn">Go to POS Settings</a>
+    </div>
+  </main>
+
+  <%- include('../partials/dashboard-footer') %>
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    document.addEventListener('DOMContentLoaded', function() {
+      var providerTabs = document.querySelectorAll('.provider-tab');
+
+      providerTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var provider = this.getAttribute('data-provider');
+
+          // Update tab buttons
+          providerTabs.forEach(function(t) {
+            t.classList.remove('active');
+          });
+          this.classList.add('active');
+
+          // Update content
+          document.querySelectorAll('.provider-content').forEach(function(content) {
+            content.classList.remove('active');
+          });
+          document.getElementById('provider-' + provider).classList.add('active');
+        });
+      });
+    });
+
+  </script>
+
+  <%- include('../partials/dashboard-footer') %>
+  <script src="/js/dashboard-menu.min.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title><%= typeof title !== 'undefined' ? title : 'MoreStars - Get More Google Reviews' %></title>
+  <meta name="description" content="<%= typeof description !== 'undefined' ? description : 'Send review requests via SMS or QR code. Customers tap once and land on your Google page. More stars, less effort.' %>">
+  <% if (typeof keywords !== 'undefined') { %>
+  <meta name="keywords" content="<%= keywords %>">
+  <% } %>
+
+  <!-- Canonical URL -->
+  <%
+  // Build canonical URL - strip query strings and normalize homepage
+  const buildCanonicalUrl = (path) => {
+    const cleanPath = (path || '/').split('?')[0];
+    // Homepage should be https://morestars.io (no trailing slash)
+    if (cleanPath === '/') return 'https://morestars.io';
+    // Other pages: remove trailing slash if present
+    return 'https://morestars.io' + cleanPath.replace(/\/$/, '');
+  };
+  const canonicalHref = typeof canonicalUrl !== 'undefined' && canonicalUrl
+    ? canonicalUrl
+    : buildCanonicalUrl(typeof currentPath !== 'undefined' ? currentPath : '/');
+  %>
+  <link rel="canonical" href="<%= canonicalHref %>">
+
+  <!-- Robots directive (optional noindex for legal/utility pages) -->
+  <% if (typeof noindex !== 'undefined' && noindex) { %>
+  <meta name="robots" content="noindex, nofollow">
+  <% } %>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : (typeof title !== 'undefined' ? title : 'MoreStars - Get More Google Reviews') %>">
+  <meta property="og:description" content="<%= typeof ogDescription !== 'undefined' ? ogDescription : (typeof description !== 'undefined' ? description : 'Send review requests via SMS or QR code. More stars, less effort.') %>">
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+  <meta property="og:site_name" content="MoreStars">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="<%= canonicalHref %>">
+  <%
+  // Default og:image fallback - uses branded social sharing image (1200x630)
+  const defaultOgImage = 'https://morestars.io/images/og-morestars.png';
+  const socialImage = (typeof ogImage !== 'undefined' && ogImage) ? ogImage : defaultOgImage;
+  // Default dimensions for social sharing image
+  const imgWidth = (typeof ogImageWidth !== 'undefined' && ogImageWidth) ? ogImageWidth : '1200';
+  const imgHeight = (typeof ogImageHeight !== 'undefined' && ogImageHeight) ? ogImageHeight : '630';
+  %>
+  <meta property="og:image" content="<%= socialImage %>">
+  <meta property="og:image:width" content="<%= imgWidth %>">
+  <meta property="og:image:height" content="<%= imgHeight %>">
+  <meta property="og:image:alt" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : 'MoreStars - Get More Google Reviews' %>">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@morestarsio">
+  <meta name="twitter:creator" content="@morestarsio">
+  <meta name="twitter:title" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : (typeof title !== 'undefined' ? title : 'MoreStars - Get More Google Reviews') %>">
+  <meta name="twitter:description" content="<%= typeof ogDescription !== 'undefined' ? ogDescription : (typeof description !== 'undefined' ? description : 'Send review requests via SMS or QR code. More stars, less effort.') %>">
+  <meta name="twitter:image" content="<%= socialImage %>">
+  <meta name="twitter:image:alt" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : 'MoreStars - Get More Google Reviews' %>">
+  <meta name="twitter:domain" content="morestars.io">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/favicon-morestars.png">
+
+  <%- include('gtm-head') %>
+
+  <!-- Tailwind CSS (compiled, minified) -->
+  <link rel="stylesheet" href="/css/tailwind.css?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>">
+
+  <!-- Design System CSS Variables - SINGLE SOURCE OF TRUTH for all colors and design tokens -->
+  <link rel="stylesheet" href="/css/design-system.css?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>">
+
+  <!-- Preconnect to CDNs for faster resource loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <!-- Google Fonts (optimized: only loading used weights 500-800) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Rubik:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom Styles (minified) -->
+  <link rel="stylesheet" href="/css/homepage.min.css?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>">
+
+  <% if (typeof extraStyles !== 'undefined') { %>
+  <style<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>><%= extraStyles %></style>
+  <% } %>
+
+  <!-- WebSite Schema with SearchAction for Sitelinks Search Box -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "MoreStars",
+    "url": "https://morestars.io",
+    "description": "B2B SaaS reputation management platform helping businesses get more Google reviews through SMS and QR code campaigns.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://morestars.io/blog?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- Organization Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "MoreStars",
+    "url": "https://morestars.io",
+    "logo": "https://morestars.io/images/Logo%20MoreStars.io.svg",
+    "description": "Review management software that helps local businesses get more Google reviews through SMS and QR code campaigns.",
+    "foundingDate": "2024",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@morestars.io",
+      "availableLanguage": "English"
+    },
+    "sameAs": []
+  }
+  </script>
+
+  <% if (typeof isHomepage !== 'undefined' && isHomepage) { %>
+  <!-- SoftwareApplication Schema (Homepage only) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MoreStars",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "Review management software that helps local businesses get more Google reviews through SMS and QR code campaigns.",
+    "url": "https://morestars.io",
+    "offers": {
+      "@type": "Offer",
+      "price": "77",
+      "priceCurrency": "USD",
+      "priceValidUntil": "<%= new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0] %>",
+      "availability": "https://schema.org/InStock"
+    },
+    "featureList": [
+      "SMS Review Requests",
+      "QR Code Generation",
+      "Google Review Integration",
+      "Analytics Dashboard",
+      "CSV Upload",
+      "Negative Feedback Filtering"
+    ]
+  }
+  </script>
+  <% } %>
+
+</head>
+<body class="font-sans text-[#500B42]">
+  <%- include('gtm-body') %>

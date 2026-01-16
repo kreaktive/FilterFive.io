@@ -6,6 +6,7 @@
 
 const { FeedbackRequest, User } = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../services/logger');
 
 /**
  * Handle QR Code Scan
@@ -21,21 +22,31 @@ const handleQrScan = async (req, res) => {
   try {
     const { businessId } = req.params;
 
+    // SECURITY: Validate businessId is a positive integer before database query
+    const parsedId = parseInt(businessId, 10);
+    if (!businessId || isNaN(parsedId) || parsedId <= 0 || String(parsedId) !== businessId) {
+      return res.status(404).render('error', {
+        title: 'Business Not Found',
+        message: 'This QR code is invalid or the business is no longer active.',
+        error: { status: 404 }
+      });
+    }
+
     // Get customer IP address (works behind nginx proxy)
     const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
 
-    console.log(`📱 QR scan attempt - Business: ${businessId}, IP: ${ipAddress}`);
+    logger.info('QR scan attempt', { businessId: parsedId, ipAddress });
 
     // Find business/tenant by ID
     const business = await User.findOne({
       where: {
-        id: businessId,
+        id: parsedId,
         role: 'tenant'
       }
     });
 
     if (!business) {
-      console.warn(`❌ QR scan failed - Business not found: ${businessId}`);
+      logger.warn('QR scan failed - Business not found', { businessId: parsedId });
       return res.status(404).render('error', {
         title: 'Business Not Found',
         message: 'This QR code is invalid or the business is no longer active.',
@@ -46,7 +57,7 @@ const handleQrScan = async (req, res) => {
     // Start trial on first QR page view (Phase 2 requirement)
     if (!business.trialStartsAt && business.subscriptionStatus === 'trial') {
       await business.startTrial();
-      console.log(`✓ Trial started for ${business.businessName} (ID: ${business.id}) - First QR scan`);
+      logger.info('Trial started via QR scan', { userId: business.id, businessName: business.businessName });
     }
 
     // Generate unique UUID for this feedback request
@@ -66,14 +77,14 @@ const handleQrScan = async (req, res) => {
       linkClickedAt: new Date() // Mark as immediately clicked
     });
 
-    console.log(`✓ QR feedback request created: ${business.businessName} (ID: ${business.id}) - UUID: ${uuid}`);
+    logger.info('QR feedback request created', { userId: business.id, uuid });
 
     // Redirect to star rating page
     // The existing review flow at /review/:uuid will handle the rest
     res.redirect(`/review/${uuid}`);
 
   } catch (error) {
-    console.error('❌ QR scan error:', error);
+    logger.error('QR scan error', { error: error.message });
     res.status(500).render('error', {
       title: 'Something Went Wrong',
       message: 'Unable to process your request. Please try scanning the QR code again.',

@@ -15,6 +15,7 @@ const {
   Review,
   User
 } = require('../models');
+const logger = require('./logger');
 
 class SnapshotService {
   /**
@@ -45,40 +46,61 @@ class SnapshotService {
       attributes: ['id']
     });
 
-    console.log(`Generating snapshots for ${users.length} users for date: ${snapshotDate.toISOString().split('T')[0]}`);
+    const userIds = users.map(u => u.id);
+
+    logger.cron('snapshot_generation', 'started', { userCount: users.length, date: snapshotDate.toISOString().split('T')[0] });
+
+    // Batch fetch all locations for all users in a single query (fixes N+1)
+    const locationsByUser = await this._getAllUsersLocations(userIds);
 
     let snapshotsCreated = 0;
     let snapshotsUpdated = 0;
     let errors = 0;
 
-    for (const user of users) {
-      try {
-        // Get user's locations
-        const locations = await this._getUserLocations(user.id);
+    // Process users in parallel batches for better performance
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const batch = users.slice(i, i + BATCH_SIZE);
 
-        // Generate snapshot for each location (+ aggregated)
-        const locationsToProcess = [null, ...locations]; // null = all locations
+      const results = await Promise.allSettled(
+        batch.map(async (user) => {
+          const locations = locationsByUser[user.id] || [];
+          const locationsToProcess = [null, ...locations]; // null = all locations
 
-        for (const location of locationsToProcess) {
-          const result = await this._generateSnapshotForUserAndLocation(
-            user.id,
-            snapshotDate,
-            location
-          );
+          let created = 0;
+          let updated = 0;
 
-          if (result.created) {
-            snapshotsCreated++;
-          } else {
-            snapshotsUpdated++;
+          for (const location of locationsToProcess) {
+            const result = await this._generateSnapshotForUserAndLocation(
+              user.id,
+              snapshotDate,
+              location
+            );
+
+            if (result.created) {
+              created++;
+            } else {
+              updated++;
+            }
           }
+
+          return { created, updated };
+        })
+      );
+
+      // Aggregate results from batch
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          snapshotsCreated += result.value.created;
+          snapshotsUpdated += result.value.updated;
+        } else {
+          logger.error('Error generating snapshot for user in batch', { error: result.reason?.message });
+          errors++;
         }
-      } catch (error) {
-        console.error(`Error generating snapshot for user ${user.id}:`, error);
-        errors++;
       }
     }
 
-    console.log(`✓ Snapshot generation complete:`, {
+    logger.cron('snapshot_generation', 'completed', {
       created: snapshotsCreated,
       updated: snapshotsUpdated,
       errors
@@ -125,9 +147,11 @@ class SnapshotService {
     // Get all feedback requests for this day
     const requests = await FeedbackRequest.findAll({
       where: requestWhere,
+      attributes: ['id', 'deliveryMethod', 'linkClickedAt', 'createdAt'],
       include: [{
         model: Review,
         as: 'review',
+        attributes: ['rating'], // Only fetch rating - we don't need other Review fields
         required: false
       }]
     });
@@ -202,33 +226,57 @@ class SnapshotService {
       attributes: ['id']
     });
 
-    console.log(`Generating timing performance for ${users.length} users`);
+    const userIds = users.map(u => u.id);
+
+    logger.cron('timing_performance', 'started', { userCount: users.length });
+
+    // Batch fetch all locations for all users in a single query (fixes N+1)
+    const locationsByUser = await this._getAllUsersLocations(userIds);
 
     let recordsCreated = 0;
     let recordsUpdated = 0;
     let errors = 0;
 
-    for (const user of users) {
-      try {
-        const locations = await this._getUserLocations(user.id);
-        const locationsToProcess = [null, ...locations];
+    // Process users in parallel batches for better performance
+    const BATCH_SIZE = 5; // Smaller batch for timing (more intensive)
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const batch = users.slice(i, i + BATCH_SIZE);
 
-        for (const location of locationsToProcess) {
-          const result = await this._generateTimingPerformanceForUserAndLocation(
-            user.id,
-            location
-          );
+      const results = await Promise.allSettled(
+        batch.map(async (user) => {
+          const locations = locationsByUser[user.id] || [];
+          const locationsToProcess = [null, ...locations];
 
-          recordsCreated += result.created;
-          recordsUpdated += result.updated;
+          let created = 0;
+          let updated = 0;
+
+          for (const location of locationsToProcess) {
+            const result = await this._generateTimingPerformanceForUserAndLocation(
+              user.id,
+              location
+            );
+
+            created += result.created;
+            updated += result.updated;
+          }
+
+          return { created, updated };
+        })
+      );
+
+      // Aggregate results from batch
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          recordsCreated += result.value.created;
+          recordsUpdated += result.value.updated;
+        } else {
+          logger.error('Error generating timing performance for user in batch', { error: result.reason?.message });
+          errors++;
         }
-      } catch (error) {
-        console.error(`Error generating timing performance for user ${user.id}:`, error);
-        errors++;
       }
     }
 
-    console.log(`✓ Timing performance generation complete:`, {
+    logger.cron('timing_performance', 'completed', {
       created: recordsCreated,
       updated: recordsUpdated,
       errors
@@ -244,6 +292,7 @@ class SnapshotService {
 
   /**
    * Generate timing performance for a specific user and location
+   * Optimized: Fetches all requests once and groups by day/hour in memory
    *
    * @private
    * @param {number} userId - User ID
@@ -254,80 +303,86 @@ class SnapshotService {
     let created = 0;
     let updated = 0;
 
-    // Loop through all day/hour combinations (7 days × 24 hours = 168 records)
-    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-      for (let hourOfDay = 0; hourOfDay < 24; hourOfDay++) {
-        const requestWhere = { userId };
-        if (location) {
-          requestWhere.location = location;
-        }
+    // Fetch ALL requests for this user/location once (instead of 168 times)
+    const requestWhere = { userId };
+    if (location) {
+      requestWhere.location = location;
+    }
 
-        // Get all requests for this time slot (all-time aggregation)
-        const requests = await FeedbackRequest.findAll({
-          where: requestWhere,
-          include: [{
-            model: Review,
-            as: 'review',
-            required: false
-          }]
-        });
+    const allRequests = await FeedbackRequest.findAll({
+      where: requestWhere,
+      attributes: ['id', 'linkClickedAt', 'createdAt'],
+      include: [{
+        model: Review,
+        as: 'review',
+        attributes: ['rating'],
+        required: false
+      }]
+    });
 
-        // Filter by day of week and hour
-        const filteredRequests = requests.filter(r => {
-          const date = new Date(r.createdAt);
-          return date.getDay() === dayOfWeek && date.getHours() === hourOfDay;
-        });
+    // Group requests by day of week and hour in memory
+    const requestsByTimeSlot = {};
+    for (const request of allRequests) {
+      const date = new Date(request.createdAt);
+      const dayOfWeek = date.getDay();
+      const hourOfDay = date.getHours();
+      const key = `${dayOfWeek}-${hourOfDay}`;
 
-        if (filteredRequests.length === 0) {
-          continue; // Skip empty time slots
-        }
+      if (!requestsByTimeSlot[key]) {
+        requestsByTimeSlot[key] = [];
+      }
+      requestsByTimeSlot[key].push(request);
+    }
 
-        // Calculate metrics for this time slot
-        const requestsSent = filteredRequests.length;
-        const requestsClicked = filteredRequests.filter(r => r.linkClickedAt).length;
-        const requestsRated = filteredRequests.filter(r => r.review).length;
-        const reviewsPositive = filteredRequests.filter(r => r.review && r.review.rating >= 4).length;
+    // Process only time slots that have data
+    for (const [key, requests] of Object.entries(requestsByTimeSlot)) {
+      const [dayOfWeek, hourOfDay] = key.split('-').map(Number);
 
-        const clickRate = requestsSent > 0
-          ? (requestsClicked / requestsSent) * 100
-          : null;
+      // Calculate metrics for this time slot
+      const requestsSent = requests.length;
+      const requestsClicked = requests.filter(r => r.linkClickedAt).length;
+      const requestsRated = requests.filter(r => r.review).length;
+      const reviewsPositive = requests.filter(r => r.review && r.review.rating >= 4).length;
 
-        const conversionRate = requestsClicked > 0
-          ? (requestsRated / requestsClicked) * 100
-          : null;
+      const clickRate = requestsSent > 0
+        ? (requestsClicked / requestsSent) * 100
+        : null;
 
-        const positiveRate = requestsRated > 0
-          ? (reviewsPositive / requestsRated) * 100
-          : null;
+      const conversionRate = requestsClicked > 0
+        ? (requestsRated / requestsClicked) * 100
+        : null;
 
-        // Calculate performance score (weighted average)
-        const performanceScore = (clickRate && conversionRate && positiveRate)
-          ? (clickRate * 0.3) + (conversionRate * 0.3) + (positiveRate * 0.4)
-          : null;
+      const positiveRate = requestsRated > 0
+        ? (reviewsPositive / requestsRated) * 100
+        : null;
 
-        // Upsert timing performance record
-        const [record, wasCreated] = await TimingPerformance.upsert({
-          userId,
-          dayOfWeek,
-          hourOfDay,
-          location,
-          requestsSent,
-          requestsClicked,
-          requestsRated,
-          reviewsPositive,
-          clickRate: clickRate ? parseFloat(clickRate.toFixed(2)) : null,
-          conversionRate: conversionRate ? parseFloat(conversionRate.toFixed(2)) : null,
-          positiveRate: positiveRate ? parseFloat(positiveRate.toFixed(2)) : null,
-          performanceScore: performanceScore ? parseFloat(performanceScore.toFixed(2)) : null
-        }, {
-          returning: true
-        });
+      // Calculate performance score (weighted average)
+      const performanceScore = (clickRate && conversionRate && positiveRate)
+        ? (clickRate * 0.3) + (conversionRate * 0.3) + (positiveRate * 0.4)
+        : null;
 
-        if (wasCreated) {
-          created++;
-        } else {
-          updated++;
-        }
+      // Upsert timing performance record
+      const [record, wasCreated] = await TimingPerformance.upsert({
+        userId,
+        dayOfWeek,
+        hourOfDay,
+        location,
+        requestsSent,
+        requestsClicked,
+        requestsRated,
+        reviewsPositive,
+        clickRate: clickRate ? parseFloat(clickRate.toFixed(2)) : null,
+        conversionRate: conversionRate ? parseFloat(conversionRate.toFixed(2)) : null,
+        positiveRate: positiveRate ? parseFloat(positiveRate.toFixed(2)) : null,
+        performanceScore: performanceScore ? parseFloat(performanceScore.toFixed(2)) : null
+      }, {
+        returning: true
+      });
+
+      if (wasCreated) {
+        created++;
+      } else {
+        updated++;
       }
     }
 
@@ -359,6 +414,43 @@ class SnapshotService {
   }
 
   /**
+   * Batch fetch distinct locations for multiple users in a single query
+   * Returns a map of userId -> array of locations
+   *
+   * @private
+   * @param {Array<number>} userIds - Array of user IDs
+   * @returns {Promise<Object>} Map of userId to location arrays
+   */
+  async _getAllUsersLocations(userIds) {
+    if (!userIds.length) {
+      return {};
+    }
+
+    const locations = await FeedbackRequest.findAll({
+      where: {
+        userId: { [Op.in]: userIds },
+        location: { [Op.ne]: null }
+      },
+      attributes: ['userId', 'location'],
+      group: ['userId', 'location'],
+      raw: true
+    });
+
+    // Group locations by userId
+    const locationsByUser = {};
+    for (const row of locations) {
+      if (!locationsByUser[row.userId]) {
+        locationsByUser[row.userId] = [];
+      }
+      if (row.location && !locationsByUser[row.userId].includes(row.location)) {
+        locationsByUser[row.userId].push(row.location);
+      }
+    }
+
+    return locationsByUser;
+  }
+
+  /**
    * Backfill snapshots for a user (useful for new analytics feature)
    *
    * @param {number} userId - User ID
@@ -366,7 +458,7 @@ class SnapshotService {
    * @returns {Promise<Object>} Summary of backfill operation
    */
   async backfillSnapshots(userId, daysBack = 90) {
-    console.log(`Backfilling ${daysBack} days of snapshots for user ${userId}`);
+    logger.cron('backfill_snapshots', 'started', { userId, daysBack });
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -396,7 +488,7 @@ class SnapshotService {
       }
     }
 
-    console.log(`✓ Backfill complete for user ${userId}:`, { created, updated });
+    logger.cron('backfill_snapshots', 'completed', { userId, created, updated });
 
     return { userId, daysBack, created, updated };
   }

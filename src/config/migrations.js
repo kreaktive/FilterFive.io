@@ -1,15 +1,14 @@
 require('dotenv').config();
 const { sequelize } = require('./database');
-const User = require('../models/User');
-const FeedbackRequest = require('../models/FeedbackRequest');
-const Review = require('../models/Review');
+// Import all models (includes relationships)
+require('../models');
 
 const syncDatabase = async () => {
   try {
     console.log('Starting database synchronization...');
 
     // Sync all models
-    await sequelize.sync({ force: false, alter: true });
+    await sequelize.sync({ alter: true });
 
     console.log('✓ All models synchronized successfully.');
 

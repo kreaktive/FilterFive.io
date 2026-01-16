@@ -3,7 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/images/favicon-morestars.png">
   <title><%= title %></title>
+  <!-- Google Tag Manager -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W6336VRQ');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Rubik:wght@700;800&display=swap" rel="stylesheet">
+
   <style>
     * {
       margin: 0;
@@ -12,150 +26,268 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #500B42;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
     }
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
     }
 
     .card {
       background: white;
-      border-radius: 20px;
-      padding: 50px 40px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 25px 50px -12px rgba(255, 186, 73, 0.25);
       text-align: center;
     }
 
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo p {
+      font-size: 14px;
+      color: #718096;
+      margin-top: 8px;
+    }
+
     .icon {
-      font-size: 80px;
-      margin-bottom: 20px;
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, rgba(255, 186, 73, 0.15) 0%, rgba(255, 186, 73, 0.05) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      border: 2px solid rgba(255, 186, 73, 0.3);
+    }
+
+    .icon svg {
+      width: 40px;
+      height: 40px;
+      fill: #FFBA49;
     }
 
     h1 {
-      font-size: 28px;
-      color: #1a202c;
-      margin-bottom: 15px;
+      font-size: 24px;
+      font-weight: 800;
+      color: #500B42;
+      margin-bottom: 16px;
+      font-family: 'Rubik', sans-serif;
     }
 
     p {
-      font-size: 16px;
+      font-size: 15px;
       color: #4a5568;
       line-height: 1.6;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .email-highlight {
-      color: #667eea;
-      font-weight: 600;
+      color: #500B42;
+      font-weight: 700;
+      background: linear-gradient(135deg, rgba(255, 186, 73, 0.2) 0%, rgba(255, 186, 73, 0.1) 100%);
+      padding: 2px 8px;
+      border-radius: 4px;
     }
 
     .info-box {
-      background: #f0f9ff;
-      border-left: 4px solid #3b82f6;
-      padding: 15px;
-      margin: 25px 0;
-      border-radius: 5px;
+      background: linear-gradient(135deg, rgba(255, 186, 73, 0.1) 0%, rgba(35, 0, 30, 0.05) 100%);
+      border-left: 4px solid #FFBA49;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 8px;
       text-align: left;
     }
 
     .info-box p {
       margin: 0;
       font-size: 14px;
-      color: #1e40af;
+      color: #500B42;
     }
 
     .resend-section {
-      margin-top: 30px;
-      padding-top: 30px;
+      margin-top: 28px;
+      padding-top: 24px;
       border-top: 1px solid #e2e8f0;
     }
 
     .resend-section p {
       font-size: 14px;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
+      color: #718096;
     }
 
     .btn-resend {
-      padding: 12px 24px;
-      background: #667eea;
-      color: white;
+      padding: 14px 28px;
+      background: #FFBA49;
+      color: #500B42;
       border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
 
     .btn-resend:hover {
-      background: #5568d3;
+      background: #500B42;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(35, 0, 30, 0.3);
+    }
+
+    .btn-resend:active {
+      transform: translateY(0);
     }
 
     .btn-resend:disabled {
       background: #cbd5e0;
+      color: #718096;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .success-message {
       background: #d1fae5;
+      border-left: 4px solid #10b981;
       color: #065f46;
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
-      margin-top: 15px;
+      margin-top: 16px;
       display: none;
     }
 
     .error-message {
       background: #fee2e2;
+      border-left: 4px solid #dc2626;
       color: #991b1b;
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
-      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .login-link {
+      margin-top: 24px;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #FFBA49;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 12px;
+      color: #718096;
+    }
+
+    .footer a {
+      color: #FFBA49;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
     }
 
     @media (max-width: 480px) {
       .card {
-        padding: 40px 25px;
+        padding: 32px 24px;
       }
 
       h1 {
-        font-size: 24px;
+        font-size: 22px;
       }
 
       .icon {
-        font-size: 60px;
+        width: 64px;
+        height: 64px;
+      }
+
+      .icon svg {
+        width: 32px;
+        height: 32px;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W6336VRQ"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
   <div class="container">
     <div class="card">
-      <div class="icon">📧</div>
+      <div class="logo">
+        <img src="/images/Logo MoreStars.io.svg" alt="MoreStars Logo" height="32">
+        <p>Almost there!</p>
+      </div>
+
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+          <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+        </svg>
+      </div>
+
       <h1>Check Your Email</h1>
 
       <p>
-        We've sent a verification email to<br>
+        We've sent a verification link to<br>
         <span class="email-highlight"><%= email %></span>
       </p>
 
       <p>
-        Click the link in the email to verify your account and start your 14-day free trial.
+        Click the link to verify your account and start your <strong>14-day free trial</strong>.
       </p>
 
       <div class="info-box">
         <p>
-          <strong>💡 Tip:</strong> Check your spam folder if you don't see the email within a few minutes.
+          <strong>Can't find our email?</strong><br>
+          Check your <strong>spam</strong> or <strong>junk</strong> folder. To ensure delivery, add <span style="color: #FFBA49; font-weight: 600;">noreply@morestars.io</span> to your contacts.
+        </p>
+      </div>
+
+      <div class="info-box" style="background: #f0fdf4; border-left-color: #22c55e; margin-top: 12px;">
+        <p style="color: #166534;">
+          <strong>Link expires in 48 hours.</strong> If it expires, click "Resend" below for a fresh one.
         </p>
       </div>
 
@@ -171,13 +303,23 @@
           Resend Verification Email
         </button>
         <div class="success-message" id="successMessage">
-          ✓ Verification email sent successfully!
+          Verification email sent successfully!
         </div>
+      </div>
+
+      <div class="login-link">
+        Already verified? <a href="/dashboard/login">Sign in</a>
+      </div>
+
+      <div class="footer">
+        <a href="/terms" target="_blank">Terms</a>
+        <a href="/privacy" target="_blank">Privacy</a>
+        <a href="/sms-compliance" target="_blank">SMS Compliance</a>
       </div>
     </div>
   </div>
 
-  <script>
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
     let resendTimeout = null;
 
     function resendVerification() {

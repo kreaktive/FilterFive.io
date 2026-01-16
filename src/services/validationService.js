@@ -3,6 +3,8 @@
  * Centralized validation logic for user inputs
  */
 
+const validator = require('validator');
+
 /**
  * Validate Email Format
  */
@@ -15,7 +17,7 @@ const isValidEmail = (email) => {
 
 /**
  * Validate Password Strength
- * Phase 2: Minimum 8 characters + at least 1 number
+ * Requirements: 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
  */
 const isValidPassword = (password) => {
   if (!password || typeof password !== 'string') return false;
@@ -26,7 +28,49 @@ const isValidPassword = (password) => {
   // Check for at least one number
   if (!/\d/.test(password)) return false;
 
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) return false;
+
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) return false;
+
+  // Check for at least one special character
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return false;
+
   return true;
+};
+
+/**
+ * Get specific password validation errors for better UX
+ */
+const getPasswordErrors = (password) => {
+  const errors = [];
+
+  if (!password || typeof password !== 'string') {
+    return ['Password is required'];
+  }
+
+  if (password.length < 8) {
+    errors.push(`Password needs ${8 - password.length} more character${8 - password.length === 1 ? '' : 's'}`);
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Add an uppercase letter (A-Z)');
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push('Add a lowercase letter (a-z)');
+  }
+
+  if (!/\d/.test(password)) {
+    errors.push('Add a number (0-9)');
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push('Add a special character (!@#$%^&*)');
+  }
+
+  return errors;
 };
 
 /**
@@ -58,17 +102,35 @@ const isValidBusinessName = (name) => {
 
 /**
  * Sanitize String Input (Remove XSS attempts)
+ * S7 FIX: Use validator.js escape function for proper sanitization
  */
 const sanitizeInput = (input) => {
   if (!input || typeof input !== 'string') return '';
 
-  return input
-    .trim()
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+  // Use validator.js escape for proper HTML entity encoding
+  // This handles: &, <, >, ", ', ` characters
+  return validator.escape(input.trim());
+};
+
+/**
+ * Strip all HTML tags from input
+ */
+const stripHtml = (input) => {
+  if (!input || typeof input !== 'string') return '';
+  return validator.stripLow(validator.escape(input.trim()));
+};
+
+/**
+ * Validate and sanitize URL
+ */
+const sanitizeUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  // Only allow http/https URLs
+  if (validator.isURL(trimmed, { protocols: ['http', 'https'], require_protocol: true })) {
+    return trimmed;
+  }
+  return '';
 };
 
 /**
@@ -77,16 +139,36 @@ const sanitizeInput = (input) => {
 const validateSignup = (businessName, email, password) => {
   const errors = [];
 
-  if (!isValidBusinessName(businessName)) {
-    errors.push('Business name must be between 2 and 100 characters');
+  // Business name validation with specific feedback
+  if (!businessName || typeof businessName !== 'string') {
+    errors.push('Business name is required');
+  } else {
+    const trimmed = businessName.trim();
+    if (trimmed.length < 2) {
+      errors.push('Business name is too short (minimum 2 characters)');
+    } else if (trimmed.length > 100) {
+      errors.push('Business name is too long (maximum 100 characters)');
+    }
   }
 
-  if (!isValidEmail(email)) {
-    errors.push('Please provide a valid email address');
+  // Email validation with specific feedback
+  if (!email || typeof email !== 'string') {
+    errors.push('Email address is required');
+  } else if (!isValidEmail(email)) {
+    const trimmed = email.trim();
+    if (!trimmed.includes('@')) {
+      errors.push('Email address must include @ symbol');
+    } else if (!trimmed.includes('.')) {
+      errors.push('Email address must include a domain (e.g., .com)');
+    } else {
+      errors.push('Please enter a valid email address');
+    }
   }
 
+  // Password validation with specific feedback
   if (!isValidPassword(password)) {
-    errors.push('Password must be at least 8 characters with at least 1 number');
+    const passwordErrors = getPasswordErrors(password);
+    errors.push(...passwordErrors);
   }
 
   return {
@@ -118,7 +200,7 @@ const validateNewPassword = (password, confirmPassword) => {
   const errors = [];
 
   if (!isValidPassword(password)) {
-    errors.push('Password must be at least 8 characters with at least 1 number');
+    errors.push('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character');
   }
 
   if (password !== confirmPassword) {
@@ -134,9 +216,12 @@ const validateNewPassword = (password, confirmPassword) => {
 module.exports = {
   isValidEmail,
   isValidPassword,
+  getPasswordErrors,
   getPasswordStrength,
   isValidBusinessName,
   sanitizeInput,
+  stripHtml,
+  sanitizeUrl,
   validateSignup,
   validatePasswordReset,
   validateNewPassword

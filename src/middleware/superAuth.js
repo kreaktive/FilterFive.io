@@ -1,4 +1,5 @@
 const { User } = require('../models');
+const logger = require('../services/logger');
 
 // Middleware to ensure user is authenticated and has super_admin role
 const requireSuperAdmin = async (req, res, next) => {
@@ -23,6 +24,17 @@ const requireSuperAdmin = async (req, res, next) => {
       });
     }
 
+    // SECURITY: Check if user account is active
+    if (!user.isActive) {
+      logger.warn('Inactive user attempted super admin access', { userId: user.id });
+      req.session.destroy();
+      return res.status(403).render('error', {
+        title: 'Access Denied',
+        message: 'Your account has been deactivated.',
+        error: { status: 403 }
+      });
+    }
+
     // Check if user is super_admin
     if (user.role !== 'super_admin') {
       return res.status(403).render('error', {
@@ -37,7 +49,7 @@ const requireSuperAdmin = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error('Error in requireSuperAdmin middleware:', error);
+    logger.error('Error in requireSuperAdmin middleware', { error: error.message });
     res.status(500).render('error', {
       title: 'Server Error',
       message: 'Something went wrong.',

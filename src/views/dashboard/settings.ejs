@@ -1,85 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
+<%- include('../partials/dashboard-head', { title: title }) %>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header h1 {
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .header-nav {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .header-nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      transition: opacity 0.2s;
-    }
-
-    .header-nav a:hover {
-      opacity: 0.8;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 30px 20px;
-    }
-
     .page-title {
-      margin-bottom: 30px;
+      margin-bottom: var(--space-8);
     }
 
     .page-title h2 {
-      font-size: 28px;
-      color: #2d3748;
-      margin-bottom: 5px;
+      font-size: var(--text-3xl);
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
     }
 
     .page-title p {
-      color: #718096;
-      font-size: 16px;
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+    }
+
+    /* Tab Navigation - uses unified tab system */
+    .tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: 0;
+      border-bottom: 2px solid var(--border-light);
+      position: relative;
+      z-index: 10;
+    }
+
+    .tab-button {
+      padding: var(--space-3) var(--space-6);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      position: relative;
+      z-index: 11;
+    }
+
+    .tab-button:hover {
+      color: var(--brand-gold);
+    }
+
+    .tab-button.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--brand-gold);
+      background: rgba(255, 186, 73, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     .settings-card {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      background: var(--bg-white);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      border-top: none;
     }
 
     .success-message {
@@ -108,10 +93,10 @@
 
     .form-section h3 {
       font-size: 18px;
-      color: #2d3748;
+      color: var(--brand-dark);
       margin-bottom: 15px;
       padding-bottom: 10px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid var(--border-light);
     }
 
     .form-group {
@@ -134,7 +119,8 @@
     }
 
     input[type="text"],
-    input[type="url"] {
+    input[type="url"],
+    input[type="tel"] {
       width: 100%;
       padding: 12px 15px;
       border: 2px solid #e2e8f0;
@@ -145,9 +131,11 @@
     }
 
     input[type="text"]:focus,
-    input[type="url"]:focus {
+    input[type="url"]:focus,
+    input[type="tel"]:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--brand-gold);
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.1);
     }
 
     .info-box {
@@ -163,6 +151,71 @@
     .info-box strong {
       display: block;
       margin-bottom: 5px;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #92400e;
+    }
+
+    /* Form Validation Feedback */
+    .input-wrapper {
+      position: relative;
+    }
+
+    .validation-feedback {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .validation-feedback.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .validation-feedback.valid {
+      color: #16a34a;
+    }
+
+    .validation-feedback.invalid {
+      color: #dc2626;
+    }
+
+    .validation-feedback svg {
+      flex-shrink: 0;
+    }
+
+    input.input-valid {
+      border-color: #22c55e !important;
+    }
+
+    input.input-invalid {
+      border-color: #ef4444 !important;
+    }
+
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #16a34a;
+      margin-left: 6px;
     }
 
     /* Radio Button Styles */
@@ -184,8 +237,8 @@
     }
 
     .radio-option:hover {
-      border-color: #667eea;
-      background: #f7fafc;
+      border-color: var(--brand-gold);
+      background: rgba(255, 186, 73, 0.05);
     }
 
     .radio-option input[type="radio"] {
@@ -196,12 +249,12 @@
     }
 
     .radio-option input[type="radio"]:checked {
-      accent-color: #667eea;
+      accent-color: var(--brand-gold);
     }
 
     .radio-option.selected {
-      border-color: #667eea;
-      background: #f0f4ff;
+      border-color: var(--brand-gold);
+      background: rgba(255, 186, 73, 0.1);
     }
 
     .radio-content {
@@ -211,7 +264,7 @@
     .radio-content strong {
       display: block;
       margin-bottom: 5px;
-      color: #2d3748;
+      color: var(--brand-dark);
       font-size: 15px;
     }
 
@@ -223,198 +276,2009 @@
       line-height: 1.5;
     }
 
+    /* Save Button - uses unified btn-primary */
     .btn-save {
       width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      padding: var(--space-4);
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: var(--radius-md);
+      font-size: var(--text-base);
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all var(--transition-base);
     }
 
     .btn-save:hover {
+      background: var(--brand-dark);
+      color: white;
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: var(--shadow-gold);
     }
 
     .btn-save:active {
       transform: translateY(0);
     }
 
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 15px;
-      }
+    .btn-save:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
 
+    .btn-save.saving {
+      position: relative;
+      color: transparent;
+      pointer-events: none;
+    }
+
+    .btn-save.saving::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 50%;
+      left: 50%;
+      margin: -9px 0 0 -9px;
+      border: 2px solid var(--brand-dark);
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: btn-spin 0.8s linear infinite;
+    }
+
+    @keyframes btn-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* POS Integration Styles */
+    .integration-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .integration-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .integration-card.connected {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .integration-card h4 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .integration-card .status-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .status-badge.connected {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.disconnected {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    /* Connect Button - uses unified btn-secondary */
+    .btn-connect {
+      display: inline-block;
+      padding: var(--space-3) var(--space-5);
+      background: var(--brand-dark);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .btn-connect:hover {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Disconnect Button - uses unified btn-danger */
+    .btn-disconnect {
+      display: inline-block;
+      padding: var(--space-3) var(--space-5);
+      background: var(--brand-negative);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .btn-disconnect:hover {
+      background: var(--brand-negative-hover);
+      transform: translateY(-1px);
+    }
+
+    .locations-list {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .location-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .location-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .toggle-switch input[type="checkbox"] {
+      width: 50px;
+      height: 26px;
+      appearance: none;
+      background: #e2e8f0;
+      border-radius: 13px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch input[type="checkbox"]:checked {
+      background: #10b981;
+    }
+
+    .toggle-switch input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch input[type="checkbox"]:checked::before {
+      transform: translateX(24px);
+    }
+
+    /* Transactions Table */
+    .transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .transactions-table th,
+    .transactions-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .transactions-table th {
+      background: #f7fafc;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .transactions-table td {
+      font-size: 14px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pill.sent {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-pill.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-pill.skipped {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .status-pill.failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #718096;
+    }
+
+    .empty-state p {
+      margin-bottom: 15px;
+    }
+
+    /* Accordion Styles */
+    .accordion {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .accordion-item {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .accordion-item:last-child {
+      border-bottom: none;
+    }
+
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .accordion-header:hover {
+      background: #f1f5f9;
+    }
+
+    .accordion-header.active {
+      background: rgba(255, 186, 73, 0.1);
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--brand-dark);
+    }
+
+    .accordion-title .icon {
+      font-size: 20px;
+    }
+
+    .accordion-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .accordion-badge {
+      background: #e2e8f0;
+      color: #64748b;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .accordion-badge.has-connected {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .accordion-chevron {
+      transition: transform 0.2s;
+      color: #94a3b8;
+    }
+
+    .accordion-header.active .accordion-chevron {
+      transform: rotate(180deg);
+    }
+
+    .accordion-preview {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-left: auto;
+      margin-right: 12px;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 20px;
+      background: white;
+    }
+
+    .accordion-content.active {
+      display: block;
+    }
+
+    .integration-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .integration-card-mini {
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+
+    .integration-card-mini:hover {
+      border-color: var(--brand-gold);
+      box-shadow: 0 2px 8px rgba(255, 186, 73, 0.15);
+    }
+
+    .integration-card-mini.connected {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .integration-card-mini h5 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .integration-card-mini p {
+      font-size: 13px;
+      color: #718096;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .btn-connect-small {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--brand-dark);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-connect-small:hover {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+    }
+
+    .btn-disconnect-small {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #fee2e2;
+      color: #dc2626;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-disconnect-small:hover {
+      background: #dc2626;
+      color: white;
+    }
+
+    .coming-soon-badge {
+      background: #f3f4f6;
+      color: #9ca3af;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
       .settings-card {
-        padding: 20px;
+        padding: 15px;
       }
 
       .radio-option {
         flex-direction: column;
         gap: 10px;
       }
+
+      .integration-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 0;
+      }
+
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab-button {
+        padding: 10px 14px;
+        font-size: 13px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .page-title h2 {
+        font-size: 22px;
+      }
+
+      /* Transactions Table to Cards */
+      .transactions-table {
+        display: block;
+      }
+
+      .transactions-table thead {
+        display: none;
+      }
+
+      .transactions-table tbody {
+        display: block;
+      }
+
+      .transactions-table tr {
+        display: block;
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        border-left: 4px solid #A1438E;
+      }
+
+      .transactions-table td {
+        display: block;
+        padding: 6px 0;
+        border: none;
+        font-size: 14px;
+      }
+
+      .transactions-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 600;
+        font-size: 11px;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      .form-section h3 {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-content">
-      <h1>🎯 FilterFive</h1>
-      <nav class="header-nav">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/dashboard/feedback">Feedback</a>
-        <a href="/dashboard/settings">Settings</a>
-        <a href="/dashboard/subscription">Subscription</a>
-        <a href="/dashboard/logout">Logout</a>
-        <a href="/privacy" target="_blank" style="font-size: 0.9rem;">Privacy</a>
-        <a href="/terms" target="_blank" style="font-size: 0.9rem;">Terms</a>
-      </nav>
-    </div>
-  </div>
+  <%- include('../partials/dashboard-header', { activePage: 'settings' }) %>
 
-  <div class="container">
+  <main id="main-content" class="container">
     <div class="page-title">
-      <h2>Settings ⚙️</h2>
-      <p>Manage your business information and review settings</p>
+      <h2>Settings</h2>
+      <p>Manage your business information, review settings, and POS integrations</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button type="button" class="tab-button active" data-tab="general">General</button>
+      <button type="button" class="tab-button" data-tab="pos">POS Integration</button>
+      <button type="button" class="tab-button" data-tab="transactions">POS Transactions</button>
+      <button type="button" class="tab-button" data-tab="support">Support</button>
     </div>
 
     <div class="settings-card">
-      <% if (success) { %>
+      <% if (success || posSuccess) { %>
         <div class="success-message">
-          ✓ <%= success %>
+          <%= success || posSuccess %>
         </div>
       <% } %>
 
-      <% if (error) { %>
+      <% if (error || posError) { %>
         <div class="error-message">
-          ✗ <%= error %>
+          <%= error || posError %>
         </div>
       <% } %>
 
-      <form method="POST" action="/dashboard/settings">
-        <div class="form-section">
-          <h3>Business Information</h3>
+      <!-- General Settings Tab -->
+      <div id="tab-general" class="tab-content active">
+        <form method="POST" action="/dashboard/settings" id="generalSettingsForm">
+          <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+          <div class="form-section">
+            <h3>Business Information</h3>
 
-          <div class="form-group">
-            <label for="businessName">Business Name</label>
-            <input
-              type="text"
-              id="businessName"
-              name="businessName"
-              value="<%= user.businessName %>"
-              required
-            >
-            <div class="help-text">This name appears in SMS messages and review pages</div>
+            <div class="form-group">
+              <label for="businessName">Business Name</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="businessName"
+                  name="businessName"
+                  value="<%= user.businessName %>"
+                  required
+                  minlength="2"
+                  maxlength="100"
+                >
+                <div id="businessNameFeedback" class="validation-feedback">
+                  <svg class="feedback-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                  <span class="feedback-text">Enter your business name</span>
+                </div>
+              </div>
+              <div class="help-text">This name appears in SMS messages and review pages</div>
+            </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <h3>Review Platform</h3>
+          <div class="form-section">
+            <h3 id="review-links">Review Platform</h3>
 
-          <div class="info-box">
-            <strong>💡 How it works:</strong>
-            Customers who click your SMS link will go directly to your review platform.
-            Paste your review link below (works with Google, Yelp, Facebook, TripAdvisor, or any custom platform).
+            <div class="info-box">
+              <strong>How it works:</strong>
+              Customers who click your SMS link will go directly to your review platform.
+              Paste your review link below (works with Google, Yelp, Facebook, TripAdvisor, or any custom platform).
+            </div>
+
+            <div class="form-group">
+              <label for="reviewUrl">Review Platform URL</label>
+              <div class="input-wrapper">
+                <input
+                  type="url"
+                  id="reviewUrl"
+                  name="reviewUrl"
+                  value="<%= user.reviewUrl || '' %>"
+                  placeholder="https://g.page/r/YOUR_BUSINESS/review"
+                  required
+                >
+                <div id="reviewUrlFeedback" class="validation-feedback">
+                  <svg class="feedback-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                  <span class="feedback-text">Enter your review platform URL</span>
+                </div>
+              </div>
+              <div class="help-text">
+                <strong>Supported platforms:</strong><br>
+                Google: https://g.page/r/CVASdxR-ATBCEAE/review — <a href="https://business.google.com/locations" target="_blank" rel="noopener" style="color: var(--brand-gold);">Get your Google review link &rarr;</a><br>
+                Yelp: https://www.yelp.com/writeareview/biz/your-business<br>
+                Facebook: https://facebook.com/YourBusiness/reviews
+              </div>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="reviewUrl">Review Platform URL</label>
-            <input
-              type="url"
-              id="reviewUrl"
-              name="reviewUrl"
-              value="<%= user.reviewUrl || '' %>"
-              placeholder="https://g.page/r/YOUR_BUSINESS/review"
-              required
-            >
-            <div class="help-text">
-              <strong>Examples:</strong><br>
-              • Google: https://g.page/r/CVASdxR-ATBCEAE/review<br>
-              • Yelp: https://www.yelp.com/writeareview/biz/your-business<br>
-              • Facebook: https://facebook.com/YourBusiness/reviews<br>
-              • TripAdvisor: https://www.tripadvisor.com/UserReview-...
+          <div class="form-section">
+            <h3>SMS Message Tone</h3>
+
+            <div class="info-box">
+              <strong>Customize your message:</strong>
+              Choose the tone that best represents your brand. This affects how your SMS review requests are worded.
+            </div>
+
+            <div class="radio-group">
+              <label class="radio-option <%= user.smsMessageTone === 'friendly' ? 'selected' : '' %>">
+                <input
+                  type="radio"
+                  name="smsMessageTone"
+                  value="friendly"
+                  class="tone-radio"
+                  <%= user.smsMessageTone === 'friendly' || !user.smsMessageTone ? 'checked' : '' %>
+                >
+                <div class="radio-content">
+                  <strong>Friendly & Casual</strong>
+                  <p>"Hi! Thanks for visiting [Business]. Reviews help small businesses like ours thrive! Would you mind sharing your experience?"</p>
+                </div>
+              </label>
+
+              <label class="radio-option <%= user.smsMessageTone === 'professional' ? 'selected' : '' %>">
+                <input
+                  type="radio"
+                  name="smsMessageTone"
+                  value="professional"
+                  class="tone-radio"
+                  <%= user.smsMessageTone === 'professional' ? 'checked' : '' %>
+                >
+                <div class="radio-content">
+                  <strong>Professional</strong>
+                  <p>"Hello, thank you for choosing [Business]. Your feedback is valuable to us. Please take a moment to leave a review."</p>
+                </div>
+              </label>
+
+              <label class="radio-option <%= user.smsMessageTone === 'grateful' ? 'selected' : '' %>">
+                <input
+                  type="radio"
+                  name="smsMessageTone"
+                  value="grateful"
+                  class="tone-radio"
+                  <%= user.smsMessageTone === 'grateful' ? 'checked' : '' %>
+                >
+                <div class="radio-content">
+                  <strong>Grateful</strong>
+                  <p>"We're grateful for your business at [Business]! Reviews mean the world to us. Would you share your thoughts?"</p>
+                </div>
+              </label>
+
+              <label class="radio-option <%= user.smsMessageTone === 'custom' ? 'selected' : '' %>">
+                <input
+                  type="radio"
+                  name="smsMessageTone"
+                  value="custom"
+                  class="tone-radio"
+                  <%= user.smsMessageTone === 'custom' ? 'checked' : '' %>
+                >
+                <div class="radio-content">
+                  <strong>Custom Message</strong>
+                  <p>Write your own message using template tags</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Custom Message Editor -->
+            <div id="customMessageEditor" style="margin-top: 20px; display: <%= user.smsMessageTone === 'custom' ? 'block' : 'none' %>;">
+              <div class="form-group">
+                <label for="customSmsMessage">Your Custom Message</label>
+                <textarea
+                  id="customSmsMessage"
+                  name="customSmsMessage"
+                  rows="4"
+                  style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; font-family: inherit; resize: vertical;"
+                  placeholder="Hi {{CustomerName}}! Thanks for visiting {{BusinessName}}. We'd love your feedback: {{ReviewLink}}"
+                ><%= user.customSmsMessage || '' %></textarea>
+                <div class="help-text" style="margin-top: 10px;">
+                  <strong>Available tags:</strong><br>
+                  <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{CustomerName}}</code> - Customer's first name (or "there" if unknown)<br>
+                  <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{BusinessName}}</code> - Your business name<br>
+                  <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ReviewLink}}</code> - Your review platform link <span style="color: #dc2626;">(required)</span>
+                </div>
+              </div>
+
+              <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                <strong style="font-size: 13px; color: #4a5568;">Preview:</strong>
+                <p id="customMessagePreview" style="margin: 10px 0 0 0; color: #2d3748; font-size: 14px; line-height: 1.6;">
+                  <em style="color: #a0aec0;">Enter a message above to see preview</em>
+                </p>
+                <div style="margin-top: 10px; font-size: 12px; color: #718096;">
+                  <span id="charCount">0</span> / 160 characters (SMS segment)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Analytics & ROI Settings</h3>
+
+            <div class="info-box">
+              <strong>Calculate your ROI:</strong>
+              Set the estimated value of each positive review to your business.
+              This is used in your Analytics dashboard to calculate return on investment.
+            </div>
+
+            <div class="form-group">
+              <label for="reviewValueEstimate">Estimated Value Per Review ($)</label>
+              <input
+                type="number"
+                id="reviewValueEstimate"
+                name="reviewValueEstimate"
+                value="<%= user.reviewValueEstimate || 80 %>"
+                min="1"
+                max="10000"
+                step="1"
+                style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px;"
+              >
+              <div class="help-text">
+                How much is each positive review worth to your business?
+                Industry average is $50-150 per review based on customer lifetime value and referral impact.
+                <br><br>
+                <strong>Tip:</strong> Consider that reviews improve search rankings, build trust with new customers, and can lead to repeat business.
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-save" id="saveSettingsBtn">
+            Save Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- POS Integration Tab -->
+      <div id="tab-pos" class="tab-content">
+        <div class="form-section">
+          <h3 style="display: flex; justify-content: space-between; align-items: center;">
+            Connect Your POS System
+            <a href="/dashboard/pos-guide" style="font-size: 14px; font-weight: 500; color: var(--brand-gold); text-decoration: none;">View Setup Guide &rarr;</a>
+          </h3>
+          <p style="color: #718096; margin-bottom: 20px;">
+            Automatically send SMS review requests when customers make purchases at your store.
+          </p>
+
+          <% if (!user.reviewUrl) { %>
+            <div class="warning-box">
+              <strong>Setup Required:</strong> Before connecting a POS system, please set up your Review Platform URL in the <a href="/dashboard/settings?tab=general" style="color: inherit; text-decoration: underline;">General tab</a>. SMS messages won't be sent without a review link.
+            </div>
+          <% } %>
+
+          <%
+            // Count connected integrations per category
+            const posConnected = (typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive ? 1 : 0) +
+                                (typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive ? 1 : 0);
+            const ecomConnected = (typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive ? 1 : 0) +
+                                 (typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive ? 1 : 0) +
+                                 (typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive ? 1 : 0);
+            const autoConnected = (typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive ? 1 : 0) +
+                                 (typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive ? 1 : 0);
+          %>
+
+          <!-- Accordion -->
+          <div class="accordion">
+            <!-- Point of Sale Section -->
+            <div class="accordion-item">
+              <div class="accordion-header active" data-accordion="pos">
+                <div class="accordion-title">
+                  <span class="icon">&#128179;</span>
+                  Point of Sale (In-Store)
+                </div>
+                <div class="accordion-meta">
+                  <span class="accordion-preview">Square, Clover</span>
+                  <span class="accordion-badge <%= posConnected > 0 ? 'has-connected' : '' %>"><%= posConnected %> of 2</span>
+                  <span class="accordion-chevron">&#9660;</span>
+                </div>
+              </div>
+              <div class="accordion-content active" id="accordion-pos">
+                <div class="integration-grid">
+                  <!-- Square -->
+                  <div class="integration-card-mini <%= typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Square
+                      <% if (typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>Send review requests after each Square payment.</p>
+                    <% if (typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive) { %>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/square" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <a href="/api/auth/square/connect" class="btn-connect-small">Connect Square</a>
+                    <% } %>
+                  </div>
+
+                  <!-- Clover -->
+                  <div class="integration-card-mini <%= typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Clover
+                      <% if (typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } else { %>
+                        <span class="coming-soon-badge">Coming Soon</span>
+                      <% } %>
+                    </h5>
+                    <p>Send review requests after Clover payments.</p>
+                    <% if (typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive) { %>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/clover" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <button class="btn-connect-small" disabled style="opacity: 0.5; cursor: not-allowed;">Coming Soon</button>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- E-Commerce Section -->
+            <div class="accordion-item">
+              <div class="accordion-header" data-accordion="ecommerce">
+                <div class="accordion-title">
+                  <span class="icon">&#128722;</span>
+                  E-Commerce (Online)
+                </div>
+                <div class="accordion-meta">
+                  <span class="accordion-preview">Shopify, WooCommerce, Stripe</span>
+                  <span class="accordion-badge <%= ecomConnected > 0 ? 'has-connected' : '' %>"><%= ecomConnected %> of 3</span>
+                  <span class="accordion-chevron">&#9660;</span>
+                </div>
+              </div>
+              <div class="accordion-content" id="accordion-ecommerce">
+                <div class="integration-grid">
+                  <!-- Shopify -->
+                  <div class="integration-card-mini <%= typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Shopify
+                      <% if (typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>Send review requests after Shopify orders.</p>
+                    <% if (typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive) { %>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/shopify" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="shopifyShopInput" placeholder="store.myshopify.com" style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        <button type="button" class="btn-connect-small" id="shopifyConnectBtn">Connect</button>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <!-- WooCommerce -->
+                  <div class="integration-card-mini <%= typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      WooCommerce
+                      <% if (typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>Send review requests after WooCommerce orders.</p>
+                    <% if (typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive) { %>
+                      <div style="font-size: 12px; color: #718096; margin-bottom: 10px;">
+                        Store: <%= woocommerceIntegration.storeUrl %>
+                      </div>
+                      <a href="/dashboard/woocommerce-setup" class="btn-connect-small" style="margin-right: 8px;">Webhook Setup</a>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/woocommerce" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <button type="button" class="btn-connect-small" id="woocommerceConnectBtn">Setup WooCommerce</button>
+                    <% } %>
+                  </div>
+
+                  <!-- Stripe -->
+                  <div class="integration-card-mini <%= typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Stripe
+                      <% if (typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>Send review requests for Stripe payments (Checkout & Terminal).</p>
+                    <% if (typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive) { %>
+                      <div style="margin-bottom: 12px; font-size: 13px;">
+                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: normal; cursor: pointer;">
+                          <input type="checkbox" <%= stripeIntegration.triggerOnCheckout ? 'checked' : '' %> disabled style="width: 16px; height: 16px;">
+                          Stripe Checkout (online)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                          <input type="checkbox" <%= stripeIntegration.triggerOnTerminal ? 'checked' : '' %> disabled style="width: 16px; height: 16px;">
+                          Stripe Terminal (in-store)
+                        </label>
+                      </div>
+                      <a href="#" class="btn-connect-small" style="margin-right: 8px;" id="stripeSettingsBtn">Settings</a>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/stripe_pos" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <button type="button" class="btn-connect-small" id="stripeConnectBtn">Enable Stripe</button>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Automation Section -->
+            <div class="accordion-item">
+              <div class="accordion-header" data-accordion="automation">
+                <div class="accordion-title">
+                  <span class="icon">&#9889;</span>
+                  Automation & Custom
+                </div>
+                <div class="accordion-meta">
+                  <span class="accordion-preview">Zapier, Custom Webhook</span>
+                  <span class="accordion-badge <%= autoConnected > 0 ? 'has-connected' : '' %>"><%= autoConnected %> of 2</span>
+                  <span class="accordion-chevron">&#9660;</span>
+                </div>
+              </div>
+              <div class="accordion-content" id="accordion-automation">
+                <div class="info-box" style="margin-bottom: 16px;">
+                  <strong>Connect any POS system!</strong> Use Zapier to connect 6,000+ apps, or set up a custom webhook for direct integration.
+                </div>
+                <div class="integration-grid">
+                  <!-- Zapier -->
+                  <div class="integration-card-mini <%= typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Zapier
+                      <% if (typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>Connect 6,000+ apps including Toast, Clover, Lightspeed & more via Zapier.</p>
+                    <% if (typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive) { %>
+                      <a href="/dashboard/webhook-setup?provider=zapier" class="btn-connect-small" style="margin-right: 8px;">View Setup</a>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/zapier" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <button type="button" class="btn-connect-small" id="zapierSetupBtn">Setup Zapier</button>
+                    <% } %>
+                  </div>
+
+                  <!-- Custom Webhook -->
+                  <div class="integration-card-mini <%= typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive ? 'connected' : '' %>">
+                    <h5>
+                      Custom Webhook
+                      <% if (typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive) { %>
+                        <span class="status-badge connected">Connected</span>
+                      <% } %>
+                    </h5>
+                    <p>For developers: Send transaction data directly via HTTP webhook.</p>
+                    <% if (typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive) { %>
+                      <a href="/dashboard/webhook-setup?provider=webhook" class="btn-connect-small" style="margin-right: 8px;">View Setup</a>
+                      <form method="POST" action="/dashboard/settings/pos/disconnect/webhook" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="btn-disconnect-small">Disconnect</button>
+                      </form>
+                    <% } else { %>
+                      <form method="POST" action="/dashboard/settings/pos/webhook/create" style="display: inline;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <input type="hidden" name="provider" value="webhook">
+                        <button type="submit" class="btn-connect-small">Setup Webhook</button>
+                      </form>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <%
+          // Check if any integration is active for showing test mode section
+          const anyIntegrationActive = (typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive) ||
+                                       (typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive) ||
+                                       (typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive) ||
+                                       (typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive) ||
+                                       (typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive) ||
+                                       (typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive) ||
+                                       (typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive);
+        %>
+
+        <% if (anyIntegrationActive) { %>
+          <div class="form-section">
+            <h3>Test Mode & Settings</h3>
+
+            <%
+              // Find the first active integration
+              let activeIntegration = null;
+              let provider = null;
+
+              if (typeof squareIntegration !== 'undefined' && squareIntegration && squareIntegration.isActive) {
+                activeIntegration = squareIntegration;
+                provider = 'square';
+              } else if (typeof shopifyIntegration !== 'undefined' && shopifyIntegration && shopifyIntegration.isActive) {
+                activeIntegration = shopifyIntegration;
+                provider = 'shopify';
+              } else if (typeof zapierIntegration !== 'undefined' && zapierIntegration && zapierIntegration.isActive) {
+                activeIntegration = zapierIntegration;
+                provider = 'zapier';
+              } else if (typeof webhookIntegration !== 'undefined' && webhookIntegration && webhookIntegration.isActive) {
+                activeIntegration = webhookIntegration;
+                provider = 'webhook';
+              } else if (typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.isActive) {
+                activeIntegration = stripeIntegration;
+                provider = 'stripe_pos';
+              } else if (typeof woocommerceIntegration !== 'undefined' && woocommerceIntegration && woocommerceIntegration.isActive) {
+                activeIntegration = woocommerceIntegration;
+                provider = 'woocommerce';
+              } else if (typeof cloverIntegration !== 'undefined' && cloverIntegration && cloverIntegration.isActive) {
+                activeIntegration = cloverIntegration;
+                provider = 'clover';
+              }
+            %>
+
+            <div class="warning-box">
+              <strong>Test Mode:</strong>
+              When enabled, all SMS messages will be sent to your test phone number instead of customers.
+              This allows you to test the integration without messaging real customers.
+            </div>
+
+            <form method="POST" action="/dashboard/settings/pos/test-mode" id="testModeForm">
+              <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+              <input type="hidden" name="provider" value="<%= provider %>">
+              <div class="toggle-switch">
+                <input type="checkbox" id="testMode" name="testMode" class="auto-submit-checkbox" <%= activeIntegration.testMode ? 'checked' : '' %>>
+                <label for="testMode" style="margin: 0; font-weight: normal;">Test Mode <%= activeIntegration.testMode ? '(Active)' : '(Inactive)' %></label>
+              </div>
+            </form>
+
+            <% if (activeIntegration.testMode) { %>
+              <form method="POST" action="/dashboard/settings/pos/test-phone" style="margin-top: 15px;">
+                <input type="hidden" name="_csrf" id="pos-csrf-token" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <input type="hidden" name="provider" value="<%= provider %>">
+                <div class="form-group">
+                  <label for="testPhoneNumber">Test Phone Number</label>
+                  <input type="tel" id="testPhoneNumber" name="testPhoneNumber" value="<%= activeIntegration.testPhoneNumber || '' %>" placeholder="(555) 123-4567">
+                  <div class="help-text">SMS messages will be sent to this number while test mode is enabled.</div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <button type="submit" class="btn-save" style="width: auto; padding: 10px 20px;">Save Test Phone</button>
+                  <button type="button" id="sendTestSmsBtn" class="btn-save" style="width: auto; padding: 10px 20px; background: #3182ce;" <%= !activeIntegration.testPhoneNumber ? 'disabled' : '' %>>
+                    Send Test SMS
+                  </button>
+                  <span id="testSmsRemaining" style="font-size: 13px; color: #718096; margin-left: 5px;">Loading...</span>
+                </div>
+              </form>
+              <div id="testSmsResult" style="margin-top: 10px; display: none;"></div>
+            <% } %>
+
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+              <label style="font-size: 15px; margin-bottom: 10px;">SMS Consent Confirmation</label>
+              <p style="color: #718096; font-size: 13px; margin-bottom: 12px;">
+                US law (TCPA) requires businesses to have consent before sending marketing SMS. By checking this box, you confirm your customers have agreed to receive SMS from your business.
+              </p>
+              <form method="POST" action="/dashboard/settings/pos/consent" id="consentForm">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <input type="hidden" name="provider" value="<%= provider %>">
+                <div class="location-checkbox">
+                  <input type="checkbox" id="consent" name="consent" class="auto-submit-checkbox" <%= activeIntegration.consentConfirmed ? 'checked' : '' %>>
+                  <label for="consent" style="margin: 0; font-weight: normal;">
+                    I confirm that I have SMS consent from customers whose phone numbers are on file.
+                  </label>
+                </div>
+              </form>
+
+              <% if (!activeIntegration.consentConfirmed) { %>
+                <div class="warning-box" style="margin-top: 15px;">
+                  <strong>Required:</strong> SMS messages will not be sent until you confirm customer consent above.
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>How It Works</h3>
+            <ul style="color: #718096; font-size: 14px; line-height: 1.8; padding-left: 20px;">
+              <li><strong>Square:</strong> SMS is sent when a payment completes with a customer on file.</li>
+              <li><strong>Shopify:</strong> SMS is sent when an order is created with a phone number.</li>
+              <li><strong>Zapier/Webhook:</strong> SMS is sent when your Zap or custom integration sends transaction data.</li>
+              <li><strong>Stripe:</strong> SMS is sent after Checkout or Terminal payments (configurable).</li>
+              <li><strong>WooCommerce:</strong> SMS is sent when an order is completed with a phone number.</li>
+              <li><strong>US Numbers Only:</strong> Only US phone numbers (+1) receive SMS. International numbers are automatically skipped.</li>
+              <li><strong>30-Day Cooldown:</strong> Each customer receives a maximum of one SMS per 30 days to avoid over-messaging.</li>
+              <li><strong>Counts Against Limit:</strong> POS-triggered SMS counts toward your monthly SMS allocation.</li>
+            </ul>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- POS Transactions Tab -->
+      <div id="tab-transactions" class="tab-content">
         <div class="form-section">
-          <h3>SMS Message Tone</h3>
+          <h3>Recent POS Transactions</h3>
+          <p style="color: #718096; margin-bottom: 20px;">
+            View recent purchases from your connected POS systems and their SMS status.
+          </p>
 
-          <div class="info-box">
-            <strong>📱 Customize your message:</strong>
-            Choose the tone that best represents your brand. This affects how your SMS review requests are worded.
-          </div>
+          <% if (typeof recentTransactions !== 'undefined' && recentTransactions && recentTransactions.length > 0) { %>
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Amount</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentTransactions.forEach(function(tx) { %>
+                  <tr>
+                    <td data-label="Date"><%= new Date(tx.createdAt).toLocaleDateString() %> <%= new Date(tx.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %></td>
+                    <td data-label="Customer"><%= tx.customerName || 'N/A' %></td>
+                    <td data-label="Phone"><%= tx.getMaskedPhone ? tx.getMaskedPhone() : (tx.customerPhone ? tx.customerPhone.slice(0,6) + '****' : 'N/A') %></td>
+                    <td data-label="Amount"><%= tx.purchaseAmount ? '$' + parseFloat(tx.purchaseAmount).toFixed(2) : 'N/A' %></td>
+                    <td data-label="Location"><%= tx.locationName || 'N/A' %></td>
+                    <td data-label="Status">
+                      <%
+                        let statusClass = 'skipped';
+                        if (tx.smsStatus === 'sent') statusClass = 'sent';
+                        else if (tx.smsStatus === 'pending') statusClass = 'pending';
+                        else if (tx.smsStatus === 'failed') statusClass = 'failed';
+                      %>
+                      <span class="status-pill <%= statusClass %>">
+                        <%= tx.getStatusLabel ? tx.getStatusLabel() : tx.smsStatus %>
+                      </span>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <div class="empty-state">
+              <p>No POS transactions yet.</p>
+              <p style="font-size: 14px;">Connect a POS system and make a purchase to see transactions here.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
 
-          <div class="radio-group">
-            <label class="radio-option <%= user.smsMessageTone === 'friendly' ? 'selected' : '' %>">
-              <input
-                type="radio"
-                name="smsMessageTone"
-                value="friendly"
-                <%= user.smsMessageTone === 'friendly' || !user.smsMessageTone ? 'checked' : '' %>
-                onchange="updateRadioSelection(this)"
-              >
-              <div class="radio-content">
-                <strong>✨ Friendly & Casual</strong>
-                <p>"Hi! Thanks for visiting [Business]. Reviews help small businesses like ours thrive! Would you mind sharing your experience?"</p>
-              </div>
-            </label>
+      <!-- Support Tab -->
+      <div id="tab-support" class="tab-content">
+        <div class="form-section">
+          <h3>Contact Us</h3>
+          <p style="color: #718096; margin-bottom: 20px;">
+            Have a question, feedback, or feature request? We'd love to hear from you!
+          </p>
 
-            <label class="radio-option <%= user.smsMessageTone === 'professional' ? 'selected' : '' %>">
-              <input
-                type="radio"
-                name="smsMessageTone"
-                value="professional"
-                <%= user.smsMessageTone === 'professional' ? 'checked' : '' %>
-                onchange="updateRadioSelection(this)"
-              >
-              <div class="radio-content">
-                <strong>💼 Professional</strong>
-                <p>"Hello, thank you for choosing [Business]. Your feedback is valuable to us. Please take a moment to leave a review."</p>
-              </div>
-            </label>
+          <form id="supportForm">
+            <input type="hidden" name="_csrf" id="support-csrf-token" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            <div class="form-group">
+              <label for="supportSubject">Subject</label>
+              <select id="supportSubject" name="subject" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px;">
+                <option value="">Select a topic...</option>
+                <option value="feature_request">Feature Request</option>
+                <option value="bug_report">Bug Report</option>
+                <option value="billing">Billing Question</option>
+                <option value="integration">Integration Help</option>
+                <option value="general">General Question</option>
+              </select>
+            </div>
 
-            <label class="radio-option <%= user.smsMessageTone === 'grateful' ? 'selected' : '' %>">
-              <input
-                type="radio"
-                name="smsMessageTone"
-                value="grateful"
-                <%= user.smsMessageTone === 'grateful' ? 'checked' : '' %>
-                onchange="updateRadioSelection(this)"
-              >
-              <div class="radio-content">
-                <strong>🙏 Grateful</strong>
-                <p>"We're grateful for your business at [Business]! Reviews mean the world to us. Would you share your thoughts?"</p>
-              </div>
-            </label>
-          </div>
+            <div class="form-group">
+              <label for="supportMessage">Message</label>
+              <textarea
+                id="supportMessage"
+                name="message"
+                rows="6"
+                required
+                placeholder="Tell us what's on your mind..."
+                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; resize: vertical; font-family: inherit;"
+              ></textarea>
+            </div>
+
+            <div id="supportSuccess" style="display: none; background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <strong>Message Sent!</strong> Your request has been received and sent to our support team. We will get back to you within 24-48 hours.
+            </div>
+
+            <div id="supportError" style="display: none; background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              Something went wrong. Please try again or email us directly.
+            </div>
+
+            <button type="button" id="supportSubmitBtn" class="btn-save" style="width: auto;">
+              Send Message
+            </button>
+          </form>
         </div>
 
-        <button type="submit" class="btn-save">
-          Save Changes
-        </button>
-      </form>
+        <div class="form-section" style="margin-top: 40px;">
+          <h3>Other Ways to Reach Us</h3>
+          <div style="display: grid; gap: 15px; margin-top: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+              <span style="font-size: 24px;">📧</span>
+              <div>
+                <div style="font-weight: 600; color: var(--brand-dark);">Email</div>
+                <a href="mailto:support@morestars.io" style="color: var(--brand-gold); text-decoration: none;">support@morestars.io</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <script>
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    function submitSupportForm(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      var btn = document.getElementById('supportSubmitBtn');
+      var successEl = document.getElementById('supportSuccess');
+      var errorEl = document.getElementById('supportError');
+      var subject = document.getElementById('supportSubject').value;
+      var message = document.getElementById('supportMessage').value;
+
+      // Validate
+      if (!subject) {
+        alert('Please select a topic.');
+        return false;
+      }
+      if (!message || message.trim() === '') {
+        alert('Please enter a message.');
+        return false;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      successEl.style.display = 'none';
+      errorEl.style.display = 'none';
+
+      var csrfToken = document.getElementById('support-csrf-token')?.value || '';
+      fetch('/dashboard/settings/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+        body: JSON.stringify({ subject: subject, message: message })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          successEl.style.display = 'block';
+          successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Reset form fields but keep showing success
+          document.getElementById('supportSubject').value = '';
+          document.getElementById('supportMessage').value = '';
+        } else {
+          errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errorEl.style.display = 'block';
+        }
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      })
+      .catch(function(err) {
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      });
+
+      return false;
+    }
+
     function updateRadioSelection(radio) {
-      // Remove selected class from all options
       document.querySelectorAll('.radio-option').forEach(option => {
         option.classList.remove('selected');
       });
-
-      // Add selected class to the parent label of the checked radio
       if (radio.checked) {
         radio.closest('.radio-option').classList.add('selected');
       }
     }
+
+    function switchTab(tabName, clickedBtn) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(function(tab) {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-button').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      var tabEl = document.getElementById('tab-' + tabName);
+      if (tabEl) {
+        tabEl.classList.add('active');
+      }
+
+      // Mark clicked button as active
+      if (clickedBtn) {
+        clickedBtn.classList.add('active');
+      }
+
+      // Update URL without reload
+      var url = new URL(window.location);
+      url.searchParams.set('tab', tabName);
+      window.history.replaceState({}, '', url);
+    }
+
+    // Initialize tabs on load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click handler for support form submit button
+      var supportBtn = document.getElementById('supportSubmitBtn');
+      if (supportBtn) {
+        supportBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          submitSupportForm(e);
+        });
+      }
+
+      // Add click handlers to tab buttons
+      var tabButtons = document.querySelectorAll('.tab-button[data-tab]');
+      tabButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var tabName = this.getAttribute('data-tab');
+          switchTab(tabName, this);
+        });
+      });
+
+      // Check URL for tab parameter on load
+      var urlParams = new URLSearchParams(window.location.search);
+      var tab = urlParams.get('tab');
+      if (tab && ['general', 'pos', 'transactions', 'support'].indexOf(tab) !== -1) {
+        // Find the right tab button and activate it
+        tabButtons.forEach(function(btn) {
+          if (btn.getAttribute('data-tab') === tab) {
+            switchTab(tab, btn);
+          }
+        });
+      }
+
+      // Add loading state to main settings form
+      var settingsForm = document.getElementById('generalSettingsForm');
+      var saveBtn = document.getElementById('saveSettingsBtn');
+      if (settingsForm && saveBtn) {
+        settingsForm.addEventListener('submit', function() {
+          saveBtn.classList.add('saving');
+          saveBtn.disabled = true;
+          // Re-enable after 10s timeout as fallback
+          setTimeout(function() {
+            saveBtn.classList.remove('saving');
+            saveBtn.disabled = false;
+          }, 10000);
+        });
+      }
+
+      // Add change handlers for radio buttons (SMS tone selection)
+      var toneRadios = document.querySelectorAll('.tone-radio');
+      toneRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          updateRadioSelection(this);
+          // Show/hide custom message editor
+          var customEditor = document.getElementById('customMessageEditor');
+          if (customEditor) {
+            customEditor.style.display = this.value === 'custom' ? 'block' : 'none';
+          }
+        });
+      });
+
+      // Initialize custom editor visibility on page load based on current selection
+      var selectedTone = document.querySelector('.tone-radio:checked');
+      if (selectedTone) {
+        var customEditor = document.getElementById('customMessageEditor');
+        if (customEditor) {
+          customEditor.style.display = selectedTone.value === 'custom' ? 'block' : 'none';
+        }
+      }
+
+      // Custom message preview functionality
+      var customMessageTextarea = document.getElementById('customSmsMessage');
+      var previewElement = document.getElementById('customMessagePreview');
+      var charCountElement = document.getElementById('charCount');
+      var businessName = '<%= user.businessName %>';
+      var reviewLink = '<%= user.reviewUrl || "https://g.page/your-business/review" %>';
+
+      function updateCustomMessagePreview() {
+        if (!customMessageTextarea || !previewElement) return;
+
+        var message = customMessageTextarea.value;
+        if (!message.trim()) {
+          previewElement.innerHTML = '<em style="color: #a0aec0;">Enter a message above to see preview</em>';
+          if (charCountElement) charCountElement.textContent = '0';
+          return;
+        }
+
+        // Replace tags with sample values
+        var preview = message
+          .replace(/\{\{CustomerName\}\}/gi, 'John')
+          .replace(/\{\{BusinessName\}\}/gi, businessName)
+          .replace(/\{\{ReviewLink\}\}/gi, reviewLink);
+
+        previewElement.textContent = preview;
+
+        // Update character count
+        if (charCountElement) {
+          var charCount = preview.length;
+          charCountElement.textContent = charCount;
+          charCountElement.style.color = charCount > 160 ? '#dc2626' : '#718096';
+        }
+      }
+
+      if (customMessageTextarea) {
+        customMessageTextarea.addEventListener('input', updateCustomMessagePreview);
+        // Initialize preview on load
+        updateCustomMessagePreview();
+      }
+
+      // Add change handlers for auto-submit checkboxes (test mode, consent)
+      var autoSubmitCheckboxes = document.querySelectorAll('.auto-submit-checkbox');
+      autoSubmitCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+          this.form.submit();
+        });
+      });
+
+      // Shopify connect button handler - direct navigation
+      var shopifyBtn = document.getElementById('shopifyConnectBtn');
+      if (shopifyBtn) {
+        shopifyBtn.addEventListener('click', function(e) {
+          var shopInput = document.getElementById('shopifyShopInput');
+          var shopValue = shopInput ? shopInput.value.trim() : '';
+
+          if (!shopValue) {
+            alert('Please enter your Shopify store URL');
+            return;
+          }
+
+          // Navigate directly to the OAuth endpoint
+          var url = '/api/auth/shopify/connect?shop=' + encodeURIComponent(shopValue);
+          console.log('Navigating to:', url);
+          window.location.href = url;
+        });
+      }
+
+      // Phone number auto-formatting for test phone input
+      var testPhoneInput = document.getElementById('testPhoneNumber');
+      if (testPhoneInput) {
+        testPhoneInput.addEventListener('input', function(e) {
+          // Get only digits from input
+          var digits = this.value.replace(/\D/g, '');
+
+          // Limit to 10 digits (US phone number)
+          digits = digits.substring(0, 10);
+
+          // Format as (XXX) XXX-XXXX
+          var formatted = '';
+          if (digits.length > 0) {
+            formatted = '(' + digits.substring(0, 3);
+          }
+          if (digits.length >= 3) {
+            formatted += ') ' + digits.substring(3, 6);
+          }
+          if (digits.length >= 6) {
+            formatted += '-' + digits.substring(6, 10);
+          }
+
+          // Update the input value
+          this.value = formatted;
+        });
+
+        // Format existing value on page load
+        if (testPhoneInput.value) {
+          var digits = testPhoneInput.value.replace(/\D/g, '');
+          if (digits.length === 10) {
+            testPhoneInput.value = '(' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6, 10);
+          } else if (digits.length === 11 && digits.charAt(0) === '1') {
+            // Handle +1 prefix
+            digits = digits.substring(1);
+            testPhoneInput.value = '(' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6, 10);
+          }
+        }
+
+        // Enable/disable Test SMS button based on phone input
+        testPhoneInput.addEventListener('input', function() {
+          var sendTestBtn = document.getElementById('sendTestSmsBtn');
+          if (sendTestBtn) {
+            var digits = this.value.replace(/\D/g, '');
+            sendTestBtn.disabled = digits.length < 10;
+          }
+        });
+      }
+
+      // Function to fetch and update test SMS remaining count
+      function updateTestSmsRemaining() {
+        var remainingEl = document.getElementById('testSmsRemaining');
+        var sendBtn = document.getElementById('sendTestSmsBtn');
+        if (!remainingEl) return;
+
+        fetch('/dashboard/settings/pos/test-sms-remaining')
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            if (data.success) {
+              var remaining = data.remaining;
+              var limit = data.limit;
+              remainingEl.textContent = remaining + '/' + limit + ' test SMS left';
+              remainingEl.style.color = remaining === 0 ? '#dc2626' : '#718096';
+              // Disable button if no SMS remaining
+              if (sendBtn && remaining === 0) {
+                sendBtn.disabled = true;
+                sendBtn.title = 'Daily test SMS limit reached (resets at midnight)';
+              }
+            } else {
+              remainingEl.textContent = '';
+            }
+          })
+          .catch(function() {
+            remainingEl.textContent = '';
+          });
+      }
+
+      // Fetch test SMS remaining on page load
+      updateTestSmsRemaining();
+
+      // Send Test SMS button handler
+      var sendTestSmsBtn = document.getElementById('sendTestSmsBtn');
+      if (sendTestSmsBtn) {
+        sendTestSmsBtn.addEventListener('click', function() {
+          var btn = this;
+          var resultDiv = document.getElementById('testSmsResult');
+          var phoneInput = document.getElementById('testPhoneNumber');
+          var phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+
+          if (phone.length < 10) {
+            resultDiv.innerHTML = '<span style="color: #dc2626;">Please enter a valid phone number first.</span>';
+            resultDiv.style.display = 'block';
+            return;
+          }
+
+          // Disable button and show loading
+          btn.disabled = true;
+          btn.textContent = 'Sending...';
+          resultDiv.style.display = 'none';
+
+          // Send test SMS via API
+          var csrfToken = document.getElementById('pos-csrf-token')?.value || document.getElementById('support-csrf-token')?.value || '';
+          fetch('/dashboard/settings/pos/send-test-sms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-csrf-token': csrfToken
+            },
+            body: JSON.stringify({ phone: phone })
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            if (data.success) {
+              resultDiv.innerHTML = '<span style="color: #10b981;">Test SMS sent successfully! Check your phone.</span>';
+              // Update remaining count after successful send
+              updateTestSmsRemaining();
+            } else {
+              resultDiv.innerHTML = '<span style="color: #dc2626;">Failed to send: ' + (data.error || 'Unknown error') + '</span>';
+            }
+            resultDiv.style.display = 'block';
+          })
+          .catch(function(err) {
+            resultDiv.innerHTML = '<span style="color: #dc2626;">Error: ' + err.message + '</span>';
+            resultDiv.style.display = 'block';
+          })
+          .finally(function() {
+            btn.disabled = false;
+            btn.textContent = 'Send Test SMS';
+          });
+        });
+      }
+
+      // Review URL real-time validation
+      var reviewUrlInput = document.getElementById('reviewUrl');
+      var reviewUrlFeedback = document.getElementById('reviewUrlFeedback');
+
+      if (reviewUrlInput && reviewUrlFeedback) {
+        var checkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>';
+        var errorIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>';
+        var infoIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+
+        function detectPlatform(url) {
+          url = url.toLowerCase();
+          if (url.includes('g.page') || url.includes('google.com/maps') || url.includes('search.google.com')) return { name: 'Google', icon: '🔵' };
+          if (url.includes('yelp.com')) return { name: 'Yelp', icon: '🔴' };
+          if (url.includes('facebook.com') || url.includes('fb.com')) return { name: 'Facebook', icon: '🔷' };
+          if (url.includes('tripadvisor.com')) return { name: 'TripAdvisor', icon: '🟢' };
+          if (url.includes('trustpilot.com')) return { name: 'Trustpilot', icon: '⭐' };
+          return null;
+        }
+
+        function validateReviewUrl(url) {
+          if (!url || url.trim() === '') {
+            return { valid: false, message: 'Enter your review platform URL' };
+          }
+
+          // Basic URL validation
+          try {
+            new URL(url);
+          } catch (e) {
+            return { valid: false, message: 'Please enter a valid URL starting with https://' };
+          }
+
+          if (!url.startsWith('https://') && !url.startsWith('http://')) {
+            return { valid: false, message: 'URL must start with https://' };
+          }
+
+          var platform = detectPlatform(url);
+          if (platform) {
+            return { valid: true, message: platform.icon + ' ' + platform.name + ' review link detected', platform: platform };
+          }
+
+          return { valid: true, message: 'Custom review platform URL' };
+        }
+
+        function updateUrlFeedback() {
+          var url = reviewUrlInput.value.trim();
+          var result = validateReviewUrl(url);
+
+          reviewUrlFeedback.classList.add('show');
+          reviewUrlFeedback.querySelector('.feedback-text').textContent = result.message;
+
+          if (url === '') {
+            reviewUrlInput.classList.remove('input-valid', 'input-invalid');
+            reviewUrlFeedback.classList.remove('valid', 'invalid');
+            reviewUrlFeedback.querySelector('.feedback-icon').innerHTML = infoIcon;
+          } else if (result.valid) {
+            reviewUrlInput.classList.add('input-valid');
+            reviewUrlInput.classList.remove('input-invalid');
+            reviewUrlFeedback.classList.add('valid');
+            reviewUrlFeedback.classList.remove('invalid');
+            reviewUrlFeedback.querySelector('.feedback-icon').innerHTML = checkIcon;
+          } else {
+            reviewUrlInput.classList.add('input-invalid');
+            reviewUrlInput.classList.remove('input-valid');
+            reviewUrlFeedback.classList.add('invalid');
+            reviewUrlFeedback.classList.remove('valid');
+            reviewUrlFeedback.querySelector('.feedback-icon').innerHTML = errorIcon;
+          }
+        }
+
+        reviewUrlInput.addEventListener('input', updateUrlFeedback);
+        reviewUrlInput.addEventListener('blur', updateUrlFeedback);
+
+        // Initialize on page load if value exists
+        if (reviewUrlInput.value) {
+          updateUrlFeedback();
+        }
+      }
+
+      // Business Name validation
+      var businessNameInput = document.getElementById('businessName');
+      var businessNameFeedback = document.getElementById('businessNameFeedback');
+
+      if (businessNameInput && businessNameFeedback) {
+        function validateBusinessName(value) {
+          if (!value || value.trim() === '') {
+            return { valid: false, message: 'Please enter your business name' };
+          }
+          if (value.trim().length < 2) {
+            return { valid: false, message: 'Business name is too short' };
+          }
+          if (value.trim().length > 100) {
+            return { valid: false, message: 'Business name is too long (max 100 chars)' };
+          }
+          return { valid: true, message: 'Looks good!' };
+        }
+
+        function setFeedbackIcon(feedbackEl, type) {
+          var iconEl = feedbackEl.querySelector('.feedback-icon');
+          // Clear existing paths
+          while (iconEl.lastChild) {
+            iconEl.removeChild(iconEl.lastChild);
+          }
+          if (type === 'valid') {
+            var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '12');
+            circle.setAttribute('r', '10');
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M9 12l2 2 4-4');
+            iconEl.appendChild(circle);
+            iconEl.appendChild(path);
+          } else {
+            var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', '12');
+            circle.setAttribute('cy', '12');
+            circle.setAttribute('r', '10');
+            var path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path1.setAttribute('d', 'M15 9l-6 6');
+            var path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path2.setAttribute('d', 'M9 9l6 6');
+            iconEl.appendChild(circle);
+            iconEl.appendChild(path1);
+            iconEl.appendChild(path2);
+          }
+        }
+
+        function updateBusinessNameFeedback() {
+          var value = businessNameInput.value;
+          var result = validateBusinessName(value);
+
+          if (value === '') {
+            businessNameInput.classList.remove('input-valid', 'input-invalid');
+            businessNameFeedback.classList.remove('show', 'valid', 'invalid');
+            return;
+          }
+
+          businessNameFeedback.classList.add('show');
+          businessNameFeedback.querySelector('.feedback-text').textContent = result.message;
+
+          if (result.valid) {
+            businessNameInput.classList.add('input-valid');
+            businessNameInput.classList.remove('input-invalid');
+            businessNameFeedback.classList.add('valid');
+            businessNameFeedback.classList.remove('invalid');
+            setFeedbackIcon(businessNameFeedback, 'valid');
+          } else {
+            businessNameInput.classList.add('input-invalid');
+            businessNameInput.classList.remove('input-valid');
+            businessNameFeedback.classList.add('invalid');
+            businessNameFeedback.classList.remove('valid');
+            setFeedbackIcon(businessNameFeedback, 'invalid');
+          }
+        }
+
+        businessNameInput.addEventListener('blur', updateBusinessNameFeedback);
+        businessNameInput.addEventListener('input', function() {
+          if (this.classList.contains('input-invalid')) {
+            updateBusinessNameFeedback();
+          }
+        });
+
+        // Initialize on page load if value exists
+        if (businessNameInput.value) {
+          updateBusinessNameFeedback();
+        }
+      }
+    });
+  </script>
+
+  <!-- WooCommerce Setup Modal -->
+  <div id="woocommerceSetupModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 24px; max-width: 550px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 18px; color: var(--brand-dark);">Connect WooCommerce Store</h3>
+        <button type="button" class="woo-modal-close" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+      </div>
+
+      <p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+        Connect your WooCommerce store to automatically send SMS review requests after orders.
+      </p>
+
+      <div class="info-box" style="margin-bottom: 20px;">
+        <strong>How to get API credentials:</strong>
+        <ol style="margin: 10px 0 0 0; padding-left: 20px; line-height: 1.8;">
+          <li>In WordPress admin, go to WooCommerce → Settings → Advanced → REST API</li>
+          <li>Click "Add key"</li>
+          <li>Set Description to "MoreStars" and Permissions to "Read"</li>
+          <li>Click "Generate API key"</li>
+          <li>Copy the Consumer Key and Consumer Secret below</li>
+        </ol>
+      </div>
+
+      <form method="POST" action="/dashboard/settings/pos/woocommerce/create">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+
+        <div class="form-group">
+          <label for="wooStoreUrl">Store URL</label>
+          <input type="url" id="wooStoreUrl" name="storeUrl" placeholder="https://yourstore.com" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+          <div class="help-text">Your WooCommerce store URL (without /wp-admin)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="wooConsumerKey">Consumer Key</label>
+          <input type="text" id="wooConsumerKey" name="consumerKey" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxx" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: monospace;">
+        </div>
+
+        <div class="form-group">
+          <label for="wooConsumerSecret">Consumer Secret</label>
+          <input type="text" id="wooConsumerSecret" name="consumerSecret" placeholder="cs_xxxxxxxxxxxxxxxxxxxxxxxx" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: monospace;">
+        </div>
+
+        <div class="warning-box" style="margin-bottom: 20px;">
+          <strong>After connecting:</strong> You'll need to set up a webhook in WooCommerce → Settings → Advanced → Webhooks to point to your unique MoreStars webhook URL. Instructions will be shown after connecting.
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button type="submit" class="btn-save" style="flex: 1; padding: 12px;">Connect WooCommerce</button>
+          <button type="button" class="woo-modal-close" style="padding: 12px 20px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #64748b;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stripe Settings Modal -->
+  <div id="stripeSettingsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 24px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 18px; color: var(--brand-dark);">Stripe Integration Settings</h3>
+        <button type="button" class="stripe-modal-close" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+      </div>
+
+      <p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+        Choose which Stripe payment types should trigger SMS review requests.
+      </p>
+
+      <form method="POST" action="/dashboard/settings/pos/stripe/create">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s;">
+            <input type="checkbox" name="triggerOnCheckout" value="on" <%= typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.triggerOnCheckout ? 'checked' : 'checked' %> style="width: 18px; height: 18px; margin-top: 2px;">
+            <div>
+              <strong style="display: block; margin-bottom: 4px;">Stripe Checkout</strong>
+              <span style="font-size: 13px; color: #718096;">Online payments through Stripe Checkout. SMS sent when payment succeeds.</span>
+            </div>
+          </label>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s;">
+            <input type="checkbox" name="triggerOnTerminal" value="on" <%= typeof stripeIntegration !== 'undefined' && stripeIntegration && stripeIntegration.triggerOnTerminal ? 'checked' : '' %> style="width: 18px; height: 18px; margin-top: 2px;">
+            <div>
+              <strong style="display: block; margin-bottom: 4px;">Stripe Terminal</strong>
+              <span style="font-size: 13px; color: #718096;">In-person payments via card readers. Requires Terminal hardware.</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="info-box" style="margin-bottom: 20px;">
+          <strong>Note:</strong> Stripe must be able to capture customer phone numbers for SMS to work. Ensure your checkout flow collects phone numbers in the customer details.
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button type="submit" class="btn-save" style="flex: 1; padding: 12px;">Save Settings</button>
+          <button type="button" class="stripe-modal-close" style="padding: 12px 20px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #64748b;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Zapier Setup Modal -->
+  <div id="zapierSetupModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 24px; max-width: 550px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 18px; color: var(--brand-dark);">Connect Zapier</h3>
+        <button type="button" class="zapier-modal-close" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+      </div>
+
+      <p style="color: #718096; font-size: 14px; margin-bottom: 20px;">
+        Connect MoreStars to 6,000+ apps via Zapier. Send automated review requests from Toast, Clover, Lightspeed, and more.
+      </p>
+
+      <div class="info-box" style="margin-bottom: 20px;">
+        <strong>How it works:</strong>
+        <ol style="margin: 10px 0 0 0; padding-left: 20px; line-height: 1.8;">
+          <li>Click "Create Zapier Integration" below to generate your unique webhook URL</li>
+          <li>Copy the webhook URL and API key to your Zapier workflow</li>
+          <li>Configure your Zap to send customer data when an order is completed</li>
+          <li>Test the connection before going live</li>
+        </ol>
+      </div>
+
+      <div class="warning-box" style="margin-bottom: 20px;">
+        <strong>Requirements:</strong> Your Zapier workflow must send customer <code>phone</code> and optionally <code>name</code> in the webhook payload.
+      </div>
+
+      <form method="POST" action="/dashboard/settings/pos/webhook/create">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+        <input type="hidden" name="provider" value="zapier">
+
+        <div style="display: flex; gap: 12px;">
+          <button type="submit" class="btn-save" style="flex: 1; padding: 12px;">Create Zapier Integration</button>
+          <button type="button" class="zapier-modal-close" style="padding: 12px 20px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #64748b;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../partials/dashboard-footer') %>
+  <script src="/js/dashboard-menu.min.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Accordion toggle functionality
+      var accordionHeaders = document.querySelectorAll('.accordion-header[data-accordion]');
+      accordionHeaders.forEach(function(header) {
+        header.addEventListener('click', function() {
+          var accordionId = this.getAttribute('data-accordion');
+          var content = document.getElementById('accordion-' + accordionId);
+
+          // Toggle active class on header
+          this.classList.toggle('active');
+
+          // Toggle content visibility
+          if (content) {
+            content.classList.toggle('active');
+          }
+        });
+      });
+
+      // WooCommerce connect button - show setup modal
+      var woocommerceBtn = document.getElementById('woocommerceConnectBtn');
+      if (woocommerceBtn) {
+        woocommerceBtn.addEventListener('click', function() {
+          document.getElementById('woocommerceSetupModal').style.display = 'flex';
+        });
+      }
+
+      // Close WooCommerce modal when clicking outside or close buttons
+      var wooModal = document.getElementById('woocommerceSetupModal');
+      if (wooModal) {
+        wooModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.style.display = 'none';
+          }
+        });
+      }
+      // WooCommerce modal close buttons
+      document.querySelectorAll('.woo-modal-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.getElementById('woocommerceSetupModal').style.display = 'none';
+        });
+      });
+
+      // Stripe connect button - show setup modal
+      var stripeBtn = document.getElementById('stripeConnectBtn');
+      if (stripeBtn) {
+        stripeBtn.addEventListener('click', function() {
+          document.getElementById('stripeSettingsModal').style.display = 'flex';
+        });
+      }
+
+      // Stripe settings button (for already connected users)
+      var stripeSettingsBtn = document.getElementById('stripeSettingsBtn');
+      if (stripeSettingsBtn) {
+        stripeSettingsBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('stripeSettingsModal').style.display = 'flex';
+        });
+      }
+
+      // Close modal when clicking outside or close buttons
+      var stripeModal = document.getElementById('stripeSettingsModal');
+      if (stripeModal) {
+        stripeModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.style.display = 'none';
+          }
+        });
+      }
+      // Stripe modal close buttons
+      document.querySelectorAll('.stripe-modal-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.getElementById('stripeSettingsModal').style.display = 'none';
+        });
+      });
+
+      // Zapier setup button - show setup modal
+      var zapierSetupBtn = document.getElementById('zapierSetupBtn');
+      if (zapierSetupBtn) {
+        zapierSetupBtn.addEventListener('click', function() {
+          document.getElementById('zapierSetupModal').style.display = 'flex';
+        });
+      }
+
+      // Close Zapier modal when clicking outside or close buttons
+      var zapierModal = document.getElementById('zapierSetupModal');
+      if (zapierModal) {
+        zapierModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.style.display = 'none';
+          }
+        });
+      }
+      // Zapier modal close buttons
+      document.querySelectorAll('.zapier-modal-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.getElementById('zapierSetupModal').style.display = 'none';
+        });
+      });
+    });
   </script>
 </body>
 </html>

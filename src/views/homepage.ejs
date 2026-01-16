@@ -1,542 +1,836 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Turn every customer into a 5-star Google review automatically. FilterFive helps local businesses generate more reviews with SMS and QR codes.">
-  <meta name="keywords" content="google reviews, review management, customer feedback, SMS reviews, QR code reviews">
-  <title>FilterFive - Turn Every Customer Into a 5-Star Google Review</title>
-  <link rel="stylesheet" href="/css/homepage.css">
-</head>
-<body>
+<%- include('partials/head', {
+  title: 'Get More Stars on Google | MoreStars - Review Request Software',
+  description: 'Send review requests via SMS or QR code. Customers tap once and land on your Google page. More stars, less effort. $77/month. Start free.',
+  keywords: 'google reviews, review management, customer feedback, SMS reviews, QR code reviews, local business marketing'
+}) %>
 
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="/" class="logo">
-        <span class="logo-text">FilterFive</span>
-      </a>
+  <% const activePage = 'home'; %>
 
-      <div class="nav-links" id="navLinks">
-        <a href="#how-it-works">How It Works</a>
-        <a href="#benefits">Benefits</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="/partners">Become a Partner</a>
-        <a href="/login" class="nav-login">Login</a>
-        <a href="/signup" class="btn-primary-nav">Start Free Trial</a>
-      </div>
+  <%- include('partials/navbar') %>
 
-      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </nav>
+  <main id="main-content" role="main">
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <h1 class="hero-headline">Turn Every Customer Into a 5-Star Google Review — Automatically</h1>
-        <p class="hero-subheadline">Stop losing reviews because asking is awkward or easy to forget. FilterFive makes it simple: your customers get a text or scan a QR code, rate their experience, and your happy customers leave public reviews while you handle concerns privately.</p>
-
-        <div class="hero-cta">
-          <a href="/signup" class="btn-primary btn-large">Start Free 30-Day Trial</a>
-          <a href="#how-it-works" class="btn-secondary btn-large">See How It Works</a>
+  <!-- ===================== -->
+  <!-- HERO SECTION -->
+  <!-- ===================== -->
+  <section class="pt-12 pb-12 md:pt-24 md:pb-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="hero-content">
+          <div class="inline-block py-1.5 px-4 rounded-full bg-[rgba(161,67,142,0.1)] text-[#A1438E] text-xs sm:text-sm font-bold tracking-wide uppercase mb-4 md:mb-6">
+            More stars. More customers.
+          </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 md:mb-4 leading-[1.1] font-title text-[#500B42]">
+            Your Happiest Customers <span class="text-gray-400">Never</span> Leave Reviews.
+          </h1>
+          <p class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#FFBA49] mb-6 md:mb-8 font-title">
+            Your Angriest One Did.
+          </p>
+          <p class="text-base sm:text-lg md:text-xl text-gray-600 mb-6 md:mb-8 leading-relaxed">
+            That's why your Google rating doesn't match reality. MoreStars sends customers a text after their visit. One tap. They're on your Google page. Review done.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 md:mb-8">
+            <a href="/signup" class="px-6 sm:px-8 py-4 rounded-full font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 bg-[#FFBA49] text-[#500B42] active:scale-[0.98]" data-track="hero-cta">
+              Start Free Trial
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="/how-it-works" class="px-6 sm:px-8 py-4 rounded-full font-bold text-base sm:text-lg border-2 border-[#500B42] text-[#500B42] hover:bg-gray-100 flex items-center justify-center active:scale-[0.98]">
+              See How It Works
+            </a>
+          </div>
+          <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600 font-medium">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              14-day free trial
+            </span>
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              No credit card
+            </span>
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              5 min setup
+            </span>
+          </div>
         </div>
 
-        <p class="hero-trust">No credit card required • Set up in 5 minutes • 30-day free trial</p>
-      </div>
+        <div class="relative hidden lg:block">
+          <!-- Gold Gradient Glow Behind Card -->
+          <div class="absolute -inset-4 bg-gradient-to-br from-[#FFBA49]/30 via-[#FFBA49]/10 to-transparent rounded-[40px] blur-2xl"></div>
 
-      <div class="hero-visual">
-        <div class="hero-image-placeholder">
-          <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-            <rect width="400" height="300" fill="#f7fafc" rx="10"/>
-            <text x="50%" y="45%" text-anchor="middle" fill="#667eea" font-size="48">📱</text>
-            <text x="50%" y="60%" text-anchor="middle" fill="#4a5568" font-size="16">SMS + QR Code Reviews</text>
-          </svg>
+          <!-- Visual Mockup - Hidden on mobile for cleaner experience -->
+          <div class="hero-visual relative bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 transform rotate-2 group overflow-visible">
+            <div class="space-y-4">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="text-sm text-gray-500">Total Reviews</p>
+                  <p id="reviewsCounter" class="text-3xl font-extrabold text-[#500B42]">452</p>
+                </div>
+                <div class="text-right">
+                  <!-- #1 Badge (subtle pill) -->
+                  <div class="inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-[9px] font-semibold px-2.5 py-1 rounded-full mb-1 whitespace-nowrap">
+                    <svg class="w-2.5 h-2.5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span>#1 in your area</span>
+                  </div>
+                  <div id="monthlyCounter" class="text-green-500 text-sm font-bold whitespace-nowrap">+137 this month</div>
+                </div>
+              </div>
+              <div class="h-32 bg-gray-50 rounded-xl flex items-end justify-between px-4 pb-0 pt-8 gap-2">
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 20%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 35%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 30%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 50%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 45%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 60%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 55%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 75%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 70%"></div>
+                <div class="hero-chart-bar w-full bg-[#A1438E] rounded-t-sm transition-all duration-300 hover:bg-[#8B3A7D]" style="height: 90%"></div>
+              </div>
+
+              <!-- Review Notification -->
+              <div id="reviewNotification" class="flex items-center gap-3 bg-green-50 p-3 rounded-lg border border-green-100 shadow-sm transition-all">
+                <div class="text-sm flex-grow">
+                  <p id="notificationSource" class="font-bold text-[#500B42]">New 5-Star in Facebook</p>
+                  <p id="notificationDetails" class="text-gray-500">1h ago from Emily W.</p>
+                </div>
+                <div class="flex gap-0.5">
+                  <svg class="w-3.5 h-3.5 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg class="w-3.5 h-3.5 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg class="w-3.5 h-3.5 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg class="w-3.5 h-3.5 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <svg class="w-3.5 h-3.5 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   </section>
 
-  <!-- The Problem Section -->
-  <section class="problem-section">
-    <div class="container">
-      <h2 class="section-headline">You're Losing Dozens of 5-Star Reviews Every Month</h2>
+  <!-- ===================== -->
+  <!-- LOGO MARQUEE -->
+  <!-- ===================== -->
+  <div class="w-full bg-[#F9F7FA] overflow-hidden relative">
+    <!-- Fade edges -->
+    <div class="absolute top-0 left-0 w-16 md:w-32 h-full z-10 pointer-events-none" style="background: linear-gradient(to right, #F9F7FA, rgba(249, 247, 250, 0))"></div>
+    <div class="absolute top-0 right-0 w-16 md:w-32 h-full z-10 pointer-events-none" style="background: linear-gradient(to left, #F9F7FA, rgba(249, 247, 250, 0))"></div>
 
-      <div class="problem-grid">
-        <div class="problem-card">
-          <div class="problem-icon">😬</div>
-          <h3>It's awkward to ask</h3>
-          <p>Your staff feels pushy asking face-to-face</p>
+    <div class="flex w-full">
+      <!-- Two identical logo sets side by side for seamless infinite loop -->
+      <div class="flex animate-scroll shrink-0 gap-16 md:gap-24">
+        <div class="flex gap-16 md:gap-24 shrink-0">
+          <img src="/images/_LogoSelection/Google_G_logo.svg" alt="Google" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/yelp_logo.svg" alt="Yelp" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Tripadvisor_Logo_RGB_Pine_For Light Background.svg" alt="TripAdvisor" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/TP-Logo-Tricolor-Black-RGB.svg" alt="TrustPilot" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Better_Business_Bureau.svg" alt="BBB" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Angi_idF6uThbGr_1.svg" alt="Angi" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/G2Logo-Red.svg" alt="G2" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Google_Maps_Logo.svg" alt="Google Maps" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/shopify_logo_whitebg.svg" alt="Shopify" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Woo_logo_black.svg" alt="WooCommerce" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Stripe wordmark - Blurple.svg" alt="Stripe" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/HubSpot_Logo.svg" alt="HubSpot" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/zapier-logo_black.svg" alt="Zapier" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Intuit_QuickBooks_logo.svg" alt="QuickBooks" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/toast-logo_color.svg" alt="Toast" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/clover-logo.svg" alt="Clover" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/Square_logo.svg" alt="Square" class="logo-marquee-item">
+          <img src="/images/_LogoSelection/LightspeedLogo_Charcoal.svg" alt="Lightspeed" class="logo-marquee-item">
         </div>
-
-        <div class="problem-card">
-          <div class="problem-icon">🤔</div>
-          <h3>Customers forget</h3>
-          <p>They mean to review you later, but life gets busy</p>
-        </div>
-
-        <div class="problem-card">
-          <div class="problem-icon">😓</div>
-          <h3>It's too complicated</h3>
-          <p>Finding your Google Business page takes effort</p>
-        </div>
-
-        <div class="problem-card">
-          <div class="problem-icon">📉</div>
-          <h3>You're inconsistent</h3>
-          <p>Sometimes you ask, sometimes you don't</p>
-        </div>
-      </div>
-
-      <p class="problem-summary">Meanwhile, your competitors are showing up higher on Google Maps with more recent reviews, and you're losing customers because of it.</p>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section class="how-it-works" id="how-it-works">
-    <div class="container">
-      <h2 class="section-headline">Two Simple Ways to Collect Reviews (You Choose)</h2>
-
-      <div class="methods-container">
-
-        <!-- Method 1: SMS -->
-        <div class="method-card">
-          <div class="method-badge">Method 1</div>
-          <h3 class="method-title">📲 Send Review Requests via Text Message</h3>
-          <p class="method-intro">Upload your customer list (one by one or via CSV), and FilterFive sends them a friendly text message asking them to rate their experience.</p>
-
-          <div class="flow-steps">
-            <div class="flow-step">
-              <div class="step-number">1</div>
-              <p>Customer receives text: <em>"Hi! Thanks for visiting [Your Business]. How was your experience? Rate us 1-5 stars"</em></p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">2</div>
-              <p>They click the link and rate you in 10 seconds</p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">3</div>
-              <p>Happy customers (4-5 stars) get sent directly to your Google Business page</p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">4</div>
-              <p>If someone rates you 1-3 stars, you get a private email alert so you can make it right</p>
-            </div>
-          </div>
-
-          <p class="method-best-for"><strong>Perfect for:</strong> Businesses with customer phone numbers (salons, auto repair, home services, restaurants with reservations)</p>
-        </div>
-
-        <!-- Method 2: QR Code -->
-        <div class="method-card">
-          <div class="method-badge">Method 2</div>
-          <h3 class="method-title">📷 Let Customers Leave Reviews On the Spot</h3>
-          <p class="method-intro">Download your custom QR code and place it at your checkout counter, table tents, or receipts. Customers scan it with their phone camera — no app needed.</p>
-
-          <div class="flow-steps">
-            <div class="flow-step">
-              <div class="step-number">1</div>
-              <p>Customer scans QR code with their phone</p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">2</div>
-              <p>They rate their experience 1-5 stars (anonymous, takes 10 seconds)</p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">3</div>
-              <p>Happy customers (4-5 stars) get redirected to leave a public Google review</p>
-            </div>
-
-            <div class="flow-step">
-              <div class="step-number">4</div>
-              <p>Lower ratings stay private, and you get an email alert</p>
-            </div>
-          </div>
-
-          <p class="method-best-for"><strong>Perfect for:</strong> Retail stores, restaurants, cafes, hotels, any business with foot traffic</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Benefits Section -->
-  <section class="benefits-section" id="benefits">
-    <div class="container">
-      <h2 class="section-headline">What You'll Get</h2>
-
-      <div class="benefits-grid">
-
-        <div class="benefit-card">
-          <div class="benefit-icon">⭐</div>
-          <h3>20-30 More 5-Star Reviews Every Month</h3>
-          <p>Automate what you used to do manually (and inconsistently). Most customers are happy — FilterFive makes sure they actually leave a review instead of just thinking about it.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="benefit-icon">📈</div>
-          <h3>Rank Higher on Google Maps</h3>
-          <p>More recent reviews = better local search rankings. Show up when people in your area search for businesses like yours. Reviews are one of the top 3 ranking factors for local SEO.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="benefit-icon">🛡️</div>
-          <h3>Protect Your Reputation</h3>
-          <p>Unhappy customers rate you 1-3 stars? You get a private alert before they post publicly, so you can address the issue and turn them into a happy customer. Handle problems privately, showcase wins publicly.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="benefit-icon">⏱️</div>
-          <h3>Set It and Forget It</h3>
-          <p>Upload your customer list once, or integrate with your POS system. FilterFive runs automatically in the background. No staff training, no remembering to ask, no awkward conversations.</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section class="features-section" id="features">
-    <div class="container">
-      <h2 class="section-headline">Everything You Need to Generate Reviews</h2>
-
-      <div class="features-grid">
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>SMS Review Requests</h4>
-            <p>Send automated text messages to customers asking for reviews</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>QR Code Generation</h4>
-            <p>Download printable QR codes for in-person scanning</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Smart Routing</h4>
-            <p>4-5 star ratings go to Google, 1-3 stars stay private</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Email Alerts</h4>
-            <p>Get notified immediately when someone leaves negative feedback</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Bulk Upload</h4>
-            <p>Upload customer lists via CSV or add one-by-one manually</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Analytics Dashboard</h4>
-            <p>Track how many reviews you're generating, response rates, and ROI</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Multi-Location Support</h4>
-            <p>Manage multiple business locations from one account</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>No Contracts</h4>
-            <p>Cancel anytime, no long-term commitments</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <span class="feature-check">✓</span>
-          <div class="feature-content">
-            <h4>Fast Setup</h4>
-            <p>Connect your Google Business Profile and start in 5 minutes</p>
-          </div>
+        <div class="flex gap-16 md:gap-24 shrink-0" aria-hidden="true">
+          <img src="/images/_LogoSelection/Google_G_logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/yelp_logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Tripadvisor_Logo_RGB_Pine_For Light Background.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/TP-Logo-Tricolor-Black-RGB.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Better_Business_Bureau.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Angi_idF6uThbGr_1.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/G2Logo-Red.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Google_Maps_Logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/shopify_logo_whitebg.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Woo_logo_black.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Stripe wordmark - Blurple.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/HubSpot_Logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/zapier-logo_black.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Intuit_QuickBooks_logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/toast-logo_color.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/clover-logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/Square_logo.svg" alt="" class="logo-marquee-item" loading="lazy">
+          <img src="/images/_LogoSelection/LightspeedLogo_Charcoal.svg" alt="" class="logo-marquee-item" loading="lazy">
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- Pricing Section -->
-  <section class="pricing-section" id="pricing">
-    <div class="container">
-      <h2 class="section-headline">Simple, Transparent Pricing</h2>
-      <p class="section-subheadline">No hidden fees. Cancel anytime. 30-day free trial — no credit card required.</p>
-
-      <div class="pricing-grid pricing-grid-two">
-
-        <!-- Monthly Plan -->
-        <div class="pricing-card popular">
-          <div class="popular-badge">Most Popular</div>
-          <h3 class="plan-name">Monthly</h3>
-          <div class="plan-price">
-            <span class="price-amount">$77</span>
-            <span class="price-period">/month</span>
-          </div>
-          <p class="plan-annual">Billed monthly • Cancel anytime</p>
-
-          <ul class="plan-features">
-            <li>Up to 200 SMS per month</li>
-            <li>Unlimited QR codes</li>
-            <li>Email alerts for negative feedback</li>
-            <li>Analytics dashboard</li>
-            <li>Multi-location support</li>
-            <li>All core features</li>
-            <li>Email support</li>
-          </ul>
-
-          <p class="plan-overage">Additional SMS: $0.10 each</p>
-
-          <a href="/signup" class="btn-primary btn-block">Start Free Trial</a>
-        </div>
-
-        <!-- Annual Plan -->
-        <div class="pricing-card">
-          <h3 class="plan-name">Annual</h3>
-          <div class="plan-price">
-            <span class="price-amount">$770</span>
-            <span class="price-period">/year</span>
-          </div>
-          <p class="plan-annual">Save $154 per year <span class="savings">(2 months free!)</span></p>
-
-          <ul class="plan-features">
-            <li>Up to 200 SMS per month</li>
-            <li>Unlimited QR codes</li>
-            <li>Email alerts for negative feedback</li>
-            <li>Analytics dashboard</li>
-            <li>Multi-location support</li>
-            <li>All core features</li>
-            <li>Email support</li>
-          </ul>
-
-          <p class="plan-overage">Additional SMS: $0.10 each</p>
-
-          <a href="/signup" class="btn-primary btn-block">Start Free Trial</a>
-        </div>
-
-      </div>
-
-      <div class="pricing-footer">
-        <p><strong>All plans include:</strong> 30-day free trial (no credit card required) • Cancel anytime • No setup fees • Free updates</p>
-        <p class="pricing-comparison">Enterprise tools cost $300-500+ per month. FilterFive gives you the same results at a fraction of the cost.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section class="faq-section" id="faq">
-    <div class="container">
-      <h2 class="section-headline">Frequently Asked Questions</h2>
-
-      <div class="faq-list">
-
-        <div class="faq-item">
-          <button class="faq-question">
-            Is this allowed by Google?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Yes! Google allows businesses to ask customers for reviews. You just can't incentivize them (pay for reviews) or be deceptive. FilterFive follows all of Google's review policies. We simply make it easier for customers to leave honest feedback.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            What if someone leaves a bad review anyway?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>FilterFive captures low ratings (1-3 stars) privately so you can address issues before they go public. However, if someone still chooses to leave a negative review directly on Google, you'll be notified and can respond professionally. The goal is to catch and fix problems early.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            Do I need a credit card to start the trial?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Nope! Start your 30-day free trial with just your Google Business Profile link and customer contact information. No credit card required until you decide to continue.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            How long does setup take?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>About 5 minutes. Connect your Google Business Profile, upload your customer list (or add manually), and you're live. You can send your first review request or generate your QR code immediately.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            What if I don't have customer phone numbers?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>No problem! Use the QR code method instead. Print it and place it at your checkout counter, table tents, receipts, or anywhere customers can scan it. No phone numbers needed.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            Can I use this for multiple locations?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Yes! All plans include multi-location support. Manage multiple business locations from one dashboard.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            How many reviews will I get?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Most businesses see 20-30 new reviews per month, depending on customer volume. Our analytics dashboard shows your conversion rates (how many texts sent → reviews received) so you can track performance.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            Can I cancel anytime?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Absolutely. No long-term contracts. Cancel anytime from your dashboard. If you prepaid annually, we'll refund the unused portion.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            What makes FilterFive different from other tools?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Three things: <strong>1)</strong> We're affordable - Enterprise tools cost $300-500/month. We're just $77/month. <strong>2)</strong> We're simple - One job, done well. No feature bloat or complicated dashboards. <strong>3)</strong> We're fast - Set up in 5 minutes, not 5 days.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            Do you offer support?
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Yes! All plans include email support. We typically respond within 24 hours on business days.</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA Section -->
-  <section class="final-cta">
-    <div class="container">
-      <h2 class="cta-headline">Start Getting More 5-Star Reviews Today</h2>
-      <p class="cta-subheadline">Join local businesses using FilterFive to automatically generate Google reviews. Set up in 5 minutes, see results in 24 hours.</p>
-
-      <div class="cta-buttons">
-        <a href="/signup" class="btn-primary btn-large">Start Free 30-Day Trial</a>
-      </div>
-
-      <p class="cta-trust">No credit card required • Cancel anytime • Set up in 5 minutes</p>
-
-      <p class="cta-contact">Have questions? Email us at <a href="mailto:support@filterfive.io">support@filterfive.io</a></p>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-
-        <div class="footer-col">
-          <h4>Product</h4>
-          <ul>
-            <li><a href="#how-it-works">How It Works</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#faq">FAQ</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/partners">Agency Partners</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/terms">Terms of Service</a></li>
-            <li><a href="/sms-compliance">SMS Compliance</a></li>
-            <li><a href="/demo">SMS Consent Demo</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="mailto:support@filterfive.io">support@filterfive.io</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2025 FilterFive. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Sticky CTA (Mobile) -->
-  <div class="sticky-cta" id="stickyCta">
-    <a href="/signup" class="btn-primary btn-block">Start Free Trial</a>
   </div>
 
-  <script src="/js/homepage.js"></script>
-</body>
-</html>
+  <!-- ===================== -->
+  <!-- PROBLEM SECTION -->
+  <!-- ===================== -->
+  <section id="problem" class="py-12 md:py-24 bg-[#F9F7FA]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+
+        <!-- Left Column: The Problem -->
+        <div class="space-y-6 md:space-y-8 problem-content">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight font-title text-[#500B42]">
+            It's Not Your Fault.
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FFBA49] to-orange-500 block sm:inline">
+              But We Fix That.
+            </span>
+          </h2>
+
+          <div class="space-y-4 md:space-y-6">
+            <div class="relative group cursor-pointer">
+              <div class="absolute -inset-1 bg-gradient-to-r from-green-400 to-green-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300"></div>
+              <div class="relative bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex gap-3 md:gap-4 transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                  <svg class="w-5 h-5 md:w-6 md:h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div>
+                  <p class="text-base md:text-lg text-gray-700 leading-relaxed">
+                    <span class="font-bold text-green-600">99% of your customers are happy</span>. They meant to leave a review. They just... didn't.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative group cursor-pointer">
+              <div class="absolute -inset-1 bg-gradient-to-r from-red-400 to-red-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300"></div>
+              <div class="relative bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex gap-3 md:gap-4 transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                  <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div>
+                  <p class="text-base md:text-lg text-gray-700 leading-relaxed">
+                    Meanwhile, the one customer who had a bad day? <span class="font-bold text-red-600">They found your Google page just fine.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative group cursor-pointer">
+              <div class="absolute -inset-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300"></div>
+              <div class="relative bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex gap-3 md:gap-4 transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                  <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                </div>
+                <div>
+                  <p class="text-base md:text-lg text-gray-700 leading-relaxed font-medium">
+                    That's why your online reputation doesn't reflect how good you actually are.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Pricing Card -->
+        <div class="relative problem-visual flex justify-center lg:justify-end mt-4 lg:mt-0">
+          <div id="pricingCard" class="relative bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 w-full max-w-md" style="box-shadow: 0 25px 50px -12px rgba(249, 115, 22, 0.35);">
+            <div class="relative">
+              <div class="text-center mb-8">
+                <!-- Toggle -->
+                <div class="inline-flex bg-gray-100 p-1 rounded-full mb-2">
+                  <button id="monthlyBtn" class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-white shadow-md text-[#500B42]">
+                    Monthly
+                  </button>
+                  <button id="yearlyBtn" class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 text-gray-500 hover:text-gray-700">
+                    Yearly <span class="text-green-600 text-xs ml-1">-17%</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="text-center mb-8">
+                <div class="flex items-baseline justify-center gap-1">
+                  <span id="priceDisplay" class="text-6xl font-extrabold tracking-tight text-[#500B42]">$77</span>
+                  <span class="text-xl text-gray-400 font-medium">/mo</span>
+                </div>
+                <p id="billingText" class="text-sm text-gray-500 mt-2 font-medium">
+                  No contracts. Cancel anytime.
+                </p>
+              </div>
+
+              <div class="space-y-4 mb-8">
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-gray-600 font-medium text-sm">1,000 SMS requests/month</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-gray-600 font-medium text-sm">Unlimited QR codes (free to print)</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-gray-600 font-medium text-sm">Google, Facebook, Yelp & more</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-gray-600 font-medium text-sm">Every feature included. No upsells.</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-gray-600 font-medium text-sm">See exactly what's working</span>
+                </div>
+              </div>
+
+              <a href="/signup" class="w-full py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 bg-[#FFBA49] text-[#500B42]" data-track="pricing-cta">
+                Start Free Trial
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </a>
+
+              <p class="text-center text-xs text-gray-400 mt-4 font-medium">
+                14-day free trial &bull; No credit card &bull; Setup in 5 minutes
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SETUP SECTION -->
+  <!-- ===================== -->
+  <section id="setup" class="py-12 md:py-24 overflow-hidden bg-[#F9F7FA]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Header -->
+      <div class="setup-header text-center max-w-3xl mx-auto mb-10 md:mb-20">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F9F7FA] text-[#A1438E] text-xs font-bold uppercase tracking-wide mb-4 md:mb-6 border border-[rgba(161,67,142,0.2)] shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          WHAT YOU GET
+        </div>
+        <h2 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 md:mb-6 font-title text-[#500B42]">
+          Reviews on Autopilot
+        </h2>
+        <p class="text-base md:text-xl text-gray-600">
+          Set it up once. Watch reviews come in while you run your business.
+        </p>
+      </div>
+
+      <!-- Steps Container -->
+      <div class="steps-container relative">
+
+        <!-- Connecting Line (Desktop Only) -->
+        <div class="hidden md:block absolute top-4 left-[16%] right-[16%] h-0.5 z-0 connecting-line origin-left overflow-hidden">
+          <div class="w-full h-full" style="background-image: linear-gradient(90deg, #CBD5E1 50%, transparent 50%); background-size: 24px 100%; animation: flowRight 1s linear infinite;"></div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-12 lg:gap-16 mb-20">
+
+          <!-- Step 1 -->
+          <div class="setup-step flex flex-col items-center text-center group">
+            <div class="px-6 py-2 rounded-full bg-[#3B82F6] shadow-[0_10px_25px_-5px_rgba(59,130,246,0.4)] flex items-center justify-center text-white text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+              Step 1
+            </div>
+            <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Easy for you</p>
+            <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">You Ask (Your Way)</h3>
+            <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+              Send a single text in 10 seconds. Upload a CSV to request hundreds at once. Or connect your POS in 5 minutes and never think about it again.
+            </p>
+
+            <!-- Visual 1: Input Form -->
+            <div class="w-full max-w-[300px] mx-auto bg-white p-5 rounded-2xl shadow-xl border border-gray-100 transform rotate-[-2deg] transition-transform group-hover:rotate-0 duration-500">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 text-left">New Request</div>
+              <div class="space-y-3">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-left">
+                  <span class="text-gray-800 text-sm font-medium">Sarah Johnson</span>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-left">
+                  <span class="text-gray-800 text-sm font-medium">(555) 123-4567</span>
+                </div>
+                <div class="bg-[#3B82F6] text-white rounded-lg py-2.5 text-sm font-bold text-center">
+                  Send Request
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="setup-step flex flex-col items-center text-center group">
+            <div class="px-6 py-2 rounded-full bg-[#A855F7] shadow-[0_10px_25px_-5px_rgba(168,85,247,0.4)] flex items-center justify-center text-white text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+              Step 2
+            </div>
+            <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Easy for them</p>
+            <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">They Tap</h3>
+            <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+              No login. No app download. No hassle at all. Your customer taps once and lands directly on your Google profile, Facebook, or wherever you want the review.
+            </p>
+
+            <!-- Visual 2: Phone Bubble -->
+            <div class="w-full max-w-[280px] mx-auto bg-white p-2 rounded-3xl shadow-xl border-4 border-gray-100 transform rotate-[2deg] transition-transform group-hover:rotate-0 duration-500">
+              <div class="bg-gray-50 rounded-2xl p-4 h-[180px] flex flex-col justify-end items-end relative overflow-hidden">
+                <div class="bg-[#3B82F6] text-white text-xs p-3 rounded-2xl rounded-tr-none shadow-sm text-left leading-relaxed mb-1 relative z-10">
+                  Hi Sarah! Thanks for choosing us today. Mind leaving a quick review?
+                  <br>
+                  <span class="underline text-[rgba(161,67,142,0.6)] font-semibold">morestars.io/link</span>
+                </div>
+                <span class="text-[10px] text-gray-400 font-medium mr-1">Delivered</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="setup-step flex flex-col items-center text-center group">
+            <div class="px-6 py-2 rounded-full bg-[#FFBA49] shadow-[0_10px_25px_-5px_rgba(255,186,73,0.4)] flex items-center justify-center text-[#500B42] text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+              Step 3
+            </div>
+            <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Instant Benefits</p>
+            <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">You Grow</h3>
+            <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+              You get more reviews. Your credibility and rating climbs. You show up higher in local search. New customers pick you over the competitors now.
+            </p>
+
+            <!-- Visual 3: Google Review Card -->
+            <div class="w-full max-w-[300px] mx-auto bg-white p-5 rounded-2xl shadow-xl border border-gray-100 transform rotate-[-1deg] transition-transform group-hover:rotate-0 duration-500 relative overflow-hidden">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold text-lg">G</div>
+                <div class="text-left">
+                  <div class="font-bold text-gray-900 text-sm">Your Business</div>
+                  <div class="text-[10px] text-gray-500">Posting publicly</div>
+                </div>
+              </div>
+
+              <div class="flex justify-center gap-1 mb-4">
+                <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+
+              <div class="text-xs text-gray-400 text-left mb-4 px-2">
+                Share details of your own experience at this place...
+              </div>
+
+              <div class="w-full h-9 bg-[#1A73E8] rounded text-white text-sm font-bold flex items-center justify-center">
+                Post
+              </div>
+
+              <!-- Hover Effect Overlay -->
+              <div class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-2">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
+                </div>
+                <span class="font-bold text-gray-900">Review Posted!</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================== -->
+        <!-- MAP SIMULATOR / COMPETITIVE COMPARISON -->
+        <!-- ===================== -->
+        <div id="map-simulator" class="py-20 w-full relative z-10">
+          <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+              <h2 class="text-3xl md:text-4xl font-extrabold mb-6 font-title text-[#500B42]">
+                Don't Let Them Win Just Because They're Louder
+              </h2>
+              <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Your competitors aren't better than you. They just have more reviews. Drag the slider to see how easy it is to overtake them. Add 50 reviews and you're competing. Add 100 and you're winning.
+              </p>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              <!-- Controls -->
+              <div class="lg:col-span-5 bg-white p-8 rounded-3xl shadow-xl border border-gray-100 relative z-10 text-left">
+                <label class="block text-sm font-bold text-gray-500 mb-6 uppercase tracking-wide">
+                  Add Reviews to Your Profile
+                </label>
+
+                <div class="relative h-4 w-full bg-gray-100 rounded-full mb-10">
+                  <div id="reviewSliderFill" class="absolute h-full bg-[#8B3A7D] rounded-full transition-all duration-75" style="width: 0%"></div>
+                  <input
+                    type="range"
+                    id="reviewSlider"
+                    min="12"
+                    max="200"
+                    value="12"
+                    class="absolute w-full h-full opacity-0 cursor-pointer top-0 left-0 z-20"
+                  />
+                  <div
+                    id="reviewSliderThumb"
+                    class="absolute w-8 h-8 bg-white border-2 border-[#A1438E] rounded-full shadow-lg -mt-2 pointer-events-none transition-all duration-75 flex items-center justify-center z-10"
+                    style="left: calc(0% - 16px)"
+                  >
+                    <div class="w-2 h-2 bg-[#8B3A7D] rounded-full"></div>
+                  </div>
+                </div>
+
+                <div class="text-center mb-8">
+                  <div id="reviewCount" class="text-7xl font-extrabold text-[#500B42] mb-2 transition-all duration-100">12</div>
+                  <p class="text-gray-500 font-medium">Your Total Reviews</p>
+                </div>
+
+                <div id="rankStatus" class="p-4 rounded-xl border text-center transition-colors duration-300 bg-gray-50 border-gray-200 text-gray-500">
+                  <p class="font-bold text-lg">You are invisible on page 2.</p>
+                </div>
+              </div>
+
+              <!-- Simulation -->
+              <div class="lg:col-span-7 relative">
+                <!-- Google Map Mockup Container -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-md mx-auto relative transform rotate-1 hover:rotate-0 transition-transform duration-500 text-left">
+                  <div class="bg-gray-100 p-4 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                      <span class="font-bold text-gray-600 text-sm">Businesses near you</span>
+                    </div>
+                    <div id="positionLabel" class="transition-all duration-300">
+                      <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-500">
+                        They don't even see you
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- The List -->
+                  <div id="businessList" class="relative h-[360px] bg-white">
+                    <!-- Business items will be rendered by JS -->
+                  </div>
+
+                  <div class="p-3 text-center border-t border-gray-100 bg-gray-50">
+                    <span class="text-[#A1438E] font-bold text-sm cursor-pointer hover:underline">View all businesses</span>
+                  </div>
+                </div>
+
+                <!-- Decorative Blob -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-r from-[rgba(161,67,142,0.1)] to-[rgba(161,67,142,0.1)] opacity-30 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="setup-cta text-center">
+          <%- include('partials/cta-3d-button', { buttonText: 'Start Getting More Stars', trackId: 'setup-cta', size: 'lg' }) %>
+          <p class="mt-6 text-sm text-gray-500 font-medium tracking-wide">
+            14-day free trial &bull; No credit card required &bull; Setup in 5 mins
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- FEATURES SECTION -->
+  <!-- ===================== -->
+  <section id="features" class="py-24">
+    <div class="w-full">
+
+      <!-- Features Header -->
+      <div class="features-header max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide mb-6 border border-green-100 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          100% Secure & Compliant
+        </div>
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-6 font-title text-[#500B42]">
+          Everything You Need. <span class="text-gray-400">Nothing You Don't.</span>
+        </h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Powerful features designed to help you get more reviews without adding more work to your plate.
+        </p>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <% const features = [
+          { icon: 'smartphone', title: 'Texts That Actually Get Opened', desc: '98% open rate. 1,000 messages included every month. Way better than email.', color: 'blue', badge: 'High Conversion' },
+          { icon: 'qrcode', title: 'No Phone Number? No Problem.', desc: 'Print codes for your counter, receipts, or tables. Unlimited scans. Zero cost per use.', color: 'purple', badge: 'Unlimited Scans' },
+          { icon: 'chart', title: 'See Exactly What\'s Working', desc: 'Track requests sent, clicks, and conversions. Know your numbers.', color: 'green', badge: 'Real-Time Data' },
+          { icon: 'location', title: 'One Dashboard, All Your Locations', desc: 'Track each spot separately. See which teams are crushing it.', color: 'orange', badge: 'Scalable' },
+          { icon: 'zap', title: 'Connect Once, Forget Forever', desc: 'Square, Shopify, Toast, Clover. Requests go out automatically after every sale.', color: 'yellow', badge: 'Automated' },
+          { icon: 'globe', title: 'Reviews Where You Need Them', desc: 'Google, Facebook, Yelp, TripAdvisor. You pick.', color: 'indigo', badge: 'Universal' },
+          { icon: 'shield', title: 'No Risk to Your Listing', desc: '100% compliant with Google\'s review policies. No fake reviews. No sketchy incentives.', color: 'green', badge: 'Zero Risk' },
+          { icon: 'lock', title: 'We Don\'t Sell Your Customer List', desc: 'Your contacts are your property. Period.', color: 'purple', badge: 'Encrypted' },
+          { icon: 'clock', title: 'Set It & Forget It', desc: 'Automate your review requests and let MoreStars work while you focus on your business.', color: 'teal', badge: 'Time Saver' }
+        ]; %>
+
+        <!-- Features Stack Container (for mobile scroll-driven animation) -->
+        <div class="features-stack-container" id="featuresStackContainer">
+          <div class="features-stack" id="featuresStack">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" id="featuresGrid">
+              <% features.forEach((f, i) => { %>
+                <div class="feature-card-wrapper" data-index="<%= i %>">
+                  <div class="feature-card relative bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl border border-<%= f.color %>-100 group" data-color="<%= f.color %>" data-index="<%= i %>">
+                <div class="flex items-start justify-between mb-4 md:mb-6">
+                  <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center bg-<%= f.color %>-50 text-<%= f.color %>-600 group-hover:scale-110 transition-transform duration-300">
+                    <% if (f.icon === 'smartphone') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <% } else if (f.icon === 'qrcode') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    <% } else if (f.icon === 'chart') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <% } else if (f.icon === 'location') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <% } else if (f.icon === 'zap') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <% } else if (f.icon === 'globe') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    <% } else if (f.icon === 'shield') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <% } else if (f.icon === 'lock') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <% } else if (f.icon === 'clock') { %>
+                      <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <% } %>
+                  </div>
+                  <span class="feature-badge text-[9px] md:text-[10px] font-extrabold uppercase tracking-wider py-1 px-2 md:px-3 rounded-full bg-<%= f.color %>-50 text-<%= f.color %>-600"><%= f.badge %></span>
+                </div>
+
+                <h3 class="font-bold text-lg md:text-xl mb-2 md:mb-3 font-title text-[#500B42]"><%= f.title %></h3>
+                <p class="text-gray-600 leading-relaxed text-sm md:text-[15px]"><%= f.desc %></p>
+              </div>
+            </div>
+          <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- FINAL CTA -->
+  <!-- ===================== -->
+  <section class="py-4 md:py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div id="finalCtaCard" class="final-cta-card relative rounded-[3rem] group transition-all duration-500 hover:-translate-y-2 border-[5px]" style="background-color: #500B42; box-shadow: 0 25px 50px -12px rgba(255, 186, 73, 0.25); animation: border-pulse 3s infinite ease-in-out; padding: 0 1rem !important;">
+
+        <!-- Animated Mesh Gradient Background -->
+        <div class="absolute inset-0 overflow-hidden rounded-[2.75rem]">
+          <div class="cta-gradient-orb cta-gradient-orb-1"></div>
+          <div class="cta-gradient-orb cta-gradient-orb-2"></div>
+          <div class="cta-gradient-orb cta-gradient-orb-3"></div>
+        </div>
+
+        <!-- Mouse Follow Gradient -->
+        <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 186, 73, 0.15), transparent 40%)"></div>
+
+        <!-- Decorative Pattern -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;"></div>
+
+        <div class="relative z-10 py-16 md:py-24 text-center">
+          <!-- Lost Revenue Frame -->
+          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white font-title">
+            You Missed Reviews Today.
+          </h2>
+          <p class="text-xl md:text-2xl font-medium mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed text-gray-200">
+            Every day you wait is a 5-star review that vanishes forever. Stop the leak.
+          </p>
+
+          <%- include('partials/cta-3d-button', { buttonText: 'Start Free Trial', trackId: 'final-cta', size: 'lg' }) %>
+
+          <!-- Visual Guarantee Badges -->
+          <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 text-sm font-bold text-gray-400">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+              5 Free SMS Included
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              14-Day Free Trial
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              No Credit Card Required
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+              Cancel Anytime
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SOCIAL PROOF / CALCULATOR SECTION -->
+  <!-- ===================== -->
+  <section class="py-24 relative overflow-hidden" style="background-color: #500B42;">
+    <!-- Animated Mesh Gradient Background -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="cta-gradient-orb cta-gradient-orb-1"></div>
+      <div class="cta-gradient-orb cta-gradient-orb-2"></div>
+      <div class="cta-gradient-orb cta-gradient-orb-3"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+
+      <!-- Header & Stats -->
+      <h2 class="sp-header text-3xl md:text-4xl font-extrabold mb-16 text-white font-title">
+        The Numbers Don't Lie
+      </h2>
+
+      <div class="stats-container grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 mb-20 max-w-5xl mx-auto">
+        <!-- Stat 1 -->
+        <div class="stat-reveal opacity-0 translate-y-8 transition-all duration-700" data-stat="1">
+          <div class="text-6xl md:text-7xl font-extrabold mb-4 text-[#FFBA49] leading-none">91%</div>
+          <p class="text-xl md:text-2xl text-gray-200 font-medium leading-relaxed">of consumers say local business reviews influence how they view a brand</p>
+          <p class="text-lg text-gray-400 mt-2">and <span class="text-[#FFBA49] font-bold">88%</span> would choose a business that replies to all its reviews.</p>
+          <a href="https://www.brightlocal.com/research/local-consumer-review-survey-2024/" target="_blank" rel="noopener" class="inline-block mt-3 text-sm text-gray-500 hover:text-[#FFBA49] transition-colors">Source: BrightLocal 2024 →</a>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="stat-reveal opacity-0 translate-y-8 transition-all duration-700 delay-200" data-stat="2">
+          <div class="text-6xl md:text-7xl font-extrabold mb-4 text-[#FFBA49] leading-none">270%</div>
+          <p class="text-xl md:text-2xl text-gray-200 font-medium leading-relaxed">boost in conversion rates when displaying reviews</p>
+          <p class="text-lg text-gray-400 mt-2">Going from <span class="text-[#FFBA49] font-bold">0 to just 5 reviews</span> can nearly quadruple purchase likelihood.</p>
+          <a href="https://blog-next.achievable.me/business/how-online-reviews-influence-sales-retailers" target="_blank" rel="noopener" class="inline-block mt-3 text-sm text-gray-500 hover:text-[#FFBA49] transition-colors">Source: Achievable →</a>
+        </div>
+      </div>
+
+      <!-- Pricing Content -->
+      <div class="mb-20" style="display: flex; flex-wrap: wrap; gap: 3rem; align-items: center;">
+        <!-- Left Side: Pricing Card (33%) -->
+        <div class="relative group" style="flex: 0 0 auto; width: 100%; max-width: 380px;">
+          <!-- Glow effect on hover -->
+          <div class="absolute -inset-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-[2rem] opacity-0 group-hover:opacity-40 blur-2xl transition-opacity duration-300"></div>
+          <div class="relative bg-white rounded-3xl p-8 shadow-2xl transition-all duration-300 group-hover:-translate-y-3 group-hover:shadow-[0_25px_60px_-12px_rgba(255,186,73,0.4)]">
+            <div class="mb-6">
+              <div class="flex items-baseline gap-1">
+                <span class="text-5xl md:text-6xl font-extrabold text-[#500B42]">$77</span>
+                <span class="text-gray-500 text-lg">/month</span>
+              </div>
+              <p class="text-gray-500 text-sm mt-1">Cancel anytime</p>
+            </div>
+
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700 font-medium">1,000 SMS requests/month</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700 font-medium">Unlimited QR codes</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700 font-medium">Google, Facebook, Yelp & more</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700 font-medium">No contracts</span>
+              </li>
+            </ul>
+
+            <a href="/signup" class="block w-full py-4 rounded-full font-bold text-lg text-center transition-all bg-[#500B42] text-white hover:bg-[#3a0033] shadow-lg hover:shadow-xl">
+              Start Free Trial
+            </a>
+            <p class="text-center text-gray-400 text-sm mt-4">14-day free trial • No credit card required</p>
+          </div>
+        </div>
+
+        <!-- Right Side: Text Content (67%) -->
+        <div style="flex: 1 1 0%; min-width: 300px;">
+          <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 font-title text-white leading-tight text-center md:text-left">
+            One New Customer<br><span class="text-[#FFBA49]">Pays for This.</span>
+          </h2>
+          <p class="text-lg md:text-xl text-gray-300 leading-relaxed mb-8 text-center md:text-left">
+            How much is a new customer worth to you? $200? $500? $2,000? MoreStars costs less than a single job. You're already doing the hard part by delivering great service. We just make sure people hear about it.
+          </p>
+
+          <!-- Visual Guarantee Badges -->
+          <div class="flex flex-wrap gap-4 md:gap-6 text-sm font-bold text-gray-400">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+              5 Free SMS Included
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              14-Day Free Trial
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              No Credit Card Required
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+              Cancel Anytime
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Organization Schema for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "MoreStars",
+    "url": "https://morestars.io",
+    "logo": "https://morestars.io/images/Logo%20MoreStars.io.svg",
+    "description": "B2B SaaS reputation management platform helping businesses get more Google reviews through SMS and QR code campaigns.",
+    "sameAs": []
+  }
+  </script>
+
+  <!-- SoftwareApplication Schema for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MoreStars",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "Reputation management software that helps local businesses get more Google reviews through SMS and QR code campaigns. Intercepts negative feedback privately while directing happy customers to public review sites.",
+    "url": "https://morestars.io",
+    "image": "https://morestars.io/images/og-morestars.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "77",
+      "priceCurrency": "USD",
+      "priceValidUntil": "2025-12-31",
+      "availability": "https://schema.org/InStock",
+      "url": "https://morestars.io/pricing"
+    },
+    "featureList": [
+      "SMS review requests",
+      "QR code campaigns",
+      "Google review management",
+      "Negative feedback interception",
+      "CSV bulk uploads",
+      "Analytics dashboard"
+    ],
+    "screenshot": "https://morestars.io/images/og-morestars.png",
+    "provider": {
+      "@type": "Organization",
+      "name": "MoreStars",
+      "url": "https://morestars.io"
+    }
+  }
+  </script>
+
+  </main>
+
+  <%- include('partials/marketing-footer') %>
+
+  <%- include('partials/mobile-cta') %>
+
+  <!-- GSAP CDN (deferred for better page load performance) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous" defer nonce="<%= cspNonce %>"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d" crossorigin="anonymous" defer nonce="<%= cspNonce %>"></script>
+
+  <!-- Custom JavaScript (minified, deferred) -->
+  <script src="/js/homepage.min.js" defer nonce="<%= cspNonce %>"></script>
+
+<%- include('partials/scripts') %>

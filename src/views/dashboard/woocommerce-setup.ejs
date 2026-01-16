@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <%- include('../partials/dashboard-head') %>
+  <style>
+    .setup-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .setup-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+      color: var(--brand-gold);
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .page-title h2 {
+      font-size: 24px;
+      margin: 0;
+      color: var(--brand-dark);
+    }
+
+    .provider-badge {
+      background: #7c3aed;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .store-url {
+      color: #718096;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--brand-dark);
+    }
+
+    .credential-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .credential-box code {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      color: var(--brand-dark);
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .credential-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .copy-btn {
+      background: var(--brand-dark);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+    }
+
+    .copy-btn.copied {
+      background: #10b981;
+    }
+
+    .steps-list {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .steps-list li {
+      position: relative;
+      padding-left: 48px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .steps-list li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .steps-list li strong {
+      color: var(--brand-dark);
+    }
+
+    .code-inline {
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #1e40af;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #92400e;
+    }
+
+    .success-box {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #065f46;
+    }
+
+    .status-section {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .status-row:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .status-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .status-value.active {
+      color: #10b981;
+    }
+
+    .status-value.inactive {
+      color: #f59e0b;
+    }
+
+    .btn-back {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--brand-dark);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <div class="setup-container">
+    <a href="/dashboard/settings?tab=pos" class="back-link">
+      &larr; Back to Settings
+    </a>
+
+    <div class="page-title">
+      <h2>WooCommerce Setup</h2>
+      <span class="provider-badge">E-Commerce</span>
+    </div>
+
+    <p class="store-url">Store: <%= storeUrl %></p>
+
+    <div class="setup-card">
+      <h3 class="section-title">Step 1: Copy Webhook Details</h3>
+      <p style="color: #718096; margin-bottom: 16px;">You'll need these values to configure the webhook in WooCommerce.</p>
+
+      <div class="credential-label">Webhook URL (Delivery URL)</div>
+      <div class="credential-box">
+        <code id="webhookUrl"><%= webhookUrl %></code>
+        <button class="copy-btn" onclick="copyToClipboard('webhookUrl', this)">Copy</button>
+      </div>
+
+      <div class="credential-label">Webhook Secret</div>
+      <div class="credential-box">
+        <code id="webhookSecret"><%= webhookSecret %></code>
+        <button class="copy-btn" onclick="copyToClipboard('webhookSecret', this)">Copy</button>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h3 class="section-title">Step 2: Create Webhook in WooCommerce</h3>
+
+      <ol class="steps-list">
+        <li>
+          <strong>Open WooCommerce Settings</strong><br>
+          In your WordPress admin, go to <span class="code-inline">WooCommerce → Settings → Advanced → Webhooks</span>
+        </li>
+        <li>
+          <strong>Add New Webhook</strong><br>
+          Click <span class="code-inline">Add webhook</span> button
+        </li>
+        <li>
+          <strong>Configure the Webhook</strong><br>
+          <ul style="margin-top: 8px; padding-left: 20px; line-height: 2;">
+            <li><strong>Name:</strong> MoreStars Review Request</li>
+            <li><strong>Status:</strong> Active</li>
+            <li><strong>Topic:</strong> Order created</li>
+            <li><strong>Delivery URL:</strong> <span class="code-inline"><%= webhookUrl %></span></li>
+            <li><strong>Secret:</strong> <span class="code-inline">(paste secret from above)</span></li>
+            <li><strong>API version:</strong> WP REST API Integration v3</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Save the Webhook</strong><br>
+          Click <span class="code-inline">Save webhook</span> to activate
+        </li>
+        <li>
+          <strong>(Optional) Add Order Completed Webhook</strong><br>
+          Repeat steps 2-4 with Topic set to <span class="code-inline">Order completed</span> if you want SMS sent when orders are marked complete instead of when they're created.
+        </li>
+      </ol>
+
+      <div class="info-box">
+        <strong>Which topic should I use?</strong><br>
+        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+          <li><strong>Order created</strong> - SMS sent immediately when customer places order</li>
+          <li><strong>Order completed</strong> - SMS sent when you mark the order as complete</li>
+        </ul>
+        For most businesses, "Order created" works best for timely review requests.
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h3 class="section-title">Integration Status</h3>
+
+      <div class="status-section" style="border-top: none; padding-top: 0; margin-top: 0;">
+        <div class="status-row">
+          <span class="status-label">Connection Status</span>
+          <span class="status-value active">Connected</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Test Mode</span>
+          <span class="status-value <%= testMode ? 'active' : 'inactive' %>">
+            <%= testMode ? 'Enabled (SMS to test phone only)' : 'Disabled (Live mode)' %>
+          </span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">SMS Consent</span>
+          <span class="status-value <%= consentConfirmed ? 'active' : 'inactive' %>">
+            <%= consentConfirmed ? 'Confirmed' : 'Not confirmed (SMS disabled)' %>
+          </span>
+        </div>
+      </div>
+
+      <% if (!consentConfirmed) { %>
+        <div class="warning-box">
+          <strong>Action Required:</strong> You must confirm SMS consent in Settings before review requests will be sent. Go to Settings → POS Integration and check the consent checkbox.
+        </div>
+      <% } %>
+
+      <% if (testMode) { %>
+        <div class="info-box">
+          <strong>Test Mode Active:</strong> All SMS messages will be sent to your test phone number. Disable test mode in Settings when ready to go live.
+        </div>
+      <% } %>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="/dashboard/settings?tab=pos" class="btn-back">Back to Settings</a>
+    </div>
+  </div>
+
+  <%- include('../partials/dashboard-footer') %>
+
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    function copyToClipboard(elementId, button) {
+      var text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        var originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.classList.add('copied');
+        setTimeout(function() {
+          button.textContent = originalText;
+          button.classList.remove('copied');
+        }, 2000);
+      }).catch(function(err) {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy. Please select and copy manually.');
+      });
+    }
+  </script>
+</body>
+</html>

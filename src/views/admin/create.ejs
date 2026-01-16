@@ -67,7 +67,7 @@
     }
 
     .breadcrumb a {
-      color: #667eea;
+      color: #A1438E;
       text-decoration: none;
     }
 
@@ -138,7 +138,7 @@
 
     input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #A1438E;
     }
 
     .help-text {
@@ -234,7 +234,7 @@
 
     <div class="page-title">
       <h2>Create New Tenant</h2>
-      <p>Manually onboard a new business to FilterFive</p>
+      <p>Manually onboard a new business to MoreStars</p>
     </div>
 
     <div class="form-card">
@@ -250,6 +250,7 @@
       </div>
 
       <form method="POST" action="/admin/create">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
         <div class="form-group">
           <label for="businessName">
             Business Name <span class="required">*</span>

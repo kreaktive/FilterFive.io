@@ -2,6 +2,45 @@ const { User, FeedbackRequest, Review } = require('../models');
 const { Op } = require('sequelize');
 const smsService = require('../services/smsService');
 const { v4: uuidv4 } = require('uuid');
+const analyticsService = require('../services/analyticsService');
+const logger = require('../services/logger');
+
+/**
+ * Build WHERE clauses for feedback filtering
+ * Shared logic between list view and export
+ * @param {object} options - Filter options
+ * @returns {{ requestWhere: object, reviewWhere: object }}
+ */
+const buildFeedbackFilters = (options) => {
+  const { userId, rating, status, dateRange, search } = options;
+
+  // Build WHERE clause for FeedbackRequest
+  const requestWhere = { userId };
+
+  // Date range filter
+  if (dateRange) {
+    const dateFrom = new Date();
+    dateFrom.setDate(dateFrom.getDate() - dateRange);
+    requestWhere.createdAt = { [Op.gte]: dateFrom };
+  }
+
+  // Build WHERE clause for Review
+  const reviewWhere = {};
+
+  if (rating && rating !== 'all') {
+    reviewWhere.rating = parseInt(rating);
+  }
+
+  if (status && status !== 'all') {
+    reviewWhere.feedbackStatus = status;
+  }
+
+  if (search && search.trim() !== '') {
+    reviewWhere.feedbackText = { [Op.iLike]: `%${search}%` };
+  }
+
+  return { requestWhere, reviewWhere };
+};
 
 // GET /dashboard/feedback - Show paginated feedback list with filters
 const showFeedbackList = async (req, res) => {
@@ -14,74 +53,54 @@ const showFeedbackList = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    // Parse query parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 25;
-    const rating = req.query.rating; // '1', '2', '3', '4', '5', or 'all'
-    const status = req.query.status; // 'new', 'viewed', 'responded', 'resolved', or 'all'
-    const hasFeedback = req.query.hasFeedback; // 'true', 'false', or 'all'
-    const dateRange = parseInt(req.query.dateRange) || 30; // days
-    const search = req.query.search || '';
+    // Parse query parameters with bounds validation (DoS protection)
+    const page = Math.max(1, Math.min(parseInt(req.query.page) || 1, 1000));
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit) || 25, 100));
+    const rating = req.query.rating;
+    const status = req.query.status;
+    const hasFeedback = req.query.hasFeedback;
+    const dateRange = Math.max(1, Math.min(parseInt(req.query.dateRange) || 30, 365));
+    const search = (req.query.search || '').slice(0, 200); // Limit search length
 
     const offset = (page - 1) * limit;
 
-    // Build WHERE clause for FeedbackRequest
-    const requestWhere = {
-      userId: user.id
-    };
-
-    // Date range filter
-    if (dateRange) {
-      const dateFrom = new Date();
-      dateFrom.setDate(dateFrom.getDate() - dateRange);
-      requestWhere.createdAt = {
-        [Op.gte]: dateFrom
-      };
-    }
-
-    // Build WHERE clause for Review (nested)
-    const reviewWhere = {};
-
-    // Rating filter
-    if (rating && rating !== 'all') {
-      reviewWhere.rating = parseInt(rating);
-    }
-
-    // Status filter
-    if (status && status !== 'all') {
-      reviewWhere.feedbackStatus = status;
-    }
-
-    // Feedback text filter
-    if (search && search.trim() !== '') {
-      reviewWhere.feedbackText = {
-        [Op.iLike]: `%${search}%` // Case-insensitive search
-      };
-    }
+    // Build filters using shared function
+    const { requestWhere, reviewWhere } = buildFeedbackFilters({
+      userId: user.id,
+      rating,
+      status,
+      dateRange,
+      search
+    });
 
     // Has feedback filter
+    // D6 FIX: Specify explicit attributes to prevent over-fetching
     const includeOptions = {
       model: Review,
       as: 'review',
-      required: hasFeedback === 'true', // INNER JOIN if true, LEFT JOIN if false
-      where: Object.keys(reviewWhere).length > 0 ? reviewWhere : undefined
+      required: hasFeedback === 'true',
+      where: Object.keys(reviewWhere).length > 0 ? reviewWhere : undefined,
+      attributes: ['id', 'rating', 'feedbackText', 'feedbackStatus', 'redirectedTo', 'createdAt']
     };
 
     // Fetch feedback requests with reviews
+    // D6 FIX: Specify explicit attributes and use subQuery:false for accurate count
     const { count, rows: feedbackList } = await FeedbackRequest.findAndCountAll({
       where: requestWhere,
       include: [includeOptions],
+      attributes: ['id', 'uuid', 'customerName', 'customerPhone', 'deliveryMethod', 'status', 'smsSentAt', 'linkClickedAt', 'createdAt'],
       order: [['createdAt', 'DESC']],
       limit: limit,
       offset: offset,
-      distinct: true
+      distinct: true,
+      subQuery: false
     });
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(count / limit);
 
     res.render('dashboard/feedback', {
-      title: 'Feedback Management - FilterFive',
+      title: 'Feedback Management - MoreStars',
       user: user,
       feedbackList: feedbackList,
       pagination: {
@@ -102,7 +121,7 @@ const showFeedbackList = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in showFeedbackList:', error);
+    logger.error('Error in showFeedbackList', { error: error.message });
     res.status(500).render('error', {
       title: 'Error',
       message: 'Failed to load feedback list',
@@ -135,7 +154,7 @@ const markAsViewed = async (req, res) => {
 
     res.json({ success: true, status: review.feedbackStatus });
   } catch (error) {
-    console.error('Error marking review as viewed:', error);
+    logger.error('Error marking review as viewed', { error: error.message });
     res.status(500).json({ error: 'Failed to update status' });
   }
 };
@@ -182,7 +201,10 @@ const respondToFeedback = async (req, res) => {
       viewedAt: review.viewedAt || new Date() // Set viewedAt if not already set
     });
 
-    console.log(`✅ Responded to feedback ${reviewId} via SMS`);
+    // Invalidate analytics cache
+    await analyticsService.invalidateCache(userId);
+
+    logger.info('Responded to feedback via SMS', { userId, reviewId });
 
     res.json({
       success: true,
@@ -191,7 +213,7 @@ const respondToFeedback = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error responding to feedback:', error);
+    logger.error('Error responding to feedback', { error: error.message });
     res.status(500).json({
       error: 'Failed to send response',
       message: error.message
@@ -236,7 +258,7 @@ const addInternalNote = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error adding internal note:', error);
+    logger.error('Error adding internal note', { error: error.message });
     res.status(500).json({ error: 'Failed to add note' });
   }
 };
@@ -276,6 +298,9 @@ const updateStatus = async (req, res) => {
 
     await review.update(updateData);
 
+    // Invalidate analytics cache
+    await analyticsService.invalidateCache(userId);
+
     res.json({
       success: true,
       status: status,
@@ -283,7 +308,7 @@ const updateStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error updating status:', error);
+    logger.error('Error updating status', { error: error.message });
     res.status(500).json({ error: 'Failed to update status' });
   }
 };
@@ -320,7 +345,10 @@ const bulkUpdateStatus = async (req, res) => {
       }
     });
 
-    console.log(`✅ Bulk updated ${updatedCount} reviews to status: ${status}`);
+    // Invalidate analytics cache
+    await analyticsService.invalidateCache(userId);
+
+    logger.info('Bulk updated reviews', { userId, updatedCount, status });
 
     res.json({
       success: true,
@@ -329,7 +357,7 @@ const bulkUpdateStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in bulk update:', error);
+    logger.error('Error in bulk update', { error: error.message });
     res.status(500).json({ error: 'Failed to bulk update' });
   }
 };
@@ -339,30 +367,20 @@ const exportFeedback = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    // Use same filters as list view
+    // Use same filters as list view with bounds validation
     const rating = req.query.rating;
     const status = req.query.status;
-    const dateRange = parseInt(req.query.dateRange) || 30;
-    const search = req.query.search || '';
+    const dateRange = Math.max(1, Math.min(parseInt(req.query.dateRange) || 30, 365));
+    const search = (req.query.search || '').slice(0, 200);
 
-    // Build WHERE clauses (same logic as showFeedbackList)
-    const requestWhere = { userId: userId };
-    if (dateRange) {
-      const dateFrom = new Date();
-      dateFrom.setDate(dateFrom.getDate() - dateRange);
-      requestWhere.createdAt = { [Op.gte]: dateFrom };
-    }
-
-    const reviewWhere = {};
-    if (rating && rating !== 'all') {
-      reviewWhere.rating = parseInt(rating);
-    }
-    if (status && status !== 'all') {
-      reviewWhere.feedbackStatus = status;
-    }
-    if (search && search.trim() !== '') {
-      reviewWhere.feedbackText = { [Op.iLike]: `%${search}%` };
-    }
+    // Build filters using shared function
+    const { requestWhere, reviewWhere } = buildFeedbackFilters({
+      userId,
+      rating,
+      status,
+      dateRange,
+      search
+    });
 
     // Fetch all matching feedback
     const feedbackList = await FeedbackRequest.findAll({
@@ -403,7 +421,7 @@ const exportFeedback = async (req, res) => {
     res.send(csv);
 
   } catch (error) {
-    console.error('Error exporting feedback:', error);
+    logger.error('Error exporting feedback', { error: error.message });
     res.status(500).json({ error: 'Failed to export feedback' });
   }
 };
@@ -412,7 +430,7 @@ const exportFeedback = async (req, res) => {
 const generateWordCloud = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const dateRange = parseInt(req.query.dateRange) || 30;
+    const dateRange = Math.max(1, Math.min(parseInt(req.query.dateRange) || 30, 365));
 
     const dateFrom = new Date();
     dateFrom.setDate(dateFrom.getDate() - dateRange);
@@ -458,7 +476,7 @@ const generateWordCloud = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error generating word cloud:', error);
+    logger.error('Error generating word cloud', { error: error.message });
     res.status(500).json({ error: 'Failed to generate word cloud' });
   }
 };

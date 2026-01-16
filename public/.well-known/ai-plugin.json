@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "MoreStars",
+  "name_for_model": "morestars",
+  "description_for_human": "Get more Google reviews for your local business through SMS and QR codes.",
+  "description_for_model": "MoreStars is a SaaS platform that helps local businesses collect more Google reviews. It sends automated SMS messages to customers with direct links to leave Google reviews, and generates QR codes for physical locations. Pricing is $77/month flat rate with unlimited SMS. Target customers are local service businesses like restaurants, auto repair, salons, dental practices, plumbers, and other SMBs that rely on Google reviews for local SEO.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://morestars.io/openapi.yaml"
+  },
+  "logo_url": "https://morestars.io/images/logo.png",
+  "contact_email": "hello@morestars.io",
+  "legal_info_url": "https://morestars.io/terms"
+}

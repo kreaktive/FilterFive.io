@@ -39,6 +39,7 @@ router.post('/resend-verification', resendVerificationLimiter, resendVerificatio
 router.get('/forgot-password', redirectIfAuthenticated, showForgotPassword);
 router.post('/forgot-password', redirectIfAuthenticated, passwordResetLimiter, forgotPassword);
 router.get('/reset-password/:token', showResetPassword);
-router.post('/reset-password/:token', resetPassword);
+// S6 FIX: Add rate limiting to password reset submission
+router.post('/reset-password/:token', passwordResetLimiter, resetPassword);
 
 module.exports = router;

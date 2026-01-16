@@ -1,0 +1,171 @@
+/**
+ * Design System - CSS Custom Properties
+ *
+ * SINGLE SOURCE OF TRUTH for all design tokens
+ * Define colors, spacing, typography, and other design values here
+ *
+ * Usage in CSS:    color: var(--brand-dark);
+ * Usage in EJS:    style="color: var(--brand-dark);"
+ * Usage in HTML:   class="text-[var(--brand-dark)]"
+ *
+ * To change a color globally: update it once here, applies everywhere instantly
+ */
+
+:root {
+  /* =====================================================
+     BRAND COLORS - Primary palette
+     ===================================================== */
+  --brand-gold: #FFBA49;
+  --brand-dark: #500B42;
+  --brand-accent: #A1438E;
+  --brand-accent-hover: #8B3A7D;
+
+  /* =====================================================
+     STATUS COLORS - For alerts, success, errors
+     ===================================================== */
+  --status-success: #20A39E;
+  --status-success-light: #D1FAE5;
+  --status-error: #EF5B5B;
+  --status-warning: #F59E0B;
+  --status-warning-light: #FEF3C7;
+  --status-info: #3B82F6;
+
+  /* Vibrant accent colors for UI highlights */
+  --accent-amber: #F59E0B;
+  --accent-orange: #F97316;
+  --accent-emerald: #34D399;
+  --accent-emerald-light: #10B981;
+
+  /* =====================================================
+     NEUTRAL COLORS - Grays for backgrounds and text
+     ===================================================== */
+  --neutral-white: #FFFFFF;
+  --neutral-50: #F9FAFB;
+  --neutral-100: #F3F4F6;
+  --neutral-200: #E5E7EB;
+  --neutral-300: #D1D5DB;
+  --neutral-400: #9CA3AF;
+  --neutral-500: #6B7280;
+  --neutral-600: #4B5563;
+  --neutral-700: #374151;
+  --neutral-800: #1F2937;
+  --neutral-900: #111827;
+
+  /* =====================================================
+     SEMANTIC COLOR ALIASES
+     ===================================================== */
+  /* Text colors */
+  --text-primary: var(--neutral-900);
+  --text-secondary: var(--neutral-600);
+  --text-muted: var(--neutral-500);
+  --text-inverse: var(--neutral-white);
+
+  /* Background colors */
+  --bg-primary: var(--neutral-white);
+  --bg-secondary: var(--neutral-50);
+  --bg-tertiary: var(--neutral-100);
+  --bg-light: #F9F7FA;
+
+  /* Border colors */
+  --border-light: var(--neutral-200);
+  --border-medium: var(--neutral-300);
+  --border-dark: var(--neutral-400);
+
+  /* Interactive colors */
+  --interactive-primary: var(--brand-accent);
+  --interactive-hover: var(--brand-accent-hover);
+  --interactive-disabled: var(--neutral-300);
+
+  /* =====================================================
+     SPACING SCALE
+     ===================================================== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* =====================================================
+     TYPOGRAPHY
+     ===================================================== */
+  --font-sans: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Font sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* =====================================================
+     SHADOWS
+     ===================================================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-gold: 0 4px 14px 0 rgba(255, 186, 73, 0.39);
+  --shadow-gold-hover: 0 6px 20px 0 rgba(255, 186, 73, 0.5);
+
+  /* =====================================================
+     TRANSITIONS
+     ===================================================== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* =====================================================
+     BORDER RADIUS
+     ===================================================== */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* =====================================================
+     Z-INDEX SCALE
+     ===================================================== */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-tooltip: 400;
+}
+
+/* =====================================================
+   REDUCED MOTION SUPPORT
+   ===================================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+/* =====================================================
+   LIGHT/DARK MODE SUPPORT (Optional future enhancement)
+   ===================================================== */
+/*
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: var(--neutral-900);
+    --text-primary: var(--neutral-100);
+    --border-light: var(--neutral-800);
+  }
+}
+*/

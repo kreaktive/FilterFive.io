@@ -4,10 +4,31 @@
  */
 
 const { User } = require('../models');
+const logger = require('../services/logger');
+
+/**
+ * Build trial status object from user
+ * Centralized to avoid duplication across controllers
+ * @param {User} user - User model instance
+ * @returns {object} Trial status object
+ */
+const buildTrialStatus = (user) => {
+  if (!user) return null;
+
+  return {
+    isActive: user.isTrialActive(),
+    isInGracePeriod: user.isInGracePeriod(),
+    isHardLocked: user.isHardLocked(),
+    canSendSms: user.canSendSms(),
+    hasActiveSubscription: user.subscriptionStatus === 'active',
+    trialEndsAt: user.trialEndsAt,
+    subscriptionStatus: user.subscriptionStatus
+  };
+};
 
 /**
  * Check trial status and attach to request
- * Loads user data and calculates trial state
+ * Uses lazy loading from auth middleware to avoid duplicate DB queries
  */
 const checkTrialStatus = async (req, res, next) => {
   try {
@@ -15,27 +36,28 @@ const checkTrialStatus = async (req, res, next) => {
       return next();
     }
 
-    const user = await User.findByPk(req.session.userId);
+    // Use lazy loader if available (from requireAuth middleware)
+    // Otherwise do a direct lookup for routes that don't use requireAuth
+    if (req.loadUserAttributes) {
+      await req.loadUserAttributes('subscription');
+    } else {
+      const user = await User.findByPk(req.session.userId);
+      if (!user) {
+        return next();
+      }
+      req.user = user;
+    }
 
-    if (!user) {
+    if (!req.user) {
       return next();
     }
 
-    // Attach user and trial info to request
-    req.user = user;
-    req.trialStatus = {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    // Build trial status from user
+    req.trialStatus = buildTrialStatus(req.user);
 
     next();
   } catch (error) {
-    console.error('Error checking trial status:', error);
+    logger.error('Error checking trial status', { error: error.message });
     next(error);
   }
 };
@@ -69,7 +91,7 @@ const requireActiveTrial = async (req, res, next) => {
     // Block access if trial expired (soft lock or hard lock)
     if (req.trialStatus && (req.trialStatus.isInGracePeriod || req.trialStatus.isHardLocked)) {
       return res.render('dashboard/trial-expired', {
-        title: 'Trial Expired - FilterFive',
+        title: 'Trial Expired - MoreStars',
         user: req.user,
         trialStatus: req.trialStatus,
         isGracePeriod: req.trialStatus.isInGracePeriod,
@@ -80,7 +102,7 @@ const requireActiveTrial = async (req, res, next) => {
     // Default: allow access (shouldn't reach here in normal flow)
     next();
   } catch (error) {
-    console.error('Error in requireActiveTrial:', error);
+    logger.error('Error in requireActiveTrial', { error: error.message });
     next(error);
   }
 };
@@ -115,7 +137,7 @@ const canSendSms = async (req, res, next) => {
       smsUsageLimit: req.user.smsUsageLimit
     });
   } catch (error) {
-    console.error('Error in canSendSms:', error);
+    logger.error('Error in canSendSms', { error: error.message });
     next(error);
   }
 };
@@ -154,6 +176,7 @@ const getRedirectBlockStatus = (user) => {
 };
 
 module.exports = {
+  buildTrialStatus,
   checkTrialStatus,
   requireActiveTrial,
   canSendSms,

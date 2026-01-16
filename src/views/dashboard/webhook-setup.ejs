@@ -1,0 +1,714 @@
+<%- include('../partials/dashboard-head', { title: title }) %>
+  <style>
+    body {
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .breadcrumb {
+      margin-bottom: 20px;
+    }
+
+    .breadcrumb a {
+      color: var(--brand-gold);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumb span {
+      color: #718096;
+    }
+
+    .page-title {
+      margin-bottom: 30px;
+    }
+
+    .page-title h2 {
+      font-size: 28px;
+      color: var(--brand-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .status-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .status-badge.connected {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.test-mode {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .guide-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .guide-card h3 {
+      font-size: 18px;
+      color: var(--brand-dark);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .guide-card h3 .step-number {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .credential-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .credential-box label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #718096;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .credential-value {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .credential-value code {
+      flex: 1;
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .btn-copy {
+      padding: 10px 16px;
+      background: var(--brand-dark);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+    }
+
+    .btn-copy.copied {
+      background: var(--brand-positive);
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #1e40af;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #92400e;
+    }
+
+    .success-box {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #065f46;
+    }
+
+    .code-block {
+      background: #1a202c;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 15px 0;
+      position: relative;
+    }
+
+    .code-block .btn-copy-code {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    .code-block pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .json-key { color: #9ae6b4; }
+    .json-string { color: #fbd38d; }
+    .json-number { color: #90cdf4; }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+
+    .step-list li {
+      padding: 10px 0 10px 35px;
+      position: relative;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .step-list li:last-child {
+      border-bottom: none;
+    }
+
+    .step-list li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 24px;
+      height: 24px;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .payload-field {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .payload-field:last-child {
+      border-bottom: none;
+    }
+
+    .payload-field-name {
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--brand-dark);
+      width: 150px;
+      flex-shrink: 0;
+    }
+
+    .payload-field-required {
+      color: #dc2626;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .payload-field-desc {
+      flex: 1;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 186, 73, 0.4);
+    }
+
+    .btn-secondary {
+      display: inline-block;
+      padding: 12px 24px;
+      background: white;
+      color: var(--brand-dark);
+      text-decoration: none;
+      border: 2px solid var(--brand-gold);
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--brand-gold);
+    }
+
+    .test-section {
+      background: rgba(255, 186, 73, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .test-section h4 {
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    #testResult {
+      margin-top: 15px;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .guide-card { padding: 20px; }
+      .credential-value { flex-direction: column; }
+      .credential-value code { width: 100%; }
+      .btn-copy { width: 100%; }
+      .payload-field { flex-direction: column; }
+      .payload-field-name { width: 100%; margin-bottom: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/dashboard-header', { activePage: 'settings' }) %>
+
+  <main id="main-content" class="container">
+    <div class="breadcrumb">
+      <a href="/dashboard/settings?tab=pos">Settings</a> <span>&rarr; <%= providerName %> Setup</span>
+    </div>
+
+    <div class="page-title">
+      <h2>
+        <% if (provider === 'zapier') { %>&#9889;<% } else { %>&#128279;<% } %>
+        <%= providerName %> Setup Guide
+        <span class="status-badge connected">Connected</span>
+        <% if (testMode) { %><span class="status-badge test-mode">Test Mode</span><% } %>
+      </h2>
+      <p>Send transaction data to MoreStars to trigger SMS review requests automatically.</p>
+    </div>
+
+    <!-- Credentials -->
+    <div class="guide-card">
+      <h3><span class="step-number">1</span> Your Webhook Credentials</h3>
+      <p>Use these credentials to send data to your unique webhook endpoint.</p>
+
+      <div class="credential-box">
+        <label>Webhook URL</label>
+        <div class="credential-value">
+          <code id="webhookUrl"><%= webhookUrl %></code>
+          <button class="btn-copy" data-copy-target="webhookUrl">Copy</button>
+        </div>
+      </div>
+
+      <div class="credential-box">
+        <label>API Key (for X-API-Key header)</label>
+        <div class="credential-value">
+          <code id="apiKey"><%= showApiKey ? apiKey : apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4) %></code>
+          <button class="btn-copy" data-copy-target="apiKey">Copy</button>
+        </div>
+        <% if (showApiKey) { %>
+        <div class="warning-box" style="margin-top: 10px; margin-bottom: 0;">
+          <strong>Save this API key now!</strong> For security, we won't show it in full again. Store it somewhere safe.
+        </div>
+        <% } %>
+      </div>
+
+      <% if (!showApiKey) { %>
+      <p style="margin-top: 10px; font-size: 13px; color: #718096;">
+        Need to regenerate your API key? <a href="#" id="regenerateKeyLink" style="color: var(--brand-gold);">Click here</a> (this will invalidate the old key)
+      </p>
+      <% } %>
+    </div>
+
+    <!-- Zapier-specific instructions -->
+    <% if (provider === 'zapier') { %>
+    <div class="guide-card">
+      <h3><span class="step-number">2</span> Create Your Zap</h3>
+
+      <ol class="step-list">
+        <li data-step="1">Go to <a href="https://zapier.com/app/editor" target="_blank" rel="noopener" style="color: var(--brand-gold);">Zapier</a> and create a new Zap</li>
+        <li data-step="2">Choose your POS system as the <strong>Trigger</strong> (e.g., Square, Clover, Toast, Lightspeed)</li>
+        <li data-step="3">Select the trigger event (e.g., "New Payment", "New Order", "New Sale")</li>
+        <li data-step="4">Connect your POS account and test the trigger</li>
+        <li data-step="5">Add <strong>"Webhooks by Zapier"</strong> as the Action</li>
+        <li data-step="6">Choose <strong>"POST"</strong> as the action event</li>
+        <li data-step="7">Configure the webhook (see settings below)</li>
+        <li data-step="8">Test the action and publish your Zap!</li>
+      </ol>
+
+      <h4 style="margin-top: 20px; font-size: 16px;">Zapier Webhook Settings:</h4>
+
+      <div class="credential-box">
+        <label>URL</label>
+        <div class="credential-value">
+          <code><%= webhookUrl %></code>
+        </div>
+      </div>
+
+      <div class="credential-box">
+        <label>Payload Type</label>
+        <div class="credential-value">
+          <code>json</code>
+        </div>
+      </div>
+
+      <div class="credential-box">
+        <label>Headers (click "Show Options" in Zapier)</label>
+        <div style="margin-top: 10px;">
+          <code style="display: block; padding: 10px;">Content-Type: application/json</code>
+          <code style="display: block; padding: 10px; margin-top: 5px;">X-API-Key: <%= apiKey.substring(0, 8) %>...</code>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Tip:</strong> In Zapier's "Data" section, map your POS fields to our expected format. At minimum, you need <code>customer_phone</code>.
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Custom Webhook instructions -->
+    <% if (provider === 'webhook') { %>
+    <div class="guide-card">
+      <h3><span class="step-number">2</span> Send a POST Request</h3>
+      <p>Send transaction data as JSON to trigger an SMS review request.</p>
+
+      <h4 style="margin-top: 20px; font-size: 16px;">Example cURL Request:</h4>
+      <div class="code-block">
+        <button class="btn-copy btn-copy-code" data-copy-code="true">Copy</button>
+        <pre>curl -X POST "<%= webhookUrl %>" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: <%= apiKey.substring(0, 8) %>..." \
+  -d '{
+  "customer_phone": "+15551234567",
+  "customer_name": "John Doe",
+  "amount": 49.99,
+  "transaction_id": "order-12345"
+}'</pre>
+      </div>
+
+      <h4 style="margin-top: 20px; font-size: 16px;">Response (Success):</h4>
+      <div class="code-block">
+        <pre>{
+  <span class="json-key">"success"</span>: <span class="json-number">true</span>,
+  <span class="json-key">"eventId"</span>: <span class="json-string">"order-12345"</span>,
+  <span class="json-key">"queued"</span>: <span class="json-number">true</span>
+}</pre>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Payload Format -->
+    <div class="guide-card">
+      <h3><span class="step-number"><%= provider === 'zapier' ? '3' : '3' %></span> JSON Payload Format</h3>
+      <p>Send a JSON object with these fields:</p>
+
+      <div style="margin-top: 15px;">
+        <div class="payload-field">
+          <div class="payload-field-name">customer_phone<span class="payload-field-required">*</span></div>
+          <div class="payload-field-desc">Customer's phone number (US format). Required. We'll normalize it automatically.</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name">customer_name</div>
+          <div class="payload-field-desc">Customer's name. Used in personalized SMS messages.</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name">amount</div>
+          <div class="payload-field-desc">Purchase amount (number). Logged for analytics.</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name">transaction_id</div>
+          <div class="payload-field-desc">Your order/transaction ID. Used for deduplication - same ID won't trigger multiple SMS.</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name">location</div>
+          <div class="payload-field-desc">Store/location name. Logged for reference.</div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 20px;">
+        <strong>Flexible field names:</strong> We also accept <code>phone</code>, <code>name</code>, <code>total</code>, <code>order_id</code>, and other common variations.
+      </div>
+    </div>
+
+    <!-- Test Section -->
+    <div class="guide-card">
+      <h3><span class="step-number"><%= provider === 'zapier' ? '4' : '4' %></span> Test Your Integration</h3>
+
+      <% if (!consentConfirmed) { %>
+      <div class="warning-box">
+        <strong>SMS Consent Required:</strong> Before SMS can be sent, you need to confirm customer consent in <a href="/dashboard/settings?tab=pos" style="color: inherit;">POS Settings</a>.
+      </div>
+      <% } %>
+
+      <% if (testMode) { %>
+      <div class="info-box">
+        <strong>Test Mode is ON:</strong> SMS will be sent to your test phone number instead of customers. Configure your test phone in <a href="/dashboard/settings?tab=pos" style="color: inherit;">POS Settings</a>.
+      </div>
+      <% } %>
+
+      <div class="test-section">
+        <h4>Send a Test Webhook</h4>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #4a5568;">
+          Enter a phone number and click "Send Test" to trigger a test webhook to your endpoint.
+        </p>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="tel" id="testPhone" placeholder="(555) 123-4567" style="flex: 1; min-width: 200px; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px;">
+          <button class="btn-primary" id="sendTestBtn">Send Test</button>
+        </div>
+
+        <div id="testResult"></div>
+      </div>
+    </div>
+
+    <!-- Status Codes -->
+    <div class="guide-card">
+      <h3>Response Codes</h3>
+      <div style="margin-top: 10px;">
+        <div class="payload-field">
+          <div class="payload-field-name" style="width: 80px;">200</div>
+          <div class="payload-field-desc"><strong>Success</strong> - Webhook received and processed (SMS queued or skipped with reason)</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name" style="width: 80px;">400</div>
+          <div class="payload-field-desc"><strong>Bad Request</strong> - Invalid payload format or missing required fields</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name" style="width: 80px;">401</div>
+          <div class="payload-field-desc"><strong>Unauthorized</strong> - Invalid or missing API key</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name" style="width: 80px;">404</div>
+          <div class="payload-field-desc"><strong>Not Found</strong> - Invalid webhook URL</div>
+        </div>
+        <div class="payload-field">
+          <div class="payload-field-name" style="width: 80px;">429</div>
+          <div class="payload-field-desc"><strong>Rate Limited</strong> - Max 60 requests per minute</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back button -->
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="/dashboard/settings?tab=pos" class="btn-secondary">&larr; Back to POS Settings</a>
+    </div>
+  </main>
+
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile menu toggle
+      var menuToggle = document.getElementById('menuToggle');
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          document.getElementById('headerNav').classList.toggle('active');
+        });
+      }
+
+      // Copy buttons with data-copy-target attribute
+      document.querySelectorAll('.btn-copy[data-copy-target]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var targetId = this.getAttribute('data-copy-target');
+          var text = document.getElementById(targetId).innerText;
+          var button = this;
+          navigator.clipboard.writeText(text).then(function() {
+            button.classList.add('copied');
+            button.textContent = 'Copied!';
+            setTimeout(function() {
+              button.classList.remove('copied');
+              button.textContent = 'Copy';
+            }, 2000);
+          });
+        });
+      });
+
+      // Copy code block buttons
+      document.querySelectorAll('.btn-copy-code[data-copy-code]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var pre = this.parentElement.querySelector('pre');
+          var button = this;
+          navigator.clipboard.writeText(pre.innerText).then(function() {
+            button.classList.add('copied');
+            button.textContent = 'Copied!';
+            setTimeout(function() {
+              button.classList.remove('copied');
+              button.textContent = 'Copy';
+            }, 2000);
+          });
+        });
+      });
+
+      // Regenerate API key link
+      var regenerateLink = document.getElementById('regenerateKeyLink');
+      if (regenerateLink) {
+        regenerateLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (!confirm('Are you sure? This will invalidate your current API key. You\'ll need to update it in Zapier or your webhook configuration.')) {
+            return;
+          }
+
+          fetch('/dashboard/settings/pos/webhook/regenerate-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider: '<%= provider %>' })
+          })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.success) {
+              document.getElementById('apiKey').textContent = data.apiKey;
+              alert('API key regenerated! Make sure to update your integration with the new key.');
+            } else {
+              alert('Failed to regenerate API key: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(function(err) {
+            alert('Error: ' + err.message);
+          });
+        });
+      }
+
+      // Send test webhook button
+      var sendTestBtn = document.getElementById('sendTestBtn');
+      if (sendTestBtn) {
+        sendTestBtn.addEventListener('click', function() {
+          var phone = document.getElementById('testPhone').value.replace(/\D/g, '');
+          var resultDiv = document.getElementById('testResult');
+
+          if (phone.length < 10) {
+            resultDiv.innerHTML = '<div class="warning-box">Please enter a valid phone number.</div>';
+            resultDiv.style.display = 'block';
+            return;
+          }
+
+          // Format to E.164
+          if (phone.length === 10) {
+            phone = '+1' + phone;
+          } else if (phone.length === 11 && phone.charAt(0) === '1') {
+            phone = '+' + phone;
+          }
+
+          resultDiv.innerHTML = '<div class="info-box">Sending test webhook...</div>';
+          resultDiv.style.display = 'block';
+
+          fetch('<%= webhookUrl %>', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': '<%= apiKey %>'
+            },
+            body: JSON.stringify({
+              customer_phone: phone,
+              customer_name: 'Test Customer',
+              amount: 25.00,
+              transaction_id: 'test-' + Date.now()
+            })
+          })
+          .then(function(res) { return res.json().then(function(data) { return { status: res.status, data: data }; }); })
+          .then(function(result) {
+            if (result.status === 200) {
+              if (result.data.queued) {
+                resultDiv.innerHTML = '<div class="success-box"><strong>Success!</strong> SMS has been queued. Check your phone shortly.</div>';
+              } else if (result.data.skipped) {
+                resultDiv.innerHTML = '<div class="info-box"><strong>Skipped:</strong> ' + (result.data.reason || 'See POS transactions for details.') + '</div>';
+              } else {
+                resultDiv.innerHTML = '<div class="success-box"><strong>Webhook received!</strong> ' + JSON.stringify(result.data) + '</div>';
+              }
+            } else {
+              resultDiv.innerHTML = '<div class="warning-box"><strong>Error ' + result.status + ':</strong> ' + (result.data.error || result.data.message || 'Unknown error') + '</div>';
+            }
+          })
+          .catch(function(err) {
+            resultDiv.innerHTML = '<div class="warning-box"><strong>Error:</strong> ' + err.message + '</div>';
+          });
+        });
+      }
+
+      // Phone number formatting
+      var testPhoneInput = document.getElementById('testPhone');
+      if (testPhoneInput) {
+        testPhoneInput.addEventListener('input', function(e) {
+          var digits = this.value.replace(/\D/g, '');
+          digits = digits.substring(0, 10);
+
+          var formatted = '';
+          if (digits.length > 0) {
+            formatted = '(' + digits.substring(0, 3);
+          }
+          if (digits.length >= 3) {
+            formatted += ') ' + digits.substring(3, 6);
+          }
+          if (digits.length >= 6) {
+            formatted += '-' + digits.substring(6, 10);
+          }
+
+          this.value = formatted;
+        });
+      }
+    });
+  </script>
+
+  <%- include('../partials/dashboard-footer') %>
+</body>
+</html>

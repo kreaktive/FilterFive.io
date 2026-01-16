@@ -1,0 +1,35 @@
+<%#
+  Auth Layout End Partial
+
+  Closes the auth-layout. Use after your form content.
+
+  Usage:
+  <%- include('partials/auth-layout', { title: 'Sign Up', subtitle: '...' }) %>
+    <!-- Your form content here -->
+  <%- include('partials/auth-layout-end', {
+    footerLinks: true,
+    extraScripts: '<script>...</script>'
+  }) %>
+
+  @param {boolean} footerLinks - Show privacy/terms links (default: true)
+  @param {string} extraScripts - Additional scripts to inject before </body>
+%>
+<%
+  const _footerLinks = typeof footerLinks !== 'undefined' ? footerLinks : true;
+%>
+      <% if (_footerLinks) { %>
+      <div class="auth-footer">
+        <p>
+          <a href="/privacy-policy">Privacy Policy</a> &bull;
+          <a href="/terms-of-service">Terms of Service</a>
+        </p>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (typeof extraScripts !== 'undefined') { %>
+  <%- extraScripts %>
+  <% } %>
+</body>
+</html>

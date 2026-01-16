@@ -23,7 +23,7 @@ const testData = {
   tenantEmail: process.env.TEST_EMAIL,
   customerName: 'Test Customer',
   rating: 2,
-  comment: 'This is a test negative feedback email from the FilterFive test script.',
+  comment: 'This is a test negative feedback email from the MoreStars test script.',
   phone: '+15551234567'
 };
 

@@ -1,0 +1,45 @@
+<!-- CTA Section - Start Free Trial Banner -->
+<section class="py-20 md:py-32 relative overflow-hidden <%= typeof bgClass !== 'undefined' ? bgClass : 'bg-[#500B42]' %>">
+  <!-- Background Decorations -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-1/4 left-0 w-64 h-64 bg-[#FFBA49] rounded-full blur-3xl opacity-10 -translate-x-1/2"></div>
+    <div class="absolute bottom-1/4 right-0 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-10 translate-x-1/2"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+    <h2 class="text-3xl md:text-5xl font-extrabold mb-6 font-title <%= typeof textClass !== 'undefined' ? textClass : 'text-white' %>">
+      <%= typeof heading !== 'undefined' ? heading : 'Ready to Get More Stars?' %>
+    </h2>
+    <p class="text-lg md:text-xl <%= typeof subtextClass !== 'undefined' ? subtextClass : 'text-gray-300' %> mb-10 max-w-2xl mx-auto">
+      <%= typeof subheading !== 'undefined' ? subheading : 'Join hundreds of local businesses already growing their reputation with MoreStars.' %>
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+      <a href="/signup" class="px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 bg-[#FFBA49] text-[#500B42]" data-track="cta-section">
+        <%= typeof buttonText !== 'undefined' ? buttonText : 'Start Free Trial' %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+      <% if (typeof showSecondaryButton === 'undefined' || showSecondaryButton) { %>
+      <a href="<%= typeof secondaryHref !== 'undefined' ? secondaryHref : '/pricing' %>" class="px-8 py-4 rounded-full font-bold text-lg border-2 <%= typeof borderClass !== 'undefined' ? borderClass : 'border-white/30 text-white hover:bg-white/10' %> flex items-center justify-center">
+        <%= typeof secondaryText !== 'undefined' ? secondaryText : 'See Pricing' %>
+      </a>
+      <% } %>
+    </div>
+
+    <!-- Trust Indicators -->
+    <div class="flex flex-wrap justify-center gap-6 text-sm <%= typeof trustTextClass !== 'undefined' ? trustTextClass : 'text-gray-400' %>">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        14-Day Free Trial
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        No Credit Card Required
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+        Cancel Anytime
+      </div>
+    </div>
+  </div>
+</section>

@@ -11,12 +11,15 @@ const { qrRateLimiter } = require('../middleware/qrRateLimiter');
 
 /**
  * QR Code Scan Entry Point
- * GET /r/:businessId
+ * GET /r/:businessId (integer only)
  *
- * Example: https://filterfive.io/r/123
+ * Example: https://app.morestars.io/r/123
  *
  * Flow: Customer scans QR → Rate limit check → Create request → Redirect to rating page
+ *
+ * Note: Uses regex to only match numeric IDs, allowing /r/:shortCode (alphanumeric)
+ * to be handled by shortUrlRoutes for SMS feedback links
  */
-router.get('/r/:businessId', qrRateLimiter, handleQrScan);
+router.get('/r/:businessId(\\d+)', qrRateLimiter, handleQrScan);
 
 module.exports = router;

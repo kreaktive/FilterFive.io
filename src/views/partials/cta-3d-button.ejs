@@ -1,0 +1,200 @@
+<!-- 3D Tilt CTA Button Partial -->
+<!--
+  Usage: include('partials/cta-3d-button', {
+    buttonText: 'Start 14-Day Free Trial',  // Button text
+    buttonLink: '/signup',                   // Link URL
+    trackId: 'hero-cta',                     // Analytics tracking ID
+    fullWidth: true,                         // Makes button full width
+    size: 'md',                              // 'sm', 'md', or 'lg'
+    showGlow: true                           // Show pulsating glow (default: true)
+  })
+-->
+
+<%
+  // Default values
+  const text = typeof buttonText !== 'undefined' ? buttonText : 'Start 14-Day Free Trial';
+  const link = typeof buttonLink !== 'undefined' ? buttonLink : '/signup';
+  const uniqueId = typeof ctaId !== 'undefined' ? ctaId : 'tiltBtn-' + Math.random().toString(36).substr(2, 9);
+  const track = typeof trackId !== 'undefined' ? trackId : '';
+  const isFullWidth = typeof fullWidth !== 'undefined' && fullWidth;
+  const btnSize = typeof size !== 'undefined' ? size : 'lg';
+  const hasGlow = typeof showGlow === 'undefined' || showGlow;
+
+  // Size classes
+  const sizeClasses = {
+    sm: 'px-6 py-3 text-base',
+    md: 'px-8 py-4 text-lg',
+    lg: 'px-10 py-5 text-lg'
+  };
+  const currentSize = sizeClasses[btnSize] || sizeClasses.lg;
+%>
+
+<!-- 3D Button CSS (only loads once) -->
+<style<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  .btn-3d {
+    background: linear-gradient(180deg, #FFD17A 0%, #FFBA49 50%, #E5A63F 100%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.4) inset,
+      0 -2px 4px 0 rgba(0, 0, 0, 0.1) inset,
+      0 4px 8px -2px rgba(229, 166, 63, 0.4),
+      0 8px 16px -4px rgba(229, 166, 63, 0.3),
+      0 16px 32px -8px rgba(229, 166, 63, 0.2);
+    border: none;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    /* GPU acceleration */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+  .btn-3d:hover {
+    background: linear-gradient(180deg, #FFD890 0%, #FFC45C 50%, #FFBA49 100%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.5) inset,
+      0 -2px 4px 0 rgba(0, 0, 0, 0.08) inset,
+      0 8px 16px -2px rgba(229, 166, 63, 0.5),
+      0 16px 32px -4px rgba(229, 166, 63, 0.4),
+      0 24px 48px -8px rgba(229, 166, 63, 0.3);
+  }
+  .btn-3d:active {
+    background: linear-gradient(180deg, #FFBA49 0%, #E5A63F 50%, #D4962F 100%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
+      0 2px 4px 0 rgba(0, 0, 0, 0.15) inset,
+      0 2px 4px -1px rgba(229, 166, 63, 0.3);
+    transform: translateY(2px) scale(0.98);
+  }
+  @keyframes cta3dPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.5; }
+  }
+  .cta-3d-glow {
+    animation: cta3dPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: opacity;
+  }
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .cta-3d-glow {
+      animation: none;
+    }
+    .btn-3d,
+    .btn-3d:hover,
+    .btn-3d:active {
+      transition: none;
+      transform: none !important;
+    }
+  }
+</style>
+
+<!-- 3D Tilt CTA Button -->
+<div id="<%= uniqueId %>-container" class="relative <%= isFullWidth ? 'block w-full' : 'inline-block' %> group cta-3d-container z-50" style="perspective: 1000px;">
+   <% if (hasGlow) { %>
+   <!-- Pulsating glow -->
+   <div id="<%= uniqueId %>-glow" class="cta-3d-glow absolute -inset-3 bg-[#FFBA49]/30 rounded-full blur-xl pointer-events-none"></div>
+   <% } %>
+   <a href="<%= link %>" id="<%= uniqueId %>" class="btn-3d cta-3d-btn relative <%= isFullWidth ? 'flex w-full justify-center' : 'inline-flex' %> items-center gap-3 <%= currentSize %> rounded-full font-bold text-[#500B42] transform-gpu" style="transform-style: preserve-3d; transition: transform 0.15s ease-out;"<% if (track) { %> data-track="<%= track %>"<% } %>>
+      <%= text %>
+      <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+   </a>
+</div>
+
+<!-- 3D Tilt Effect Script (only loads once) -->
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  (function() {
+    // Only initialize once globally
+    if (window.cta3DTiltInitialized) return;
+    window.cta3DTiltInitialized = true;
+
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return; // Skip all tilt effects for accessibility
+
+    const maxTilt = 15;
+    const maxGlowOffset = 30;
+    const effectRadius = 1000;
+
+    // Throttle mousemove for performance (60fps max)
+    let ticking = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    function initTiltEffect() {
+      const buttons = document.querySelectorAll('.cta-3d-btn');
+
+      function updateTilt() {
+        buttons.forEach(btn => {
+          const rect = btn.getBoundingClientRect();
+          const btnCenterX = rect.left + rect.width / 2;
+          const btnCenterY = rect.top + rect.height / 2;
+
+          const deltaX = lastMouseX - btnCenterX;
+          const deltaY = lastMouseY - btnCenterY;
+          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+          const rawIntensity = Math.max(0, 1 - distance / effectRadius);
+          const intensity = rawIntensity * (2 - rawIntensity);
+
+          // Find associated glow element
+          const container = btn.closest('.cta-3d-container');
+          const glow = container ? container.querySelector('[id$="-glow"]') : null;
+
+          if (intensity > 0) {
+            const normalizedX = deltaX / Math.max(distance, 1);
+            const normalizedY = deltaY / Math.max(distance, 1);
+
+            const tiltX = -normalizedY * maxTilt * intensity;
+            const tiltY = normalizedX * maxTilt * intensity;
+
+            const isDesktop = window.innerWidth >= 768;
+            const maxScale = isDesktop ? 1.2 : 0.12;
+            const scale = 1 + (intensity * maxScale);
+
+            // Use translate3d for GPU acceleration
+            btn.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(${scale}, ${scale}, 1)`;
+
+            // Move glow to follow cursor direction
+            if (glow) {
+              glow.style.transform = `translate3d(${normalizedX * maxGlowOffset * intensity}px, ${normalizedY * maxGlowOffset * intensity}px, 0) scale(${1 + intensity * 0.5})`;
+              glow.style.opacity = 0.3 + (intensity * 0.6);
+            }
+          } else {
+            btn.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            if (glow) {
+              glow.style.transform = 'translate3d(0, 0, 0) scale(1)';
+              glow.style.opacity = 0.3;
+            }
+          }
+        });
+        ticking = false;
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        if (!ticking) {
+          requestAnimationFrame(updateTilt);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      buttons.forEach(btn => {
+        // GPU acceleration hints
+        btn.style.willChange = 'transform';
+        btn.style.backfaceVisibility = 'hidden';
+        btn.style.transition = 'transform 0.15s ease-out';
+        const container = btn.closest('.cta-3d-container');
+        const glow = container ? container.querySelector('[id$="-glow"]') : null;
+        if (glow) {
+          glow.style.willChange = 'transform, opacity';
+          glow.style.backfaceVisibility = 'hidden';
+          glow.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out';
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTiltEffect);
+    } else {
+      initTiltEffect();
+    }
+  })();
+</script>

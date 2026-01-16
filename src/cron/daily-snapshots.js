@@ -11,36 +11,39 @@
 
 const cron = require('node-cron');
 const snapshotService = require('../services/snapshotService');
+const { sendAdminAlert } = require('../services/emailService');
+const logger = require('../services/logger');
 
 /**
  * Execute daily snapshot generation
  */
 async function executeDailySnapshots() {
-  console.log('============================================');
-  console.log(`[Cron] Daily Snapshot Generation Started`);
-  console.log(`[Cron] Time: ${new Date().toISOString()}`);
-  console.log('============================================');
+  logger.cron('daily-snapshots', 'started');
 
   try {
     // Generate daily snapshots (for yesterday)
     const snapshotResult = await snapshotService.generateDailySnapshots();
-    console.log('[Cron] Snapshot generation completed:', snapshotResult);
+    logger.cron('daily-snapshots', 'snapshots-completed', { result: snapshotResult });
 
     // Generate timing performance aggregations
     const timingResult = await snapshotService.generateTimingPerformance();
-    console.log('[Cron] Timing performance generation completed:', timingResult);
+    logger.cron('daily-snapshots', 'timing-completed', { result: timingResult });
 
-    console.log('============================================');
-    console.log('[Cron] Daily Snapshot Generation Completed Successfully');
-    console.log('============================================');
+    logger.cron('daily-snapshots', 'completed');
   } catch (error) {
-    console.error('============================================');
-    console.error('[Cron] ERROR in Daily Snapshot Generation:');
-    console.error(error);
-    console.error('============================================');
+    logger.error('Cron job failed: daily-snapshots', {
+      error: error.message,
+      stack: error.stack,
+      job: 'daily-snapshots'
+    });
 
-    // TODO: Send error alert to admin
-    // You might want to integrate with your alerting system here
+    // Send error alert to admin
+    await sendAdminAlert(
+      'Cron Job Failed: Daily Snapshots',
+      error.message,
+      error.stack,
+      { cronJob: 'daily-snapshots', timestamp: new Date().toISOString() }
+    );
   }
 }
 
@@ -52,14 +55,14 @@ function initDailySnapshotsCron() {
   // Cron format: minute hour day month dayOfWeek
   const schedule = '0 2 * * *';
 
-  console.log(`[Cron] Scheduling daily snapshots job: ${schedule} (2:00 AM daily)`);
+  logger.info('Scheduling daily snapshots cron job', { schedule, timezone: 'America/Los_Angeles' });
 
   cron.schedule(schedule, executeDailySnapshots, {
     scheduled: true,
     timezone: 'America/Los_Angeles' // Adjust to your timezone
   });
 
-  console.log('[Cron] Daily snapshots job scheduled successfully');
+  logger.cron('daily-snapshots', 'scheduled');
 }
 
 /**
@@ -68,9 +71,9 @@ function initDailySnapshotsCron() {
  * @param {Date} [targetDate] - Specific date to generate snapshots for
  */
 async function manualTrigger(targetDate = null) {
-  console.log('[Manual Trigger] Starting snapshot generation...');
+  logger.info('Manual snapshot generation triggered', { targetDate });
   await executeDailySnapshots(targetDate);
-  console.log('[Manual Trigger] Snapshot generation completed');
+  logger.info('Manual snapshot generation completed');
 }
 
 module.exports = {

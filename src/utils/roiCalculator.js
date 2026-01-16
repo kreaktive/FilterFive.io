@@ -12,6 +12,8 @@
  * @module utils/roiCalculator
  */
 
+const { SUBSCRIPTION_PRICES } = require('../config/constants');
+
 class ROICalculator {
   /**
    * Calculate the cost per positive review
@@ -88,10 +90,10 @@ class ROICalculator {
    */
   getMonthlyPrice(subscriptionPlan) {
     const prices = {
-      monthly: 77,
-      annual: 770 / 12 // $770/year = $64.17/month
+      monthly: SUBSCRIPTION_PRICES.monthly,
+      annual: SUBSCRIPTION_PRICES.annual / 12
     };
-    return prices[subscriptionPlan] || 77;
+    return prices[subscriptionPlan] || SUBSCRIPTION_PRICES.monthly;
   }
 
   /**

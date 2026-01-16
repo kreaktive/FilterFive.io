@@ -1,0 +1,403 @@
+<%
+const industryStyles = `.font-title { font-family: 'Rubik', sans-serif; }`;
+%>
+<%- include('partials/head', {
+  title: industry.metaTitle,
+  description: industry.metaDescription,
+  ogTitle: industry.metaTitle,
+  ogDescription: industry.metaDescription,
+  keywords: industry.keywords || `${industry.title} reviews, ${industry.title} Google reviews, ${industry.title} reputation management, review software for ${industry.title}`,
+  extraStyles: industryStyles
+}) %>
+
+<!-- BreadcrumbList Schema for Industry Page -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://morestars.io"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Industries",
+      "item": "https://morestars.io/industries"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "<%= industry.title %>",
+      "item": "https://morestars.io/industries/<%= industry.slug %>"
+    }
+  ]
+}
+</script>
+
+<!-- Service Schema for Industry-Specific Offering -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "MoreStars Review Software for <%= industry.title %>",
+  "description": "<%= industry.metaDescription %>",
+  "provider": {
+    "@type": "Organization",
+    "name": "MoreStars",
+    "url": "https://morestars.io"
+  },
+  "serviceType": "Review Management Software",
+  "areaServed": {
+    "@type": "Country",
+    "name": "United States"
+  },
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "<%= industry.title %>"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "77",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+
+  <% const activePage = 'industries'; %>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="pt-24 pb-24 relative overflow-hidden bg-[#F9F7FA]">
+      <!-- Background elements -->
+      <div class="absolute top-0 right-0 w-1/2 h-full bg-<%= industry.color.bgLight %> opacity-50 skew-x-12 transform origin-top-right"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-<%= industry.color.bgDark %> text-<%= industry.color.text %> text-xs font-bold uppercase tracking-wide mb-6">
+              <%- include('partials/industry-icons/badge-icon', { icon: industry.badgeIcon }) %>
+              <%= industry.badge %>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-[#500B42]">
+              <%= industry.headline %>
+              <% if (industry.headlineLine2) { %>
+              <br/><%= industry.headlineLine2 %>
+              <% } %>
+              <br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r <%= industry.color.gradient %>">
+                <%= industry.headlineHighlight %>
+              </span>
+            </h1>
+            <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+              <%= industry.subheadline %>
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/signup" class="px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 bg-[#FFBA49] text-[#500B42]">
+                Start Free Trial
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </div>
+            <p class="mt-6 text-sm text-gray-500 font-medium flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              14-day free trial. No credit card required.
+            </p>
+          </div>
+
+          <!-- Hero Visual -->
+          <div class="relative">
+            <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 transform rotate-1">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl">
+                  <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div>
+                  <div class="font-bold text-lg"><%= industry.testimonial.name %></div>
+                  <div class="flex text-yellow-400 text-sm">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  </div>
+                </div>
+                <div class="ml-auto text-xs text-gray-400"><%= industry.testimonial.timeAgo %></div>
+              </div>
+              <p class="text-gray-700 italic text-lg leading-relaxed mb-4">
+                "<%= industry.testimonial.text %> <span class="bg-yellow-100 font-bold px-1"><%= industry.testimonial.highlight %></span>"
+                <% if (industry.testimonial.extra) { %> <%= industry.testimonial.extra %><% } %>
+              </p>
+            </div>
+            <!-- Floating Stats -->
+            <div class="absolute -bottom-6 -left-6 bg-[#500B42] text-white p-6 rounded-xl shadow-lg">
+              <div class="text-xs text-gray-300 uppercase tracking-widest mb-1">Rating</div>
+              <div class="text-3xl font-bold flex items-center gap-2">
+                <%= industry.testimonial.rating %>
+                <svg class="w-6 h-6 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Pain Section -->
+    <section class="py-24 bg-white">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-6 text-[#500B42]">
+            <%= industry.painTitle %>
+          </h2>
+          <p class="text-xl text-gray-600">
+            <%= industry.painSubtitle %>
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+          <div class="space-y-6">
+            <p class="text-lg text-gray-600 leading-relaxed">
+              <%- industry.painContent %>
+            </p>
+            <p class="text-lg text-gray-600 leading-relaxed">
+              Here's the math that hurts:
+            </p>
+            <ul class="space-y-3">
+              <% industry.painStats.forEach(stat => { %>
+              <li class="flex gap-3 items-center text-gray-700 bg-gray-50 p-3 rounded-lg">
+                <span class="font-bold text-<%= stat.color %>"><%= stat.number %></span> <%= stat.label %>
+              </li>
+              <% }); %>
+            </ul>
+            <div class="p-4 border-l-4 border-red-500 bg-red-50 rounded-r-lg">
+              <p class="font-bold text-red-800"><%= industry.painResult %></p>
+            </div>
+          </div>
+
+          <div class="bg-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-full">
+            <svg class="w-16 h-16 text-orange-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <h3 class="text-2xl font-bold mb-4 text-[#500B42]"><%= industry.painBoxTitle %></h3>
+            <p class="text-gray-600">
+              <%= industry.painBoxText %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What Changes Section -->
+    <section class="py-24 bg-[#500B42]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-extrabold mb-6 text-white">What Changes With MoreStars</h2>
+          <p class="text-xl text-gray-300">We turn your silent happy customers into a loud marketing army.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <% industry.changes.forEach(change => { %>
+          <div class="bg-white/5 border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors">
+            <div class="w-12 h-12 bg-<%= change.iconColor %> rounded-xl flex items-center justify-center mb-6 text-white">
+              <%- include('partials/industry-icons/change-icon', { icon: change.icon }) %>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3"><%= change.title %></h3>
+            <% if (change.beforeRating && change.afterRating) { %>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <p class="text-xs text-gray-400 uppercase">Before</p>
+                <p class="text-red-400 font-bold text-lg"><%= change.beforeRating %> Stars</p>
+                <p class="text-xs text-gray-500"><%= change.beforeLabel %></p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase">After 90 Days</p>
+                <p class="text-green-400 font-bold text-lg"><%= change.afterRating %> Stars</p>
+                <p class="text-xs text-gray-500"><%= change.afterLabel %></p>
+              </div>
+            </div>
+            <% } %>
+            <p class="text-gray-300 leading-relaxed<% if (change.example) { %> mb-4<% } %>">
+              <%= change.content %>
+            </p>
+            <% if (change.example) { %>
+            <div class="bg-black/30 p-4 rounded-lg border-l-2 border-[#FFBA49] text-sm text-gray-200 italic">
+              <%= change.example %>
+            </div>
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scenarios Section -->
+    <section class="py-24 bg-[#F9F7FA]">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-extrabold mb-4 text-[#500B42]">Real World Scenarios</h2>
+          <p class="text-gray-600">How automation saves your reputation.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-12">
+          <% industry.scenarios.forEach(scenario => { %>
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="<%= scenario.type === 'positive' ? 'bg-green-100 border-green-200' : 'bg-orange-100 border-orange-200' %> p-4 border-b">
+              <h3 class="font-bold <%= scenario.type === 'positive' ? 'text-green-800' : 'text-orange-800' %> flex items-center gap-2">
+                <% if (scenario.type === 'positive') { %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+                <% } else { %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <% } %>
+                Scenario: <%= scenario.title %>
+              </h3>
+            </div>
+            <div class="p-8">
+              <p class="mb-6 text-gray-700"><%= scenario.setup %></p>
+
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-sm text-gray-900">Without MoreStars</p>
+                    <p class="text-sm text-gray-600"><%= scenario.without %> <span class="font-semibold text-red-500"><%= scenario.withoutResult %></span><% if (scenario.withoutSuffix) { %> <%= scenario.withoutSuffix %><% } %></p>
+                  </div>
+                </div>
+                <div class="h-px bg-gray-100"></div>
+                <div class="flex gap-4">
+                  <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-500 shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-sm text-gray-900">With MoreStars</p>
+                    <p class="text-sm text-gray-600"><%= scenario.with %> <span class="font-semibold text-green-600"><%= scenario.withResult %></span> <%= scenario.withQuote %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-24 bg-white">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-extrabold mb-4 text-[#500B42]"><%= industry.faqTitle %></h2>
+        </div>
+
+        <div class="space-y-4">
+          <% industry.faqs.forEach(faq => { %>
+          <div class="border border-gray-200 rounded-2xl overflow-hidden">
+            <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors">
+              <span class="font-bold text-[#500B42]"><%= faq.question %></span>
+              <svg class="faq-icon w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="faq-content hidden px-6 pb-5">
+              <p class="text-gray-600"><%= faq.answer %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 bg-[#FFBA49]">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-8 text-[#500B42]">
+          <%= industry.ctaTitle %>
+        </h2>
+        <p class="text-lg md:text-xl font-medium mb-8 opacity-90 leading-relaxed text-[#500B42]">
+          <%= industry.ctaText %>
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="/signup" class="px-10 py-5 rounded-full text-xl font-bold shadow-xl transition-transform hover:scale-105 hover:bg-white flex items-center justify-center gap-3 bg-[#500B42] text-white hover:text-[#500B42]">
+            Start Free Trial
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </a>
+          <a href="/pricing" class="px-10 py-5 rounded-full text-xl font-bold border-2 border-[#500B42] text-[#500B42] hover:bg-white/50 flex items-center justify-center">
+            See Pricing
+          </a>
+        </div>
+        <p class="mt-8 text-sm font-bold opacity-75 text-[#500B42]">
+          14-day free trial. 10 SMS included. No credit card required.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- BreadcrumbList Schema for Industry Pages -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://morestars.io"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Industries",
+        "item": "https://morestars.io/industries"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "<%= industry.title %>",
+        "item": "https://morestars.io/industries/<%= industry.slug %>"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Service Schema for Industry-Specific Landing Page -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "MoreStars for <%= industry.title %>",
+    "description": "<%= industry.metaDescription %>",
+    "provider": {
+      "@type": "Organization",
+      "name": "MoreStars",
+      "url": "https://morestars.io"
+    },
+    "serviceType": "Reputation Management Software",
+    "areaServed": "United States",
+    "url": "https://morestars.io/industries/<%= industry.slug %>",
+    "image": "https://morestars.io/images/og-morestars.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "77",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+
+  <%- include('partials/marketing-footer') %>
+
+  <!-- FAQ Toggle Script -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    document.querySelectorAll('.faq-toggle').forEach(button => {
+      button.addEventListener('click', () => {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('.faq-icon');
+
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<%
+const featuresStyles = `
+  /* Custom animations */
+  @keyframes border-pulse {
+    0%, 100% { border-color: #FFBA49; }
+    50% { border-color: #FFE6B3; }
+  }
+
+  .feature-card {
+    transition: all 0.5s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-12px);
+  }
+`;
+%>
+<%- include('partials/head', {
+  title: 'Features - SMS Reviews, QR Codes & Analytics | MoreStars',
+  description: 'MoreStars features: SMS review requests, QR codes, analytics dashboard, multi-location support, POS integrations, and more. 100% Google compliant.',
+  keywords: 'review software features, SMS reviews, QR code reviews, review analytics, multi-location reviews'
+}) %>
+  <!-- BreadcrumbList Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://morestars.io" },
+      { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://morestars.io/features" }
+    ]
+  }
+  </script>
+  <style><%= featuresStyles %></style>
+
+  <% const activePage = 'features'; %>
+  <%- include('partials/navbar') %>
+
+  <main id="main-content" role="main">
+
+  <!-- ===================== -->
+  <!-- HERO SECTION -->
+  <!-- ===================== -->
+  <section class="pt-32 pb-16 bg-gradient-to-b from-[#F9F7FA] to-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wide mb-6 border border-green-100">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        100% Secure & Compliant
+      </span>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-[#500B42]">
+        Everything You Need. <span class="text-gray-400">Nothing You Don't.</span>
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Powerful features designed to help you get more reviews without adding more work to your plate.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- FEATURES GRID -->
+  <!-- ===================== -->
+  <section class="py-24 bg-[#F9F7FA]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="sr-only">Core Features</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <!-- Feature 1: SMS Review Requests -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-[rgba(161,67,142,0.2)] shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(37,99,235,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-[#F9F7FA] text-[#A1438E] group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-[#F9F7FA] text-[#A1438E]">
+              High Conversion
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">SMS Review Requests</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            Send personalized text messages asking for reviews. Choose from friendly, professional, or grateful tones, or write your own. 1,000 messages included every month.
+          </p>
+        </div>
+
+        <!-- Feature 2: QR Codes -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-purple-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(147,51,234,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-purple-50 text-purple-600">
+              Unlimited Scans
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">QR Codes</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            Generate QR codes for your checkout counter, receipts, table tents, or anywhere customers can scan. No phone numbers needed. Unlimited scans.
+          </p>
+        </div>
+
+        <!-- Feature 3: Analytics Dashboard -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-green-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(22,163,74,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-green-50 text-green-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-green-50 text-green-600">
+              Real-Time Data
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">Analytics Dashboard</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            See how many requests you've sent, who clicked, and your conversion rate. Know exactly what's working. Track everything in one place.
+          </p>
+        </div>
+
+        <!-- Feature 4: Multi-Location Support -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-orange-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(234,88,12,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-orange-50 text-orange-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-orange-50 text-orange-600">
+              Scalable
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">Multi-Location Support</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            Managing multiple locations? Track each one separately. See which locations are getting reviews and which need attention. One dashboard for everything.
+          </p>
+        </div>
+
+        <!-- Feature 5: POS Integrations -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-yellow-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(202,138,4,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-yellow-50 text-yellow-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-yellow-50 text-yellow-600">
+              Automated
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">POS Integrations</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            Connect Square or Shopify. Send review requests automatically after every sale. Set it and forget it. Works with your existing tools.
+          </p>
+        </div>
+
+        <!-- Feature 6: Works With Any Platform -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-indigo-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(79,70,229,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-indigo-50 text-indigo-600">
+              Universal
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">Works With Any Platform</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            Google, Facebook, Yelp, TripAdvisor, Vitals... You choose where reviews go, we handle the rest.
+          </p>
+        </div>
+
+        <!-- Feature 7: Google Compliant -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-green-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(22,163,74,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-green-50 text-green-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-green-50 text-green-600">
+              Zero Risk
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">Google Compliant</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            MoreStars follows all Google review policies. We help you ask for reviews, and give customers a direct link. No fake reviews. No incentives. No funny business.
+          </p>
+        </div>
+
+        <!-- Feature 8: SMS Compliant -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-[rgba(161,67,142,0.2)] shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(37,99,235,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-[#F9F7FA] text-[#A1438E] group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-[#F9F7FA] text-[#A1438E]">
+              10DLC Registered
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">SMS Compliant</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            A2P 10DLC registered. TCPA compliant. Every message includes opt-out instructions. Your customers can unsubscribe anytime.
+          </p>
+        </div>
+
+        <!-- Feature 9: Your Data Is Yours -->
+        <div class="feature-card bg-white p-8 rounded-3xl border border-purple-100 shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(147,51,234,0.25)] group">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider py-1 px-3 rounded-full bg-purple-50 text-purple-600">
+              Encrypted
+            </span>
+          </div>
+          <h3 class="font-bold text-xl mb-3 text-[#500B42]">Your Data Is Yours</h3>
+          <p class="text-gray-600 leading-relaxed text-[15px]">
+            We don't sell customer data. We don't use it for anything except sending your review requests. Your list is your property. Period.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- FINAL CTA -->
+  <!-- ===================== -->
+  <section class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="relative rounded-[3rem] overflow-hidden border-[5px] bg-[#500B42] shadow-[0_25px_50px_-12px_rgba(255,186,73,0.4)]" style="animation: border-pulse 3s infinite ease-in-out;">
+
+        <!-- Decorative Pattern -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+             style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;">
+        </div>
+
+        <div class="relative z-10 px-6 py-16 md:px-12 md:py-24 text-center">
+          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-white">
+            Ready to Get Started?
+          </h2>
+          <p class="text-xl md:text-2xl font-medium mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed text-gray-200">
+            Everything you need to turn happy customers into 5-star reviews. $77/month.
+          </p>
+
+          <a href="/signup">
+            <button class="px-10 py-5 rounded-full text-xl font-bold shadow-[0_0_30px_rgba(255,186,73,0.3)] transition-all transform hover:scale-105 bg-[#FFBA49] text-[#500B42] hover:bg-white flex items-center gap-3 mx-auto">
+              Start Free Trial
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </button>
+          </a>
+
+          <!-- Trust Badges -->
+          <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 text-sm font-bold text-gray-400">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              14-Day Free Trial
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              No Credit Card Required
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#FFBA49]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+              Cancel Anytime
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- Footer -->
+  <%- include('partials/marketing-footer') %>
+
+  <!-- Mega Menu JavaScript -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        if (!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('mobile-menu-enter');
+        }
+      });
+    }
+
+    // Desktop Mega Menu
+    const megaMenuTrigger = document.getElementById('industriesTrigger');
+    const megaMenu = document.getElementById('industriesMegaMenu');
+
+    if (megaMenuTrigger && megaMenu) {
+      let menuTimeout;
+
+      megaMenuTrigger.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+        megaMenu.classList.add('open');
+        megaMenuTrigger.classList.add('active');
+      });
+
+      megaMenuTrigger.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+
+      megaMenu.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+      });
+
+      megaMenu.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+    }
+
+    // Mobile Industries Accordion
+    const mobileIndustriesTrigger = document.getElementById('mobileIndustriesTrigger');
+    const mobileIndustriesAccordion = document.getElementById('mobileIndustriesAccordion');
+    const mobileIndustriesArrow = document.getElementById('mobileIndustriesArrow');
+
+    if (mobileIndustriesTrigger && mobileIndustriesAccordion) {
+      mobileIndustriesTrigger.addEventListener('click', () => {
+        mobileIndustriesAccordion.classList.toggle('open');
+        mobileIndustriesArrow.style.transform = mobileIndustriesAccordion.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+    }
+  </script>
+
+<%- include('partials/scripts') %>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FFBA49">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MoreStars">
+  <title><%= typeof title !== 'undefined' ? title : 'Dashboard | MoreStars' %></title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Shared Dashboard Styles -->
+  <link rel="stylesheet" href="/css/dashboard-base.css">
+  <% if (typeof extraCss !== 'undefined' && extraCss) { %>
+    <link rel="stylesheet" href="<%= extraCss %>">
+  <% } %>
+
+  <!-- Page-specific head content -->
+  <%- typeof headContent !== 'undefined' ? headContent : '' %>
+
+  <!-- Optional Chart.js for analytics pages -->
+  <% if (typeof includeChartJs !== 'undefined' && includeChartJs) { %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo" crossorigin="anonymous" defer></script>
+  <% } %>
+</head>
+<body>
+  <%- include('../partials/dashboard-header', { activePage: typeof activePage !== 'undefined' ? activePage : '' }) %>
+
+  <main id="main-content" class="container">
+    <%- body %>
+  </main>
+
+  <%- include('../partials/dashboard-footer') %>
+
+  <!-- Shared Dashboard JS -->
+  <script src="/js/dashboard-menu.min.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
+
+  <!-- Toast Notifications -->
+  <script src="/js/toast.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
+
+  <!-- Page-specific scripts -->
+  <%- typeof scripts !== 'undefined' ? scripts : '' %>
+</body>
+</html>

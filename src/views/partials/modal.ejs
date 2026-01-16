@@ -1,0 +1,492 @@
+<%#
+  Accessible Modal Component
+
+  A fully accessible modal dialog with focus trapping, escape key handling,
+  and proper ARIA attributes.
+
+  Usage:
+  1. Include this partial once in your layout (before </body>):
+     <%- include('partials/modal') %>
+
+  2. Open modals via JavaScript:
+     openModal('modal-id', {
+       title: 'Confirm Action',
+       content: '<p>Are you sure?</p>',
+       actions: [
+         { text: 'Cancel', variant: 'secondary', onClick: () => closeModal() },
+         { text: 'Confirm', variant: 'primary', onClick: handleConfirm }
+       ],
+       size: 'md', // 'sm' | 'md' | 'lg' | 'full'
+       closeOnOverlay: true,
+       closeOnEscape: true
+     });
+
+  3. Close modals:
+     closeModal();
+     closeModal('specific-modal-id');
+%>
+
+<!-- Modal Container -->
+<div id="modal-root" class="modal-root" aria-hidden="true"></div>
+
+<style>
+  .modal-root {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: none;
+  }
+
+  .modal-root.modal-open {
+    display: block;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(35, 0, 30, 0.7);
+    backdrop-filter: blur(4px);
+    animation: modal-fade-in 0.2s ease;
+  }
+
+  .modal-backdrop.modal-exit {
+    animation: modal-fade-out 0.15s ease forwards;
+  }
+
+  @keyframes modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modal-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  .modal-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .modal-dialog {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    animation: modal-slide-in 0.25s ease;
+    width: 100%;
+  }
+
+  .modal-dialog.modal-exit {
+    animation: modal-slide-out 0.15s ease forwards;
+  }
+
+  @keyframes modal-slide-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes modal-slide-out {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(-10px);
+    }
+  }
+
+  /* Modal Sizes */
+  .modal-sm { max-width: 400px; }
+  .modal-md { max-width: 500px; }
+  .modal-lg { max-width: 700px; }
+  .modal-full { max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); }
+
+  @media (max-width: 480px) {
+    .modal-container {
+      padding: 16px;
+      align-items: flex-end;
+    }
+    .modal-dialog {
+      border-radius: 16px 16px 0 0;
+      max-height: calc(100vh - 32px);
+    }
+    .modal-sm, .modal-md, .modal-lg {
+      max-width: 100%;
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #500B42;
+    margin: 0;
+    font-family: 'Rubik', 'Inter Tight', sans-serif;
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9CA3AF;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    margin: -8px -8px -8px 8px;
+  }
+
+  .modal-close:hover {
+    background: #F3F4F6;
+    color: #6B7280;
+  }
+
+  .modal-close:focus {
+    outline: 2px solid #FFBA49;
+    outline-offset: 2px;
+  }
+
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-body p {
+    font-size: 15px;
+    color: #4B5563;
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+
+  .modal-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  /* Modal Button Styles */
+  .modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+    font-family: inherit;
+  }
+
+  .modal-btn:focus {
+    outline: 2px solid #FFBA49;
+    outline-offset: 2px;
+  }
+
+  .modal-btn-primary {
+    background: #FFBA49;
+    color: #500B42;
+  }
+
+  .modal-btn-primary:hover {
+    background: #500B42;
+    color: white;
+  }
+
+  .modal-btn-secondary {
+    background: #F3F4F6;
+    color: #374151;
+  }
+
+  .modal-btn-secondary:hover {
+    background: #E5E7EB;
+  }
+
+  .modal-btn-danger {
+    background: #EF4444;
+    color: white;
+  }
+
+  .modal-btn-danger:hover {
+    background: #DC2626;
+  }
+
+  /* Body scroll lock when modal is open */
+  body.modal-open {
+    overflow: hidden;
+  }
+</style>
+
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+(function() {
+  let activeModal = null;
+  let previousActiveElement = null;
+  let focusableElements = [];
+
+  /**
+   * Open a modal dialog
+   * @param {string} id - Unique modal ID
+   * @param {Object} options - Modal configuration
+   */
+  window.openModal = function(id, options = {}) {
+    const {
+      title = '',
+      content = '',
+      actions = [],
+      size = 'md',
+      closeOnOverlay = true,
+      closeOnEscape = true,
+      onClose = null
+    } = options;
+
+    // Store currently focused element
+    previousActiveElement = document.activeElement;
+
+    // Get or create modal root
+    const root = document.getElementById('modal-root');
+    if (!root) return;
+
+    // Close any existing modal
+    if (activeModal) {
+      closeModal(null, true);
+    }
+
+    // Build modal HTML
+    const modalHTML = `
+      <div class="modal-backdrop" data-modal-backdrop></div>
+      <div class="modal-container" data-modal-container>
+        <div
+          class="modal-dialog modal-${size}"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title-${id}"
+          data-modal-dialog
+        >
+          ${title ? `
+            <div class="modal-header">
+              <h2 class="modal-title" id="modal-title-${id}">${escapeHtml(title)}</h2>
+              <button class="modal-close" aria-label="Close dialog" data-modal-close>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          ` : ''}
+          <div class="modal-body">${content}</div>
+          ${actions.length > 0 ? `
+            <div class="modal-footer">
+              ${actions.map((action, index) => `
+                <button
+                  class="modal-btn modal-btn-${action.variant || 'secondary'}"
+                  data-modal-action="${index}"
+                  ${action.disabled ? 'disabled' : ''}
+                >
+                  ${escapeHtml(action.text)}
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    root.innerHTML = modalHTML;
+    root.classList.add('modal-open');
+    root.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    // Store modal state
+    activeModal = {
+      id,
+      options,
+      root,
+      closeOnOverlay,
+      closeOnEscape,
+      onClose,
+      actions
+    };
+
+    // Setup event listeners
+    setupModalEventListeners();
+
+    // Focus first focusable element
+    setTimeout(() => {
+      const dialog = root.querySelector('[data-modal-dialog]');
+      focusableElements = getFocusableElements(dialog);
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      }
+    }, 50);
+  };
+
+  /**
+   * Close the current modal
+   * @param {string} id - Optional specific modal ID to close
+   * @param {boolean} immediate - Skip animation
+   */
+  window.closeModal = function(id = null, immediate = false) {
+    if (!activeModal) return;
+    if (id && activeModal.id !== id) return;
+
+    const { root, onClose } = activeModal;
+
+    if (immediate) {
+      finishClose();
+    } else {
+      // Add exit animations
+      const backdrop = root.querySelector('[data-modal-backdrop]');
+      const dialog = root.querySelector('[data-modal-dialog]');
+      if (backdrop) backdrop.classList.add('modal-exit');
+      if (dialog) dialog.classList.add('modal-exit');
+
+      setTimeout(finishClose, 150);
+    }
+
+    function finishClose() {
+      root.classList.remove('modal-open');
+      root.setAttribute('aria-hidden', 'true');
+      root.innerHTML = '';
+      document.body.classList.remove('modal-open');
+
+      // Call onClose callback
+      if (onClose) onClose();
+
+      // Restore focus
+      if (previousActiveElement && previousActiveElement.focus) {
+        previousActiveElement.focus();
+      }
+
+      activeModal = null;
+      previousActiveElement = null;
+      focusableElements = [];
+    }
+  };
+
+  /**
+   * Setup event listeners for the modal
+   */
+  function setupModalEventListeners() {
+    const { root, closeOnOverlay, closeOnEscape, actions } = activeModal;
+
+    // Close button
+    const closeBtn = root.querySelector('[data-modal-close]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => closeModal());
+    }
+
+    // Overlay click
+    if (closeOnOverlay) {
+      const container = root.querySelector('[data-modal-container]');
+      container.addEventListener('click', (e) => {
+        if (e.target === container) {
+          closeModal();
+        }
+      });
+    }
+
+    // Escape key
+    if (closeOnEscape) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    // Action buttons
+    const actionBtns = root.querySelectorAll('[data-modal-action]');
+    actionBtns.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        const action = actions[index];
+        if (action && action.onClick) {
+          action.onClick();
+        }
+      });
+    });
+
+    // Focus trap
+    document.addEventListener('keydown', handleTabKey);
+  }
+
+  /**
+   * Handle escape key
+   */
+  function handleEscapeKey(e) {
+    if (e.key === 'Escape' && activeModal && activeModal.closeOnEscape) {
+      closeModal();
+      document.removeEventListener('keydown', handleEscapeKey);
+    }
+  }
+
+  /**
+   * Handle tab key for focus trapping
+   */
+  function handleTabKey(e) {
+    if (!activeModal || e.key !== 'Tab') return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }
+
+  /**
+   * Get all focusable elements within a container
+   */
+  function getFocusableElements(container) {
+    const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    return Array.from(container.querySelectorAll(selector)).filter(el => {
+      return !el.disabled && el.offsetParent !== null;
+    });
+  }
+
+  /**
+   * Escape HTML
+   */
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+})();
+</script>

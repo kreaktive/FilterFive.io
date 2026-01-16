@@ -1,0 +1,70 @@
+# MoreStars Robots.txt
+# https://morestars.io
+
+# Default rules for all crawlers
+User-agent: *
+Allow: /
+
+# Disallow private/authenticated areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /webhooks/
+Disallow: /review/
+Disallow: /r/
+Disallow: /qr/
+
+# Disallow query string variations (avoid duplicate content)
+Disallow: /*?*
+
+# Disallow assets that don't need indexing
+Disallow: /css/
+Disallow: /js/
+Disallow: /fonts/
+
+# Googlebot-specific rules (allow images for image search)
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /images/
+Disallow: /dashboard/
+Disallow: /admin/
+
+# Allow AI bots to index content (for AI search visibility)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# Allow social media preview bots
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Sitemap location (dynamic, includes blog posts and industries)
+Sitemap: https://morestars.io/sitemap.xml
+
+# Canonical host
+Host: https://morestars.io

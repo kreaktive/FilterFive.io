@@ -3,8 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/images/favicon-morestars.png">
   <title><%= title %></title>
+  <!-- Google Tag Manager -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W6336VRQ');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Rubik:wght@700;800&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      /* Design Tokens for Login Page */
+      --brand-dark: #500B42;
+      --brand-gold: #FFBA49;
+      --bg-white: #ffffff;
+      --bg-light: #f9fafb;
+      --text-primary: #500B42;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-light: #e2e8f0;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-7: 28px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --text-xs: 12px;
+      --text-sm: 14px;
+      --text-base: 16px;
+      --text-2xl: 28px;
+      --transition-base: 0.2s ease;
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-gold: 0 4px 12px rgba(255, 186, 73, 0.4);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,126 +57,234 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--brand-dark);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: var(--space-5);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
     }
 
     .login-container {
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
     }
 
     .login-card {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      background: var(--bg-white);
+      border-radius: var(--radius-xl);
+      padding: var(--space-12) var(--space-10);
+      box-shadow: 0 25px 50px -12px rgba(255, 186, 73, 0.25);
     }
 
     .logo {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: var(--space-8);
     }
 
     .logo h1 {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--brand-dark);
+      font-family: 'Rubik', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo h1 svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--brand-gold);
     }
 
     .logo p {
-      font-size: 14px;
-      color: #718096;
-      margin-top: 5px;
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-top: var(--space-2);
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: var(--space-5);
     }
 
     label {
       display: block;
-      font-size: 14px;
+      font-size: var(--text-sm);
       font-weight: 600;
-      color: #4a5568;
-      margin-bottom: 8px;
+      color: var(--brand-dark);
+      margin-bottom: var(--space-2);
     }
 
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 16px;
+      padding: var(--space-3) var(--space-4);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-base);
       font-family: inherit;
-      transition: border-color 0.2s ease;
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+      background: var(--bg-light);
     }
 
     input[type="email"]:focus,
     input[type="password"]:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--brand-gold);
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.1);
+      background: var(--bg-white);
     }
 
     .error-message {
       background: #fee2e2;
       border-left: 4px solid #dc2626;
-      padding: 12px 15px;
-      margin-bottom: 20px;
-      border-radius: 5px;
+      padding: var(--space-3) var(--space-4);
+      margin-bottom: var(--space-5);
+      border-radius: var(--radius-md);
       color: #991b1b;
-      font-size: 14px;
+      font-size: var(--text-sm);
     }
 
     .btn-login {
       width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      padding: var(--space-4);
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
+      border-radius: var(--radius-lg);
+      font-size: var(--text-base);
+      font-weight: 700;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all var(--transition-base);
     }
 
     .btn-login:hover {
+      background: var(--brand-dark);
+      color: white;
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 10px 25px rgba(35, 0, 30, 0.3);
+    }
+
+    .btn-login:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.5);
     }
 
     .btn-login:active {
       transform: translateY(0);
     }
 
+    .btn-login:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-login.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn-login.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin: -10px 0 0 -10px;
+      border: 2px solid var(--brand-dark);
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .forgot-password {
       text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
+      margin-top: var(--space-4);
+      font-size: var(--text-sm);
     }
 
     .forgot-password a {
-      color: #667eea;
+      color: var(--brand-gold);
       text-decoration: none;
+      font-weight: 600;
+      border-radius: 4px;
     }
 
     .forgot-password a:hover {
       text-decoration: underline;
     }
 
+    .forgot-password a:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 186, 73, 0.5);
+    }
+
+    .resend-verification {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: var(--space-3) var(--space-4);
+      margin-top: var(--space-2);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+    }
+
+    .resend-verification a {
+      color: #d97706;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .resend-verification a:hover {
+      text-decoration: underline;
+    }
+
+    .resend-success {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: var(--space-3) var(--space-4);
+      margin-top: var(--space-2);
+      border-radius: var(--radius-md);
+      color: #065f46;
+      font-size: var(--text-sm);
+      display: none;
+    }
+
+    .resend-error {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      padding: var(--space-3) var(--space-4);
+      margin-top: var(--space-2);
+      border-radius: var(--radius-md);
+      color: #991b1b;
+      font-size: var(--text-sm);
+      display: none;
+    }
+
     .divider {
       text-align: center;
-      margin: 30px 0;
+      margin: var(--space-7) 0;
       position: relative;
     }
 
@@ -142,66 +295,101 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: #e2e8f0;
+      background: var(--border-light);
     }
 
     .divider span {
-      background: white;
-      padding: 0 15px;
+      background: var(--bg-white);
+      padding: 0 var(--space-4);
       position: relative;
-      color: #94a3b8;
-      font-size: 14px;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      font-weight: 500;
     }
 
     .signup-cta {
       text-align: center;
-      padding: 20px;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      border-radius: 10px;
-      margin-top: 20px;
+      padding: var(--space-6);
+      background: linear-gradient(135deg, rgba(255, 186, 73, 0.1) 0%, rgba(35, 0, 30, 0.05) 100%);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 186, 73, 0.2);
     }
 
     .signup-cta p {
-      margin: 0 0 15px 0;
-      font-size: 14px;
-      color: #4a5568;
+      margin: 0 0 var(--space-4) 0;
+      font-size: var(--text-sm);
+      color: var(--brand-dark);
     }
 
     .btn-signup {
       display: inline-block;
-      padding: 12px 24px;
-      background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
-      border-radius: 8px;
+      padding: var(--space-3) var(--space-7);
+      background: var(--brand-dark);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.2s ease;
+      font-weight: 700;
+      font-size: var(--text-sm);
+      transition: all var(--transition-base);
     }
 
     .btn-signup:hover {
-      background: #667eea;
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       transform: translateY(-2px);
+    }
+
+    .btn-signup:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.5);
+    }
+
+    .login-footer {
+      margin-top: var(--space-7);
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .login-footer a {
+      color: var(--brand-gold);
+      text-decoration: none;
+      margin: 0 var(--space-2);
+      border-radius: 4px;
+    }
+
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .login-footer a:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 186, 73, 0.5);
     }
 
     @media (max-width: 480px) {
       .login-card {
-        padding: 30px 20px;
+        padding: var(--space-8) var(--space-6);
       }
 
       .logo h1 {
-        font-size: 28px;
+        font-size: 24px;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W6336VRQ"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <div class="login-container">
     <div class="login-card">
       <div class="logo">
-        <h1>FilterFive</h1>
+        <img src="/images/Logo MoreStars.io.svg" alt="MoreStars Logo" height="32">
         <p>Dashboard Login</p>
       </div>
 
@@ -209,9 +397,21 @@
         <div class="error-message">
           <%= error %>
         </div>
+        <% if (typeof showResendVerification !== 'undefined' && showResendVerification) { %>
+          <div class="resend-verification" id="resend-section">
+            Didn't receive the email? <a href="#" id="resend-link">Resend verification email</a>
+          </div>
+          <div class="resend-success" id="resend-success">
+            Verification email sent! Check your inbox.
+          </div>
+          <div class="resend-error" id="resend-error">
+            Failed to send email. Please try again.
+          </div>
+        <% } %>
       <% } %>
 
-      <form method="POST" action="/dashboard/login">
+      <form method="POST" action="/dashboard/login" id="loginForm">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
         <div class="form-group">
           <label for="email">Email Address</label>
           <input
@@ -236,7 +436,7 @@
           >
         </div>
 
-        <button type="submit" class="btn-login">
+        <button type="submit" class="btn-login" id="loginBtn">
           Sign In
         </button>
       </form>
@@ -246,7 +446,7 @@
       </div>
 
       <div class="divider">
-        <span>New to FilterFive?</span>
+        <span>New to MoreStars?</span>
       </div>
 
       <div class="signup-cta">
@@ -254,14 +454,73 @@
         <a href="/signup" class="btn-signup">Create Free Account</a>
       </div>
 
-      <div class="login-footer" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #718096;">
-        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-          <a href="/terms" target="_blank" style="color: #667eea; text-decoration: none;">Terms of Service</a>
-          <a href="/privacy" target="_blank" style="color: #667eea; text-decoration: none;">Privacy Policy</a>
-          <a href="/sms-compliance" target="_blank" style="color: #667eea; text-decoration: none;">SMS Compliance</a>
-        </div>
+      <div class="login-footer">
+        <a href="/terms" target="_blank">Terms</a>
+        <a href="/privacy" target="_blank">Privacy</a>
+        <a href="/sms-compliance" target="_blank">SMS Compliance</a>
       </div>
     </div>
   </div>
+
+<!-- Login Form Loading State -->
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    var btn = document.getElementById('loginBtn');
+    var originalText = btn.textContent;
+
+    // Show loading state
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.setAttribute('data-original-text', originalText);
+
+    // Re-enable after 10s in case of slow connection/error
+    setTimeout(function() {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.textContent = originalText;
+    }, 10000);
+  });
+</script>
+
+<% if (typeof showResendVerification !== 'undefined' && showResendVerification) { %>
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  document.getElementById('resend-link').addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    const resendSection = document.getElementById('resend-section');
+    const successMsg = document.getElementById('resend-success');
+    const errorMsg = document.getElementById('resend-error');
+    const link = this;
+
+    // Disable link while sending
+    link.style.pointerEvents = 'none';
+    link.textContent = 'Sending...';
+
+    try {
+      const response = await fetch('/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: '<%= typeof unverifiedEmail !== "undefined" ? unverifiedEmail : "" %>' })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        resendSection.style.display = 'none';
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+      } else {
+        throw new Error(data.message || 'Failed to send');
+      }
+    } catch (error) {
+      resendSection.style.display = 'none';
+      errorMsg.style.display = 'block';
+      successMsg.style.display = 'none';
+    }
+  });
+</script>
+<% } %>
 </body>
 </html>

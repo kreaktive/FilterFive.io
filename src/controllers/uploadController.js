@@ -4,12 +4,36 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const path = require('path');
 const pLimit = require('p-limit');
-const { FeedbackRequest, CsvUpload } = require('../models');
-const { validateRow, isDuplicatePhone } = require('../utils/csvValidator');
+const { FeedbackRequest, CsvUpload, User } = require('../models');
+const { validateRow, batchCheckDuplicatePhones } = require('../utils/csvValidator');
+const { processCSVStream, validateFileSize } = require('../utils/csvStreamProcessor');
 const smsService = require('../services/smsService');
+const smsLimitService = require('../services/smsLimitService');
+const shortUrlService = require('../services/shortUrlService');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../services/logger');
+
+// Store for SSE progress streams (keyed by sessionId)
+const progressStreams = new Map();
+
+// Helper to send SSE progress event
+const sendProgressEvent = (sessionId, data) => {
+  const res = progressStreams.get(sessionId);
+  if (res && !res.finished) {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  }
+};
 
 // Configure multer
+// S10 FIX: Validate both extension AND MIME type for CSV uploads
+const ALLOWED_CSV_MIMES = [
+  'text/csv',
+  'text/plain',
+  'application/csv',
+  'application/vnd.ms-excel', // Excel sometimes sends CSVs with this
+  'text/x-csv'
+];
+
 const upload = multer({
   dest: '/tmp/uploads/',
   limits: {
@@ -17,8 +41,13 @@ const upload = multer({
     files: 1
   },
   fileFilter: (req, file, cb) => {
+    // Check extension
     if (path.extname(file.originalname).toLowerCase() !== '.csv') {
       return cb(new Error('Only CSV files are allowed'));
+    }
+    // S10 FIX: Also check MIME type to prevent disguised files
+    if (!ALLOWED_CSV_MIMES.includes(file.mimetype)) {
+      return cb(new Error('Invalid file type. Only CSV files are allowed.'));
     }
     cb(null, true);
   }
@@ -28,24 +57,27 @@ const upload = multer({
 const showUploadPage = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { User } = require('../models');
-    const user = req.user || await User.findByPk(userId);
+    // Always fetch fresh user data to ensure we have the latest reviewUrl
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.redirect('/dashboard/login');
     }
 
-    // Check if review URL is configured
-    const needsSetup = !user.reviewUrl || user.reviewUrl.trim() === '';
+    // Prevent browser caching of this page
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
 
     res.render('upload', {
       title: 'Upload Customers',
       user: user,
-      blocked: needsSetup,
-      message: needsSetup ? 'You must configure your review platform URL before uploading customers.' : null
+      blocked: false,
+      message: null
     });
   } catch (error) {
-    console.error('Upload page error:', error);
+    logger.error('Upload page error', { error: error.message });
     res.status(500).render('error', {
       title: 'Error',
       message: 'Failed to load upload page',
@@ -68,16 +100,12 @@ const processUpload = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    // Validate review URL is configured
-    if (!user.reviewUrl || user.reviewUrl.trim() === '') {
-      return res.status(400).render('upload', {
-        title: 'Upload Customers',
-        user: user,
-        blocked: true,
-        error: 'Review platform URL not configured. Please add your review URL in Settings first.',
-        message: 'You must configure your review platform URL before uploading customers.'
-      });
-    }
+    logger.info('Processing upload', {
+      userId: user.id,
+      hasReviewUrl: !!user.reviewUrl,
+      reviewUrlValue: user.reviewUrl?.substring(0, 30) + '...',
+      hasFile: !!req.file
+    });
 
     // Get uploaded file
     if (!req.file) {
@@ -92,7 +120,7 @@ const processUpload = async (req, res) => {
     uploadedFilePath = req.file.path;
     const filename = req.file.originalname;
 
-    console.log(`📄 Parsing CSV upload: ${filename} for user ${user.id}`);
+    logger.info('Parsing CSV upload', { filename, userId: user.id });
 
     // Parse CSV
     const rows = [];
@@ -145,6 +173,8 @@ const processUpload = async (req, res) => {
     const duplicateRows = [];
     const errors = [];
 
+    // First pass: validate all rows and collect formatted phones
+    const validatedRows = [];
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const rowNumber = i + 1;
@@ -167,20 +197,39 @@ const processUpload = async (req, res) => {
 
       // Use formatted phone number for duplicate check
       const formattedPhone = validation.phoneFormatted?.formatted || row.phone;
+      validatedRows.push({
+        row,
+        rowNumber,
+        formattedPhone,
+        validation
+      });
+    }
 
-      // Check for duplicates
-      const isDuplicate = await isDuplicatePhone(user.id, formattedPhone);
-      if (isDuplicate) {
+    // Batch check all phones for duplicates (single query instead of N)
+    const phonesToCheck = validatedRows.map(r => r.formattedPhone);
+    const duplicateMap = await batchCheckDuplicatePhones(user.id, phonesToCheck);
+
+    // Second pass: categorize based on duplicate check results
+    for (const { row, rowNumber, formattedPhone, validation } of validatedRows) {
+      const duplicateCheck = duplicateMap.get(formattedPhone) || { isDuplicate: false, lastContactedAt: null };
+
+      if (duplicateCheck.isDuplicate) {
+        // Format the date for display
+        const contactDate = duplicateCheck.lastContactedAt
+          ? new Date(duplicateCheck.lastContactedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : 'within last 30 days';
+
         duplicateRows.push({
           ...row,
           rowNumber: rowNumber,
-          phoneFormatted: validation.phoneFormatted
+          phoneFormatted: validation.phoneFormatted,
+          lastContactedAt: duplicateCheck.lastContactedAt
         });
         errors.push({
           row: rowNumber,
           name: row.name,
           phone: row.phone,
-          error: 'Duplicate: Already sent SMS to this number in last 30 days'
+          error: `Duplicate: Already contacted on ${contactDate}`
         });
         continue;
       }
@@ -199,7 +248,7 @@ const processUpload = async (req, res) => {
     // Clean up uploaded file
     fs.unlinkSync(uploadedFilePath);
 
-    console.log(`✅ Parsed ${rows.length} rows: ${validRows.length} valid, ${invalidRows.length} invalid, ${duplicateRows.length} duplicates`);
+    logger.info('CSV parsing complete', { totalRows: rows.length, validRows: validRows.length, invalidRows: invalidRows.length, duplicateRows: duplicateRows.length });
 
     // Store parsed data in session for preview
     req.session.csvPreview = {
@@ -219,8 +268,8 @@ const processUpload = async (req, res) => {
     };
 
     // Save session before redirecting to ensure data persists
-    console.log('💾 Saving session data - Session ID:', req.sessionID);
-    console.log('💾 Data to save:', {
+    logger.debug('Saving session data', { sessionId: req.sessionID });
+    logger.debug('Session data to save', {
       filename: req.session.csvPreview.filename,
       validRows: req.session.csvPreview.validRows.length,
       totalRows: req.session.csvPreview.totalRows
@@ -228,20 +277,20 @@ const processUpload = async (req, res) => {
 
     req.session.save((err) => {
       if (err) {
-        console.error('❌ Session save error:', err);
+        logger.error('Session save error', { error: err.message });
         return res.status(500).render('upload', {
           title: 'Upload Customers',
           user: user,
           error: 'Failed to save upload data. Please try again.'
         });
       }
-      console.log('✅ Session saved successfully - redirecting to preview');
+      logger.debug('Session saved successfully - redirecting to preview');
       // Redirect to preview page
       res.redirect('/dashboard/upload/preview');
     });
 
   } catch (error) {
-    console.error('CSV parsing error:', error);
+    logger.error('CSV parsing error', { error: error.message });
 
     // Clean up file
     if (uploadedFilePath && fs.existsSync(uploadedFilePath)) {
@@ -274,10 +323,9 @@ const showPreview = async (req, res) => {
 
     // Get preview data from session
     const previewData = req.session.csvPreview;
-    console.log('🔍 Preview page - Session ID:', req.sessionID);
-    console.log('🔍 Preview page - Has preview data:', !!previewData);
+    logger.debug('Preview page', { sessionId: req.sessionID, hasPreviewData: !!previewData });
     if (previewData) {
-      console.log('🔍 Preview data found:', {
+      logger.debug('Preview data found', {
         filename: previewData.filename,
         validRows: previewData.validRows?.length,
         totalRows: previewData.totalRows
@@ -285,7 +333,7 @@ const showPreview = async (req, res) => {
     }
 
     if (!previewData) {
-      console.log('⚠️  No preview data in session - redirecting to upload');
+      logger.warn('No preview data in session - redirecting to upload');
       return res.redirect('/dashboard/upload');
     }
 
@@ -295,7 +343,7 @@ const showPreview = async (req, res) => {
       preview: previewData
     });
   } catch (error) {
-    console.error('Preview error:', error);
+    logger.error('Preview error', { error: error.message });
     res.status(500).render('error', {
       title: 'Error',
       message: 'Failed to load preview',
@@ -304,14 +352,10 @@ const showPreview = async (req, res) => {
   }
 };
 
-// POST /dashboard/upload/send - Send SMS to selected customers
+// POST /dashboard/upload/send - Initiate sending and show progress page
 const sendToSelected = async (req, res) => {
-  const startTime = Date.now();
-  let uploadRecord = null;
-
   try {
     const userId = req.session.userId;
-    const { User } = require('../models');
     const user = req.user || await User.findByPk(userId);
 
     if (!user) {
@@ -321,22 +365,15 @@ const sendToSelected = async (req, res) => {
     // Get preview data from session
     const previewData = req.session.csvPreview;
 
-    console.log('🔍 Send page - Session ID:', req.sessionID);
-    console.log('🔍 Send page - Has preview data:', !!previewData);
-    console.log('🔍 Send page - Session keys:', Object.keys(req.session));
+    logger.debug('Send page', { sessionId: req.sessionID, hasPreviewData: !!previewData });
 
     if (!previewData) {
-      console.log('⚠️  Session data lost - redirecting to upload page');
-      console.log('⚠️  Full session:', JSON.stringify(req.session, null, 2));
+      logger.warn('Session data lost - redirecting to upload page');
       return res.redirect('/dashboard/upload');
     }
 
-    console.log(`📤 Sending SMS to selected customers from CSV: ${previewData.filename}`);
-
     // Get selected row numbers from POST data
     const selectedRows = req.body.selectedRows || [];
-
-    // Convert to array if single value
     const selectedRowNumbers = Array.isArray(selectedRows)
       ? selectedRows.map(Number)
       : [Number(selectedRows)];
@@ -355,20 +392,171 @@ const sendToSelected = async (req, res) => {
       });
     }
 
-    console.log(`Sending SMS to ${rowsToSend.length} selected customers`);
+    // Check SMS limit BEFORE sending
+    const smsLimit = user.smsLimit || 100;
+    const smsUsed = user.smsUsageCount || 0;
+    const remainingLimit = smsLimit - smsUsed;
 
-    // Create upload record
+    if (rowsToSend.length > remainingLimit) {
+      return res.status(400).render('upload-preview', {
+        title: 'Review Upload',
+        user: user,
+        preview: previewData,
+        error: `SMS limit exceeded. You can only send ${remainingLimit} more SMS this period. Please select fewer contacts or upgrade your plan.`
+      });
+    }
+
+    logger.info('Preparing to send SMS', { customerCount: rowsToSend.length, filename: previewData.filename });
+
+    // Generate unique session ID for progress tracking
+    const progressSessionId = uuidv4();
+
+    // Store sending data in session for background processing
+    req.session.sendingData = {
+      progressSessionId,
+      rowsToSend,
+      previewData,
+      startTime: Date.now()
+    };
+
+    // Save session and render progress page
+    req.session.save((err) => {
+      if (err) {
+        logger.error('Session save error', { error: err.message });
+        return res.status(500).render('upload', {
+          title: 'Upload Customers',
+          user: user,
+          error: 'Failed to initiate sending. Please try again.'
+        });
+      }
+
+      // Render progress page with SSE session ID
+      res.render('upload-sending', {
+        title: 'Sending SMS',
+        user: user,
+        progressSessionId,
+        totalToSend: rowsToSend.length,
+        filename: previewData.filename
+      });
+    });
+
+  } catch (error) {
+    logger.error('Send initiation error', { error: error.message });
+    const userId = req.session.userId;
+    const user = req.user || await User.findByPk(userId);
+
+    res.status(500).render('upload', {
+      title: 'Upload Customers',
+      user: user,
+      error: `Send failed: ${error.message}`
+    });
+  }
+};
+
+// GET /dashboard/upload/progress/:sessionId - SSE stream for progress
+const progressStream = (req, res) => {
+  const { sessionId } = req.params;
+
+  // Set SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+  // Store response for sending events
+  progressStreams.set(sessionId, res);
+
+  // Send initial connected event
+  res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+
+  // Clean up on close
+  req.on('close', () => {
+    progressStreams.delete(sessionId);
+  });
+};
+
+// POST /dashboard/upload/start-sending - Actually send the SMS messages
+const startSending = async (req, res) => {
+  const { sessionId } = req.body;
+  let uploadRecord = null;
+  let bulkReservation = null;
+
+  try {
+    const userId = req.session.userId;
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.json({ error: 'Not authenticated' });
+    }
+
+    // Get sending data from session
+    const sendingData = req.session.sendingData;
+    if (!sendingData || sendingData.progressSessionId !== sessionId) {
+      return res.json({ error: 'Session expired' });
+    }
+
+    const { rowsToSend, previewData, startTime } = sendingData;
+    const smsDelay = 150; // 150ms between SMS sends
+
+    logger.info('Starting SMS send', { customerCount: rowsToSend.length });
+
+    // B5 FIX: Start trial on first CSV SMS send (if not already started)
+    // IMPORTANT: Must be done BEFORE bulk reservation to avoid deadlock
+    // (bulk reservation locks user row, startTrial() tries to update same row)
+    logger.info('Checking trial status', { trialStartsAt: user.trialStartsAt, subscriptionStatus: user.subscriptionStatus });
+    if (!user.trialStartsAt && user.subscriptionStatus === 'trial') {
+      logger.info('Starting trial for user');
+      await user.startTrial();
+      logger.info('Trial started successfully');
+    }
+
+    // D1 FIX: Reserve bulk SMS slots atomically before sending
+    logger.info('Reserving bulk SMS slots', { userId, count: rowsToSend.length });
+    bulkReservation = await smsLimitService.reserveBulkSmsSlots(userId, rowsToSend.length);
+    logger.info('Bulk reservation result', { canSend: bulkReservation.canSend, error: bulkReservation.error });
+
+    if (!bulkReservation.canSend) {
+      logger.warn('Bulk SMS reservation failed', { error: bulkReservation.error });
+      sendProgressEvent(sessionId, {
+        type: 'error',
+        error: `${bulkReservation.error}. Available: ${bulkReservation.availableSlots}, Requested: ${rowsToSend.length}`
+      });
+      return res.json({
+        error: bulkReservation.error,
+        availableSlots: bulkReservation.availableSlots,
+        requestedCount: rowsToSend.length
+      });
+    }
+
+    // Get the transaction from bulk reservation to avoid FK deadlock
+    // (CsvUpload and FeedbackRequest have FK to users, which is locked)
+    const { transaction } = bulkReservation;
+
+    // Create upload record - use same transaction to avoid FK lock wait
+    logger.info('Creating CsvUpload record', { userId: user.id, filename: previewData.filename });
     uploadRecord = await CsvUpload.create({
       userId: user.id,
       filename: previewData.filename,
       totalRows: previewData.totalRows,
       status: 'processing'
-    });
+    }, { transaction });
+    logger.info('CsvUpload record created', { uploadId: uploadRecord.id });
 
-    // Bulk create FeedbackRequests (use camelCase for Sequelize model)
-    const feedbackRequests = rowsToSend.map(row => ({
+    // Generate unique short codes for all requests
+    logger.info('Generating short codes', { count: rowsToSend.length });
+    const shortCodes = [];
+    for (let i = 0; i < rowsToSend.length; i++) {
+      const shortCode = await shortUrlService.generateShortCode();
+      shortCodes.push(shortCode);
+    }
+    logger.info('Short codes generated', { count: shortCodes.length });
+
+    // Bulk create FeedbackRequests with short codes - use same transaction
+    logger.info('Creating FeedbackRequests', { count: rowsToSend.length });
+    const feedbackRequests = rowsToSend.map((row, index) => ({
       userId: user.id,
       uuid: uuidv4(),
+      shortCode: shortCodes[index],
       customerName: row.name,
       customerPhone: row.phone,
       customerEmail: row.email || null,
@@ -376,75 +564,113 @@ const sendToSelected = async (req, res) => {
       source: 'csv_upload'
     }));
 
-    const createdRequests = await FeedbackRequest.bulkCreate(feedbackRequests);
+    const createdRequests = await FeedbackRequest.bulkCreate(feedbackRequests, { transaction });
+    logger.info('FeedbackRequests created', { count: createdRequests.length });
 
-    // Send SMS with rate limiting
-    const limit = pLimit(1);
-    const smsDelay = 1000;
+    const successfulSends = [];
     const errors = [];
+    let actualSentCount = 0;
 
-    const smsResults = await Promise.all(
-      createdRequests.map((request, index) =>
-        limit(async () => {
-          try {
-            if (index > 0) {
-              await new Promise(resolve => setTimeout(resolve, smsDelay));
-            }
+    logger.info('Starting SMS send loop', { requestCount: createdRequests.length });
 
-            const baseUrl = process.env.APP_URL || 'http://localhost:3000';
-            const reviewLink = `${baseUrl}/review/${request.uuid}`;
+    // Send SMS sequentially with progress updates
+    for (let i = 0; i < createdRequests.length; i++) {
+      const request = createdRequests[i];
+      const row = rowsToSend[i];
 
-            const result = await smsService.sendReviewRequest(
-              request.customerPhone,
-              request.customerName,
-              user.businessName,
-              reviewLink,
-              user.smsMessageTone || 'friendly'
-            );
+      // Send progress event
+      sendProgressEvent(sessionId, {
+        type: 'sending',
+        current: i + 1,
+        total: createdRequests.length,
+        customerName: request.customerName || 'Customer',
+        phone: request.customerPhone.slice(-4) // Last 4 digits
+      });
 
-            const sentAt = new Date();
-            await request.update({
-              status: 'sent',
-              smsSentAt: sentAt,
-              twilioMessageSid: result.messageSid
-            });
+      try {
+        // Use short URL for shorter SMS
+        const reviewLink = shortUrlService.buildShortUrl(request.shortCode);
 
-            return {
-              success: true,
-              requestId: request.id,
-              name: request.customerName || '-',
-              phone: request.customerPhone,
-              sentAt: sentAt,
-              twilioSid: result.messageSid,
-              reviewLink: reviewLink,
-              uuid: request.uuid
-            };
-          } catch (error) {
-            console.error(`SMS failed for ${request.customerPhone}:`, error);
-            errors.push({
-              row: rowsToSend[index].rowNumber,
-              name: request.customerName,
-              phone: request.customerPhone,
-              error: `SMS failed: ${error.message}`
-            });
-            return { success: false, requestId: request.id, error: error.message };
-          }
-        })
-      )
-    );
+        const result = await smsService.sendReviewRequest(
+          request.customerPhone,
+          request.customerName,
+          user.businessName,
+          reviewLink,
+          user.smsMessageTone || 'friendly',
+          user.customSmsMessage
+        );
 
-    // Calculate results
-    const successfulSends = smsResults.filter(r => r.success);
-    const failedSends = smsResults.filter(r => !r.success);
+        const sentAt = new Date();
+        await request.update({
+          status: 'sent',
+          smsSentAt: sentAt,
+          twilioMessageSid: result.messageSid
+        }, { transaction });
+
+        // D1 FIX: Track successful sends for atomic increment at end
+        actualSentCount++;
+
+        successfulSends.push({
+          success: true,
+          requestId: request.id,
+          name: request.customerName || '-',
+          phone: request.customerPhone,
+          sentAt: sentAt,
+          twilioSid: result.messageSid,
+          reviewLink: reviewLink,
+          shortCode: request.shortCode
+        });
+
+        // Send success event
+        sendProgressEvent(sessionId, {
+          type: 'sent',
+          current: i + 1,
+          total: createdRequests.length,
+          customerName: request.customerName || 'Customer'
+        });
+
+      } catch (error) {
+        logger.error('SMS failed', { customerPhone: request.customerPhone, error: error.message });
+
+        await request.update({ status: 'failed' }, { transaction });
+
+        errors.push({
+          row: row.rowNumber,
+          name: request.customerName,
+          phone: request.customerPhone,
+          error: error.message
+        });
+
+        // Send failure event
+        sendProgressEvent(sessionId, {
+          type: 'failed',
+          current: i + 1,
+          total: createdRequests.length,
+          customerName: request.customerName || 'Customer',
+          error: error.message
+        });
+      }
+
+      // Delay between sends (except for last one)
+      if (i < createdRequests.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, smsDelay));
+      }
+    }
+
+    // D1 FIX: Atomically increment SMS count for all successful sends and release lock
+    await bulkReservation.incrementAndRelease(actualSentCount);
+    bulkReservation = null; // Mark as released
+
+    // Calculate final results
+    const processingTime = Date.now() - startTime;
     const successCount = successfulSends.length;
-    const smsFailedCount = failedSends.length;
+    const failedCount = errors.length;
 
     // Update upload record
-    const processingTime = Date.now() - startTime;
     await uploadRecord.update({
       validRows: rowsToSend.length,
       successCount: successCount,
-      failedCount: smsFailedCount + previewData.invalidRows.length + previewData.duplicateRows.length,
+      failedCount: failedCount + previewData.invalidRows.length + previewData.duplicateRows.length,
       duplicateCount: previewData.duplicateRows.length,
       errors: [...previewData.errors, ...errors],
       status: successCount > 0 ? 'completed' : 'failed',
@@ -452,32 +678,49 @@ const sendToSelected = async (req, res) => {
       completedAt: new Date()
     });
 
-    // Clear session data
+    // Store results in session for results page
+    req.session.uploadResults = {
+      filename: previewData.filename,
+      totalRows: previewData.totalRows,
+      successCount: successCount,
+      failedCount: failedCount,
+      duplicateCount: previewData.duplicateRows.length,
+      invalidCount: previewData.invalidRows.length,
+      processingTimeSeconds: Math.round(processingTime / 1000),
+      successfulSends: successfulSends,
+      failedSends: errors,
+      duplicates: previewData.duplicateRows,
+      invalidRows: previewData.invalidRows
+    };
+
+    // Clear preview data
     delete req.session.csvPreview;
+    delete req.session.sendingData;
 
-    // Render results
-    res.render('upload-results', {
-      title: 'Upload Results',
-      user: user,
-      results: {
-        filename: previewData.filename,
-        totalRows: previewData.totalRows,
-        successCount: successCount,
-        failedCount: smsFailedCount,
-        duplicateCount: previewData.duplicateRows.length,
-        invalidCount: previewData.invalidRows.length,
-        processingTimeSeconds: Math.round(processingTime / 1000),
+    // Send completion event
+    sendProgressEvent(sessionId, {
+      type: 'complete',
+      successCount,
+      failedCount,
+      processingTimeSeconds: Math.round(processingTime / 1000)
+    });
 
-        // Detailed arrays for tables
-        successfulSends: successfulSends,
-        failedSends: errors, // Already has row, name, phone, error
-        duplicates: previewData.duplicateRows,
-        invalidRows: previewData.invalidRows
-      }
+    // Save session
+    req.session.save(() => {
+      res.json({ success: true, successCount, failedCount });
     });
 
   } catch (error) {
-    console.error('Send SMS error:', error);
+    logger.error('Send SMS error', { error: error.message });
+
+    // D1 FIX: Rollback bulk reservation if it wasn't released
+    if (bulkReservation) {
+      try {
+        await bulkReservation.rollback();
+      } catch (rollbackError) {
+        logger.error('Error rolling back bulk reservation', { error: rollbackError.message });
+      }
+    }
 
     if (uploadRecord) {
       await uploadRecord.update({
@@ -487,15 +730,43 @@ const sendToSelected = async (req, res) => {
       });
     }
 
+    // Send error event
+    sendProgressEvent(sessionId, {
+      type: 'error',
+      error: error.message
+    });
+
+    res.json({ error: error.message });
+  }
+};
+
+// GET /dashboard/upload/results - Show results page (after SSE completion)
+const showResults = async (req, res) => {
+  try {
     const userId = req.session.userId;
-    const { User } = require('../models');
     const user = req.user || await User.findByPk(userId);
 
-    res.status(500).render('upload', {
-      title: 'Upload Customers',
+    if (!user) {
+      return res.redirect('/dashboard/login');
+    }
+
+    const results = req.session.uploadResults;
+
+    if (!results) {
+      return res.redirect('/dashboard/upload');
+    }
+
+    // Clear results from session after displaying
+    delete req.session.uploadResults;
+
+    res.render('upload-results', {
+      title: 'Upload Results',
       user: user,
-      error: `Send failed: ${error.message}`
+      results: results
     });
+  } catch (error) {
+    logger.error('Results page error', { error: error.message });
+    res.redirect('/dashboard/upload');
   }
 };
 
@@ -522,7 +793,7 @@ const showUploadHistory = async (req, res) => {
       uploads: uploads
     });
   } catch (error) {
-    console.error('Upload history error:', error);
+    logger.error('Upload history error', { error: error.message });
     res.status(500).render('error', {
       title: 'Error',
       message: 'Failed to load upload history',
@@ -548,12 +819,11 @@ const sendSingleSMS = async (req, res) => {
       return res.status(400).json({ error: 'Phone number is required' });
     }
 
-    console.log(`📤 Resending SMS to: ${name || phone}`);
+    logger.info('Resending SMS', { name: name || 'unknown', phone });
 
-    // Create feedback request
-    const feedbackRequest = await FeedbackRequest.create({
+    // Create feedback request with short URL
+    const { feedbackRequest, reviewLink } = await shortUrlService.createFeedbackRequestWithShortUrl({
       userId: user.id,
-      uuid: uuidv4(),
       customerName: name || '',
       customerPhone: phone,
       customerEmail: null,
@@ -561,16 +831,13 @@ const sendSingleSMS = async (req, res) => {
       source: 'manual_resend'
     });
 
-    // Send SMS
-    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
-    const reviewLink = `${baseUrl}/review/${feedbackRequest.uuid}`;
-
     const result = await smsService.sendReviewRequest(
       feedbackRequest.customerPhone,
       feedbackRequest.customerName,
       user.businessName,
       reviewLink,
-      user.smsMessageTone || 'friendly'
+      user.smsMessageTone || 'friendly',
+      user.customSmsMessage
     );
 
     await feedbackRequest.update({
@@ -579,13 +846,16 @@ const sendSingleSMS = async (req, res) => {
       twilioMessageSid: result.messageSid
     });
 
-    console.log(`✅ SMS resent successfully to ${phone}`);
+    logger.info('SMS resent successfully', { phone });
 
-    // Redirect back to previous page or dashboard
-    res.redirect('back');
+    // Redirect back with success indicator for toast notification
+    const referer = req.get('Referer') || '/dashboard';
+    const url = new URL(referer, `${req.protocol}://${req.get('host')}`);
+    url.searchParams.set('resent', 'true');
+    res.redirect(url.pathname + url.search);
 
   } catch (error) {
-    console.error('Resend SMS error:', error);
+    logger.error('Resend SMS error', { error: error.message });
     res.status(500).json({
       error: 'Failed to resend SMS',
       message: error.message
@@ -599,6 +869,9 @@ module.exports = {
   processUpload,
   showPreview,
   sendToSelected,
+  progressStream,
+  startSending,
+  showResults,
   showUploadHistory,
   sendSingleSMS
 };

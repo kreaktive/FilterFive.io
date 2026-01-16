@@ -3,11 +3,13 @@
  *
  * Core service for fetching analytics data for the dashboard.
  * Uses pre-calculated snapshots for performance and real-time data for immediate updates.
+ * Includes Redis caching for improved performance.
  *
  * @module services/analyticsService
  */
 
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 const {
   AnalyticsSnapshot,
   TimingPerformance,
@@ -17,6 +19,7 @@ const {
   User
 } = require('../models');
 const roiCalculator = require('../utils/roiCalculator');
+const cacheService = require('./cacheService');
 
 class AnalyticsService {
   /**
@@ -52,22 +55,23 @@ class AnalyticsService {
     }
 
     // Fetch aggregated metrics from snapshots
+    // B7 FIX: Use imported sequelize instance instead of this.sequelize
     const snapshots = await AnalyticsSnapshot.findAll({
       where,
       attributes: [
-        [this.sequelize.fn('SUM', this.sequelize.col('requests_sent')), 'totalRequestsSent'],
-        [this.sequelize.fn('SUM', this.sequelize.col('requests_sms')), 'totalRequestsSms'],
-        [this.sequelize.fn('SUM', this.sequelize.col('requests_qr')), 'totalRequestsQr'],
-        [this.sequelize.fn('SUM', this.sequelize.col('requests_clicked')), 'totalRequestsClicked'],
-        [this.sequelize.fn('SUM', this.sequelize.col('requests_rated')), 'totalRequestsRated'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_positive')), 'totalReviewsPositive'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_negative')), 'totalReviewsNegative'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_1_star')), 'totalReviews1Star'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_2_star')), 'totalReviews2Star'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_3_star')), 'totalReviews3Star'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_4_star')), 'totalReviews4Star'],
-        [this.sequelize.fn('SUM', this.sequelize.col('reviews_5_star')), 'totalReviews5Star'],
-        [this.sequelize.fn('AVG', this.sequelize.col('average_rating')), 'avgRating']
+        [sequelize.fn('SUM', sequelize.col('requests_sent')), 'totalRequestsSent'],
+        [sequelize.fn('SUM', sequelize.col('requests_sms')), 'totalRequestsSms'],
+        [sequelize.fn('SUM', sequelize.col('requests_qr')), 'totalRequestsQr'],
+        [sequelize.fn('SUM', sequelize.col('requests_clicked')), 'totalRequestsClicked'],
+        [sequelize.fn('SUM', sequelize.col('requests_rated')), 'totalRequestsRated'],
+        [sequelize.fn('SUM', sequelize.col('reviews_positive')), 'totalReviewsPositive'],
+        [sequelize.fn('SUM', sequelize.col('reviews_negative')), 'totalReviewsNegative'],
+        [sequelize.fn('SUM', sequelize.col('reviews_1_star')), 'totalReviews1Star'],
+        [sequelize.fn('SUM', sequelize.col('reviews_2_star')), 'totalReviews2Star'],
+        [sequelize.fn('SUM', sequelize.col('reviews_3_star')), 'totalReviews3Star'],
+        [sequelize.fn('SUM', sequelize.col('reviews_4_star')), 'totalReviews4Star'],
+        [sequelize.fn('SUM', sequelize.col('reviews_5_star')), 'totalReviews5Star'],
+        [sequelize.fn('AVG', sequelize.col('average_rating')), 'avgRating']
       ],
       raw: true
     });
@@ -230,11 +234,12 @@ class AnalyticsService {
       }
     };
 
+    // B7 FIX: Use imported sequelize instance
     const events = await SmsEvent.findAll({
       where,
       attributes: [
         'eventType',
-        [this.sequelize.fn('COUNT', this.sequelize.col('id')), 'count']
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
       ],
       group: ['eventType'],
       raw: true
@@ -263,6 +268,7 @@ class AnalyticsService {
    * @returns {Promise<Array<string>>} List of location names
    */
   async getUserLocations(userId) {
+    // B7 FIX: Use imported sequelize instance
     const locations = await FeedbackRequest.findAll({
       where: {
         userId,
@@ -271,7 +277,7 @@ class AnalyticsService {
         }
       },
       attributes: [
-        [this.sequelize.fn('DISTINCT', this.sequelize.col('location')), 'location']
+        [sequelize.fn('DISTINCT', sequelize.col('location')), 'location']
       ],
       raw: true
     });
@@ -331,9 +337,80 @@ class AnalyticsService {
     };
   }
 
-  // Helper to get sequelize instance
-  get sequelize() {
-    return AnalyticsSnapshot.sequelize;
+  // ============================================
+  // Cached versions of analytics methods
+  // ============================================
+
+  /**
+   * Get dashboard metrics with caching
+   * @param {number} userId - User ID
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} Dashboard metrics (from cache or fresh)
+   */
+  async getDashboardMetricsCached(userId, { startDate, endDate, location = null }) {
+    const cacheKey = cacheService.dashboardKey(userId, startDate, endDate, location);
+
+    return cacheService.getOrSet(
+      cacheKey,
+      () => this.getDashboardMetrics(userId, { startDate, endDate, location }),
+      cacheService.constructor.TTL.DASHBOARD
+    );
+  }
+
+  /**
+   * Get trend data with caching
+   * @param {number} userId - User ID
+   * @param {string} [location] - Optional location filter
+   * @returns {Promise<Object>} Trend data (from cache or fresh)
+   */
+  async getTrendDataCached(userId, location = null) {
+    const cacheKey = cacheService.trendKey(userId, location);
+
+    return cacheService.getOrSet(
+      cacheKey,
+      () => this.getTrendData(userId, location),
+      cacheService.constructor.TTL.TREND
+    );
+  }
+
+  /**
+   * Get timing heatmap with caching
+   * @param {number} userId - User ID
+   * @param {string} [location] - Optional location filter
+   * @returns {Promise<Array>} Heatmap data (from cache or fresh)
+   */
+  async getTimingHeatmapCached(userId, location = null) {
+    const cacheKey = cacheService.heatmapKey(userId, location);
+
+    return cacheService.getOrSet(
+      cacheKey,
+      () => this.getTimingHeatmap(userId, location),
+      cacheService.constructor.TTL.HEATMAP
+    );
+  }
+
+  /**
+   * Get user locations with caching
+   * @param {number} userId - User ID
+   * @returns {Promise<Array<string>>} Location list (from cache or fresh)
+   */
+  async getUserLocationsCached(userId) {
+    const cacheKey = cacheService.locationsKey(userId);
+
+    return cacheService.getOrSet(
+      cacheKey,
+      () => this.getUserLocations(userId),
+      cacheService.constructor.TTL.LOCATIONS
+    );
+  }
+
+  /**
+   * Invalidate all cached analytics for a user
+   * Call this when data changes (new SMS sent, review received, etc.)
+   * @param {number} userId - User ID
+   */
+  async invalidateCache(userId) {
+    return cacheService.invalidateUserAnalytics(userId);
   }
 }
 

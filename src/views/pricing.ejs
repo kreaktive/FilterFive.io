@@ -1,0 +1,604 @@
+<%- include('partials/head', {
+  title: 'Pricing | One New Customer Pays For It | MoreStars',
+  description: 'Simple pricing. $77/month. No contracts. If MoreStars brings you one new customer, it pays for itself. Start your 14-day free trial.',
+  ogTitle: 'Pricing | One New Customer Pays For It | MoreStars',
+  ogDescription: 'Simple pricing. $77/month. No contracts. If MoreStars brings you one new customer, it pays for itself. Start your 14-day free trial.'
+}) %>
+
+<!-- Product/Offer Schema for Pricing Page -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "MoreStars Review Software",
+  "description": "Review management software that helps local businesses get more Google reviews through SMS and QR code campaigns.",
+  "brand": {
+    "@type": "Brand",
+    "name": "MoreStars"
+  },
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Monthly Plan",
+      "price": "77",
+      "priceCurrency": "USD",
+      "priceValidUntil": "<%= new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0] %>",
+      "availability": "https://schema.org/InStock",
+      "url": "https://morestars.io/pricing",
+      "description": "No contract. Cancel anytime. 1,000 SMS messages per month included."
+    },
+    {
+      "@type": "Offer",
+      "name": "Annual Plan",
+      "price": "770",
+      "priceCurrency": "USD",
+      "priceValidUntil": "<%= new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0] %>",
+      "availability": "https://schema.org/InStock",
+      "url": "https://morestars.io/pricing",
+      "description": "Save $154 per year. 12,000 SMS messages per year included."
+    }
+  ]
+}
+</script>
+
+  <% const activePage = 'pricing'; %>
+  <%- include('partials/navbar') %>
+
+  <style>
+    /* Pulsating animations for Final CTA */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(-25%);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+      }
+      50% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+      }
+    }
+    @keyframes starTwinkle {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+      }
+    }
+    @keyframes glowPulse {
+      0%, 100% {
+        transform: scale(1) translateY(0);
+      }
+      50% {
+        transform: scale(1.02) translateY(-2px);
+      }
+    }
+
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .animate-ping {
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .animate-bounce {
+      animation: bounce 1s infinite;
+    }
+    .animate-twinkle {
+      animation: starTwinkle 1.5s ease-in-out infinite;
+    }
+    .animate-glow {
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+  </style>
+
+  <main>
+    <!-- Hero Section: The Value Proposition -->
+    <div class="pt-24 pb-16 text-center bg-[#F9F7FA]">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="inline-block py-1 px-3 rounded-full bg-green-100 text-green-700 text-xs font-bold tracking-wide uppercase mb-6 border border-green-200">
+            14-Day Free Trial • No Credit Card
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight text-[#500B42]">
+          One New Customer <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FFBA49] to-orange-500">Pays For The Whole Year.</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+          If MoreStars gets you just <strong>one</strong> extra customer per month, the software is free. Everything else is pure profit.
+        </p>
+      </div>
+    </div>
+
+    <!-- Pricing Switcher & Card -->
+    <section class="pb-24 px-4 -mt-8">
+        <div class="max-w-5xl mx-auto">
+
+            <!-- Toggle -->
+            <div class="flex justify-center mb-12 relative z-10">
+                <div class="bg-white p-1 rounded-full shadow-md border border-gray-200 inline-flex relative">
+                    <button
+                        id="monthlyBtn"
+                        class="px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 bg-[#500B42] text-white shadow-lg"
+                    >
+                        Monthly (No Contract)
+                    </button>
+                    <button
+                        id="annualBtn"
+                        class="px-6 py-3 rounded-full text-sm font-bold transition-all duration-200 flex items-center gap-2 text-gray-500 hover:text-gray-900"
+                    >
+                        Yearly <span class="bg-[#FFBA49] text-[#500B42] text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Save 17%</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- The Main Card -->
+            <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-4xl mx-auto flex flex-col md:flex-row relative z-20 overflow-hidden">
+                <!-- Best Value Badge for Annual -->
+                <div id="bestValueBadge" class="absolute -top-3 -right-3 bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-xl z-30 shadow-lg hidden">
+                    2 MONTHS FREE
+                </div>
+
+                <!-- Left Side: The Offer -->
+                <div class="p-8 md:p-12 md:w-3/5 border-b md:border-b-0 md:border-r border-gray-100">
+                    <h3 class="text-2xl font-bold mb-2" style="color: #500B42;">The Growth Plan</h3>
+                    <p class="text-gray-500 mb-8">Everything you need to dominate your local market.</p>
+
+                    <div class="space-y-5">
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 rounded-full bg-green-100 text-green-600 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-gray-800">1,000 SMS Requests / mo</span>
+                                <p class="text-xs text-gray-500">Reach customers directly on their phone.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 rounded-full bg-green-100 text-green-600 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-gray-800">Unlimited QR Codes</span>
+                                <p class="text-xs text-gray-500">For receipts, front desk, or vehicles.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 rounded-full bg-green-100 text-green-600 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-gray-800">Review Monitoring</span>
+                                <p class="text-xs text-gray-500">Track your growth in one dashboard.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 rounded-full bg-green-100 text-green-600 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-gray-800">POS Integrations</span>
+                                <p class="text-xs text-gray-500">Square, Shopify, and Zapier included.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 rounded-full bg-green-100 text-green-600 mt-0.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-gray-800">Multi-Location Ready</span>
+                                <p class="text-xs text-gray-500">Manage all your spots from one login.</p>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+
+                <!-- Right Side: The Price & CTA -->
+                <div class="p-8 md:p-12 md:w-2/5 bg-gray-50 flex flex-col justify-center items-center text-center relative">
+                    <div class="mb-2">
+                        <span id="priceAmount" class="text-6xl font-extrabold tracking-tight" style="color: #500B42;">
+                            $77
+                        </span>
+                        <span class="text-gray-500 font-medium text-xl">/mo</span>
+                    </div>
+
+                    <div id="pricingDetails">
+                        <p class="text-sm text-gray-500 mb-8 font-medium">Cancel anytime. No fees.</p>
+                    </div>
+
+                    <button class="w-full py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4 bg-[#FFBA49] text-[#500B42]">
+                        Start 14-Day Free Trial
+                    </button>
+
+                    <div class="flex flex-col gap-3 text-xs text-gray-500 font-medium w-full">
+                        <div class="flex items-center justify-center gap-2">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            No credit card required
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-2 flex items-center justify-center gap-2 text-[10px] text-gray-400">
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                            Cancel in 2 clicks. No phone calls.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SETUP SECTION (duplicated from homepage) -->
+            <div class="mt-24">
+              <!-- Header -->
+              <div class="text-center max-w-3xl mx-auto mb-10 md:mb-20">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">What Happens After You Start</h3>
+              </div>
+
+              <!-- Steps Container -->
+              <div class="relative">
+
+                <!-- Connecting Line (Desktop Only) -->
+                <div class="hidden md:block absolute top-4 left-[16%] right-[16%] h-0.5 z-0 overflow-hidden">
+                  <div class="w-full h-full" style="background-image: linear-gradient(90deg, #CBD5E1 50%, transparent 50%); background-size: 24px 100%; animation: flowRight 1s linear infinite;"></div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-12 lg:gap-16 mb-20">
+
+                  <!-- Step 1 -->
+                  <div class="flex flex-col items-center text-center group">
+                    <div class="px-6 py-2 rounded-full bg-[#3B82F6] shadow-[0_10px_25px_-5px_rgba(59,130,246,0.4)] flex items-center justify-center text-white text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+                      Step 1
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Easy for you</p>
+                    <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">You Ask (Your Way)</h3>
+                    <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+                      Send a single text in 10 seconds. Upload a CSV to request hundreds at once. Or connect your POS in 5 minutes and never think about it again.
+                    </p>
+
+                    <!-- Visual 1: Input Form -->
+                    <div class="w-full max-w-[300px] mx-auto bg-white p-5 rounded-2xl shadow-xl border border-gray-100 transform rotate-[-2deg] transition-transform group-hover:rotate-0 duration-500">
+                      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3 text-left">New Request</div>
+                      <div class="space-y-3">
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-left">
+                          <span class="text-gray-800 text-sm font-medium">Sarah Johnson</span>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-left">
+                          <span class="text-gray-800 text-sm font-medium">(555) 123-4567</span>
+                        </div>
+                        <div class="bg-[#3B82F6] text-white rounded-lg py-2.5 text-sm font-bold text-center">
+                          Send Request
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2 -->
+                  <div class="flex flex-col items-center text-center group">
+                    <div class="px-6 py-2 rounded-full bg-[#A855F7] shadow-[0_10px_25px_-5px_rgba(168,85,247,0.4)] flex items-center justify-center text-white text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+                      Step 2
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Easy for them</p>
+                    <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">They Tap</h3>
+                    <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+                      No login. No app download. No hassle at all. Your customer taps once and lands directly on your Google profile, Facebook, or wherever you want the review.
+                    </p>
+
+                    <!-- Visual 2: Phone Bubble -->
+                    <div class="w-full max-w-[280px] mx-auto bg-white p-2 rounded-3xl shadow-xl border-4 border-gray-100 transform rotate-[2deg] transition-transform group-hover:rotate-0 duration-500">
+                      <div class="bg-gray-50 rounded-2xl p-4 h-[180px] flex flex-col justify-end items-end relative overflow-hidden">
+                        <div class="bg-[#3B82F6] text-white text-xs p-3 rounded-2xl rounded-tr-none shadow-sm text-left leading-relaxed mb-1 relative z-10">
+                          Hi Sarah! Thanks for choosing us today. Mind leaving a quick review?
+                          <br>
+                          <span class="underline text-[rgba(161,67,142,0.6)] font-semibold">morestars.io/link</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 font-medium mr-1">Delivered</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3 -->
+                  <div class="flex flex-col items-center text-center group">
+                    <div class="px-6 py-2 rounded-full bg-[#FFBA49] shadow-[0_10px_25px_-5px_rgba(255,186,73,0.4)] flex items-center justify-center text-[#500B42] text-xs font-bold uppercase tracking-widest z-10 relative transition-transform group-hover:scale-105 duration-300">
+                      Step 3
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium mb-6 mt-2">Instant Benefits</p>
+                    <h3 class="text-2xl font-bold mb-4 font-title text-[#500B42]">You Grow</h3>
+                    <p class="text-gray-600 mb-10 text-sm leading-relaxed px-4">
+                      You get more reviews. Your credibility and rating climbs. You show up higher in local search. New customers pick you over the competitors now.
+                    </p>
+
+                    <!-- Visual 3: Google Review Card -->
+                    <div class="w-full max-w-[300px] mx-auto bg-white p-5 rounded-2xl shadow-xl border border-gray-100 transform rotate-[-1deg] transition-transform group-hover:rotate-0 duration-500 relative overflow-hidden">
+                      <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold text-lg">G</div>
+                        <div class="text-left">
+                          <div class="font-bold text-gray-900 text-sm">Your Business</div>
+                          <div class="text-[10px] text-gray-500">Posting publicly</div>
+                        </div>
+                      </div>
+
+                      <div class="flex justify-center gap-1 mb-4">
+                        <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-7 h-7 text-[#FFBA49] fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      </div>
+
+                      <div class="text-xs text-gray-400 text-left mb-4 px-2">
+                        Share details of your own experience at this place...
+                      </div>
+
+                      <div class="w-full h-9 bg-[#1A73E8] rounded text-white text-sm font-bold flex items-center justify-center">
+                        Post
+                      </div>
+
+                      <!-- Hover Effect Overlay -->
+                      <div class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-2">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
+                        </div>
+                        <span class="font-bold text-gray-900">Review Posted!</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ROI Visualizer -->
+    <section class="py-24 bg-[#F9F7FA]">
+       <div class="max-w-6xl mx-auto px-4">
+          <h2 class="text-3xl font-extrabold mb-12 text-center" style="color: #500B42;">The Math That Matters</h2>
+
+          <div class="grid md:grid-cols-2 gap-12 items-center">
+             <!-- Visual Equation -->
+             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+                <div class="flex flex-col items-center justify-center space-y-6">
+                    <!-- Cost -->
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500 uppercase tracking-wide font-bold mb-2">Cost of MoreStars</p>
+                        <div class="text-4xl font-bold text-red-500">$77<span class="text-lg text-gray-400">/mo</span></div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="w-full h-px bg-gray-100 relative">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="bg-white px-3 text-sm font-bold text-gray-400">VS</span>
+                        </div>
+                    </div>
+
+                    <!-- Value -->
+                    <div class="text-center w-full">
+                        <p class="text-sm text-gray-500 uppercase tracking-wide font-bold mb-4">Value of 1 New Customer</p>
+
+                        <div class="grid grid-cols-3 gap-2 text-sm w-full">
+                            <div class="bg-gray-50 p-2 rounded border border-gray-100">
+                                <div class="font-bold text-gray-800">$400</div>
+                                <div class="text-xs text-gray-500">Auto Repair</div>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded border border-gray-100">
+                                <div class="font-bold text-gray-800">$1,200</div>
+                                <div class="text-xs text-gray-500">Dental</div>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded border border-gray-100">
+                                <div class="font-bold text-gray-800">$5,000+</div>
+                                <div class="text-xs text-gray-500">Real Estate</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result -->
+                    <div class="bg-green-50 w-full p-4 rounded-xl border border-green-100 text-center">
+                        <p class="text-green-800 font-bold flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            One customer pays for the whole year.
+                        </p>
+                    </div>
+                </div>
+             </div>
+
+             <!-- Explanation -->
+             <div>
+                <h3 class="text-2xl font-bold mb-6" style="color: #500B42;">Why Enterprise Tools are a Rip-off</h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="mt-1">
+                            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Competitors charge $350-$500/mo</h4>
+                            <p class="text-gray-600 text-sm">They load their software with "AI sentiment analysis" and "social listening" features you will literally never use.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1">
+                            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">They lock you in</h4>
+                            <p class="text-gray-600 text-sm">12-month contracts are standard. Even if it doesn't work, you keep paying.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1">
+                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">We do one thing</h4>
+                            <p class="text-gray-600 text-sm">We help you ask for reviews. We charge a fair price for a simple tool. That's it.</p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+          </div>
+       </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-24 bg-[#F9F7FA]">
+       <div class="max-w-4xl mx-auto px-4 text-center">
+          <!-- Animated stars decoration -->
+          <div class="flex justify-center gap-2 mb-6">
+             <svg class="w-7 h-7 text-[#FFBA49] fill-current animate-twinkle" style="animation-delay: 0s;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+             <svg class="w-7 h-7 text-[#FFBA49] fill-current animate-twinkle" style="animation-delay: 0.2s;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+             <svg class="w-7 h-7 text-[#FFBA49] fill-current animate-twinkle" style="animation-delay: 0.4s;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+             <svg class="w-7 h-7 text-[#FFBA49] fill-current animate-twinkle" style="animation-delay: 0.6s;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+             <svg class="w-7 h-7 text-[#FFBA49] fill-current animate-twinkle" style="animation-delay: 0.8s;" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+
+          <h2 class="text-3xl md:text-4xl font-extrabold mb-4" style="color: #500B42;">
+             Ready to get more stars?
+          </h2>
+          <p class="text-gray-600 mb-8 max-w-lg mx-auto">Join thousands of local businesses already growing their reputation with MoreStars.</p>
+
+          <!-- Pulsating CTA Button with 3D Tilt -->
+          <%- include('partials/cta-3d-button', {
+            buttonText: 'Start 14-Day Free Trial',
+            buttonLink: '/signup',
+            trackId: 'pricing-final-cta',
+            size: 'lg'
+          }) %>
+
+          <!-- Trust indicators with hover effects -->
+          <div class="mt-8 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+             <div class="flex items-center gap-2 hover:text-gray-700 transition-colors cursor-default group">
+                <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span>No credit card required</span>
+             </div>
+             <div class="flex items-center gap-2 hover:text-gray-700 transition-colors cursor-default group">
+                <div class="w-5 h-5 rounded-full bg-[rgba(161,67,142,0.1)] flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <svg class="w-3 h-3 text-[#A1438E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <span>Setup in 5 minutes</span>
+             </div>
+             <div class="flex items-center gap-2 hover:text-gray-700 transition-colors cursor-default group">
+                <div class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <span>Cancel anytime</span>
+             </div>
+          </div>
+       </div>
+    </section>
+  </main>
+
+  <!-- Product Schema for Pricing SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "MoreStars Reputation Management",
+    "description": "B2B SaaS platform that helps local businesses get more Google reviews through SMS and QR code campaigns. Intercepts negative feedback privately while directing happy customers to public review sites.",
+    "brand": {
+      "@type": "Brand",
+      "name": "MoreStars"
+    },
+    "image": "https://morestars.io/images/og-morestars.png",
+    "url": "https://morestars.io/pricing",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Monthly Plan",
+        "price": "77",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "availability": "https://schema.org/InStock",
+        "url": "https://morestars.io/pricing",
+        "itemCondition": "https://schema.org/NewCondition",
+        "description": "Unlimited SMS requests, QR codes, CSV uploads. No contracts."
+      },
+      {
+        "@type": "Offer",
+        "name": "Annual Plan",
+        "price": "770",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "availability": "https://schema.org/InStock",
+        "url": "https://morestars.io/pricing",
+        "itemCondition": "https://schema.org/NewCondition",
+        "description": "Save $154/year with annual billing. Billed $770 yearly."
+      }
+    ],
+    "category": "Business Software"
+  }
+  </script>
+
+  <!-- BreadcrumbList Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://morestars.io"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Pricing",
+        "item": "https://morestars.io/pricing"
+      }
+    ]
+  }
+  </script>
+
+  <%- include('partials/marketing-footer') %>
+
+  <!-- Pricing Toggle Script -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    const monthlyBtn = document.getElementById('monthlyBtn');
+    const annualBtn = document.getElementById('annualBtn');
+    const priceAmount = document.getElementById('priceAmount');
+    const pricingDetails = document.getElementById('pricingDetails');
+    const bestValueBadge = document.getElementById('bestValueBadge');
+
+    let isAnnual = false;
+
+    monthlyBtn.addEventListener('click', () => {
+      isAnnual = false;
+      monthlyBtn.classList.add('bg-[#500B42]', 'text-white', 'shadow-lg');
+      monthlyBtn.classList.remove('text-gray-500', 'hover:text-gray-900');
+      annualBtn.classList.remove('bg-[#500B42]', 'text-white', 'shadow-lg');
+      annualBtn.classList.add('text-gray-500', 'hover:text-gray-900');
+
+      priceAmount.textContent = '$77';
+      pricingDetails.innerHTML = '<p class="text-sm text-gray-500 mb-8 font-medium">Cancel anytime. No fees.</p>';
+      bestValueBadge.classList.add('hidden');
+    });
+
+    annualBtn.addEventListener('click', () => {
+      isAnnual = true;
+      annualBtn.classList.add('bg-[#500B42]', 'text-white', 'shadow-lg');
+      annualBtn.classList.remove('text-gray-500', 'hover:text-gray-900');
+      monthlyBtn.classList.remove('bg-[#500B42]', 'text-white', 'shadow-lg');
+      monthlyBtn.classList.add('text-gray-500', 'hover:text-gray-900');
+
+      const monthlyPrice = Math.round(770 / 12);
+      priceAmount.textContent = '$' + monthlyPrice;
+      pricingDetails.innerHTML = `
+        <div class="mb-8">
+          <p class="text-sm text-gray-500">Billed $770 yearly</p>
+          <p class="text-sm text-green-600 font-bold bg-green-100 px-2 py-1 rounded-md mt-2 inline-block">You save $154/year</p>
+        </div>
+      `;
+      bestValueBadge.classList.remove('hidden');
+    });
+  </script>
+
+<%- include('partials/scripts') %>

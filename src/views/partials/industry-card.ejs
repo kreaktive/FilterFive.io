@@ -1,0 +1,48 @@
+<!-- Industry Card Component -->
+<!--
+  Usage: <%- include('partials/industry-card', {
+    industry: {
+      slug: 'auto-repair',
+      name: 'Auto Repair',
+      description: 'Trust is the engine of your business...',
+      icon: '<svg>...</svg>',  // SVG inner content
+      color: 'red',  // Tailwind color name (red, blue, cyan, etc.)
+      ctaText: 'See Auto Repair Solution'  // optional
+    }
+  }) %>
+-->
+
+<a href="/industries/<%= industry.slug %>" class="block no-underline">
+  <div class="industry-card group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+    <!-- Hover Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-white to-<%= industry.color %>-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+    <div class="relative z-10 flex flex-col h-full">
+      <!-- Icon -->
+      <div class="card-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-<%= industry.color %>-600 bg-<%= industry.color %>-50 transition-transform duration-300">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><%- industry.icon %></svg>
+      </div>
+
+      <!-- Title -->
+      <h3 class="text-xl font-bold mb-3 text-[#500B42]"><%= industry.name %></h3>
+
+      <!-- Description -->
+      <p class="text-gray-600 leading-relaxed mb-6 flex-grow text-sm">
+        <%= industry.description %>
+      </p>
+
+      <!-- CTA Arrow -->
+      <div class="card-arrow flex items-center text-sm font-bold text-gray-400 transition-all mt-auto">
+        <%= typeof industry.ctaText !== 'undefined' ? industry.ctaText : 'See ' + industry.name + ' Solution' %>
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </div>
+    </div>
+  </div>
+</a>
+
+<style nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
+  .industry-card { transition: all 0.3s ease; }
+  .industry-card:hover { transform: translateY(-4px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+  .industry-card:hover .card-icon { transform: scale(1.1); }
+  .industry-card:hover .card-arrow { transform: translateX(4px); color: #500B42; }
+</style>

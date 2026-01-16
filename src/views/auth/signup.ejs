@@ -4,9 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/favicon-morestars.png">
+  <!-- Google Tag Manager -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W6336VRQ');</script>
+  <!-- End Google Tag Manager -->
   <% if (recaptchaSiteKey) { %>
   <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchaSiteKey %>"></script>
   <% } %>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Rubik:wght@700;800&display=swap" rel="stylesheet">
+
   <style>
     * {
       margin: 0;
@@ -15,45 +30,65 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #500B42;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
     }
 
     .signup-container {
       width: 100%;
       max-width: 450px;
+      position: relative;
+      z-index: 1;
     }
 
     .signup-card {
       background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 25px 50px -12px rgba(255, 186, 73, 0.25);
     }
 
     .logo {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
 
     .logo h1 {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 28px;
+      font-weight: 800;
+      color: #500B42;
+      font-family: 'Rubik', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo h1 svg {
+      width: 32px;
+      height: 32px;
+      fill: #FFBA49;
     }
 
     .logo p {
       font-size: 14px;
       color: #718096;
-      margin-top: 5px;
+      margin-top: 8px;
     }
 
     .form-group {
@@ -64,7 +99,7 @@
       display: block;
       font-size: 14px;
       font-weight: 600;
-      color: #4a5568;
+      color: #500B42;
       margin-bottom: 8px;
     }
 
@@ -72,19 +107,22 @@
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 12px 15px;
+      padding: 14px 16px;
       border: 2px solid #e2e8f0;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       font-family: inherit;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #f9fafb;
     }
 
     input[type="text"]:focus,
     input[type="email"]:focus,
     input[type="password"]:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #FFBA49;
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.1);
+      background: white;
     }
 
     .error-message {
@@ -95,6 +133,48 @@
       border-radius: 5px;
       color: #991b1b;
       font-size: 14px;
+    }
+
+    .resend-verification {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .resend-verification a {
+      color: #d97706;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .resend-verification a:hover {
+      text-decoration: underline;
+    }
+
+    .resend-success {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 12px 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+      color: #065f46;
+      font-size: 14px;
+      display: none;
+    }
+
+    .resend-error {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      padding: 12px 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+      color: #991b1b;
+      font-size: 14px;
+      display: none;
     }
 
     .help-text {
@@ -125,19 +205,26 @@
     .btn-signup {
       width: 100%;
       padding: 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: #FFBA49;
+      color: #500B42;
       border: none;
-      border-radius: 10px;
+      border-radius: 9999px;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
     }
 
     .btn-signup:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      background: #500B42;
+      color: white;
+      box-shadow: 0 10px 25px rgba(255, 186, 73, 0.3);
+    }
+
+    .btn-signup:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.5);
     }
 
     .btn-signup:active {
@@ -158,13 +245,19 @@
     }
 
     .login-link a {
-      color: #667eea;
+      color: #FFBA49;
       text-decoration: none;
       font-weight: 600;
+      border-radius: 4px;
     }
 
     .login-link a:hover {
       text-decoration: underline;
+    }
+
+    .login-link a:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 186, 73, 0.5);
     }
 
     .signup-footer {
@@ -177,12 +270,165 @@
     }
 
     .signup-footer a {
-      color: #667eea;
+      color: #FFBA49;
       text-decoration: none;
+      border-radius: 4px;
     }
 
     .signup-footer a:hover {
       text-decoration: underline;
+    }
+
+    .signup-footer a:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 186, 73, 0.5);
+    }
+
+    /* Trust Signals */
+    .trust-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #718096;
+    }
+
+    .trust-item svg {
+      width: 16px;
+      height: 16px;
+      fill: #10b981;
+    }
+
+    /* Value Callout */
+    .value-callout {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border: 1px solid #bbf7d0;
+      border-radius: 9999px;
+      padding: 8px 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .value-callout-items {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+
+    .value-callout-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #166534;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .value-callout-item svg {
+      width: 14px;
+      height: 14px;
+      fill: #22c55e;
+      flex-shrink: 0;
+    }
+
+    /* Password Requirements */
+    .password-requirements {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .password-requirements.show {
+      display: block;
+    }
+
+    .password-req-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .password-req-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .password-req-item.valid {
+      color: #16a34a;
+    }
+
+    .password-req-item svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .password-req-item svg.check {
+      fill: #22c55e;
+    }
+
+    .password-req-item svg.x {
+      fill: #94a3b8;
+    }
+
+    /* Inline validation feedback */
+    .input-wrapper {
+      position: relative;
+    }
+
+    .validation-feedback {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .validation-feedback.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .validation-feedback.valid {
+      color: #16a34a;
+    }
+
+    .validation-feedback.invalid {
+      color: #dc2626;
+    }
+
+    .validation-feedback svg {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+    }
+
+    input.input-valid {
+      border-color: #22c55e !important;
+    }
+
+    input.input-invalid {
+      border-color: #ef4444 !important;
     }
 
     @media (max-width: 480px) {
@@ -197,46 +443,92 @@
   </style>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W6336VRQ"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <div class="signup-container">
     <div class="signup-card">
       <div class="logo">
-        <h1>FilterFive</h1>
+        <img src="/images/Logo MoreStars.io.svg" alt="MoreStars Logo" height="32">
         <p>Start Your 14-Day Free Trial</p>
+      </div>
+
+      <!-- Value Callout -->
+      <div class="value-callout">
+        <div class="value-callout-items">
+          <span class="value-callout-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            14 days free
+          </span>
+          <span class="value-callout-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            No credit card
+          </span>
+          <span class="value-callout-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Cancel anytime
+          </span>
+        </div>
       </div>
 
       <% if (error) { %>
         <div class="error-message">
           <%= error %>
         </div>
+        <% if (typeof showResendVerification !== 'undefined' && showResendVerification) { %>
+          <div class="resend-verification" id="resend-section">
+            Haven't verified your email yet? <a href="#" id="resend-link">Resend verification email</a>
+          </div>
+          <div class="resend-success" id="resend-success">
+            Verification email sent! Check your inbox.
+          </div>
+          <div class="resend-error" id="resend-error">
+            Failed to send email. Please try again.
+          </div>
+        <% } %>
       <% } %>
 
       <form method="POST" action="/signup" id="signupForm">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
         <div class="form-group">
           <label for="businessName">Business Name</label>
-          <input
-            type="text"
-            id="businessName"
-            name="businessName"
-            placeholder="Your Business Name"
-            value="<%= businessName %>"
-            required
-            minlength="2"
-            maxlength="100"
-            autocomplete="organization"
-          >
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="businessName"
+              name="businessName"
+              placeholder="Your Business Name"
+              value="<%= businessName %>"
+              required
+              minlength="2"
+              maxlength="100"
+              autocomplete="organization"
+            >
+            <div id="businessNameFeedback" class="validation-feedback">
+              <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="8"/></svg>
+              <span class="feedback-text"></span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="your@email.com"
-            value="<%= email %>"
-            required
-            autocomplete="email"
-          >
+          <div class="input-wrapper">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="your@email.com"
+              value="<%= email %>"
+              required
+              autocomplete="email"
+            >
+            <div id="emailFeedback" class="validation-feedback">
+              <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="8"/></svg>
+              <span class="feedback-text"></span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -249,16 +541,51 @@
             required
             minlength="12"
             autocomplete="new-password"
+            aria-describedby="passwordReqs strengthStatus"
           >
-          <div class="password-strength">
+          <div class="password-strength" role="progressbar" aria-label="Password strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="password-strength-bar" id="strengthBar"></div>
           </div>
-          <p class="help-text">Use at least 12 characters for better security</p>
+          <div id="strengthStatus" class="sr-only" aria-live="polite"></div>
+          <div class="password-requirements" id="passwordReqs" role="list" aria-label="Password requirements">
+            <div class="password-req-item" id="req-length" role="listitem">
+              <svg class="x" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              <span>At least 12 characters</span>
+            </div>
+            <div class="password-req-item" id="req-upper" role="listitem">
+              <svg class="x" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              <span>Uppercase letter</span>
+            </div>
+            <div class="password-req-item" id="req-lower" role="listitem">
+              <svg class="x" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              <span>Lowercase letter</span>
+            </div>
+            <div class="password-req-item" id="req-number" role="listitem">
+              <svg class="x" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+              <span>Number</span>
+            </div>
+          </div>
         </div>
 
         <button type="submit" class="btn-signup" id="submitBtn">
           Start Free Trial
         </button>
+
+        <!-- Trust Strip -->
+        <div class="trust-strip">
+          <span class="trust-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+            256-bit SSL
+          </span>
+          <span class="trust-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Google Compliant
+          </span>
+          <span class="trust-item">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+            TCPA Compliant
+          </span>
+        </div>
       </form>
 
       <div class="login-link">
@@ -272,31 +599,216 @@
     </div>
   </div>
 
-  <script>
-    // Password strength indicator
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // Password strength indicator and requirements
     const passwordInput = document.getElementById('password');
     const strengthBar = document.getElementById('strengthBar');
+    const passwordReqs = document.getElementById('passwordReqs');
+
+    // Check icon SVG
+    const checkSvg = '<svg class="check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+    const xSvg = '<svg class="x" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>';
+
+    // Safe SVG icon replacement function
+    function setValidationIcon(container, isValid) {
+      const oldSvg = container.querySelector('svg');
+      if (!oldSvg) return;
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 20 20');
+      svg.setAttribute('fill', 'currentColor');
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('fill-rule', 'evenodd');
+      path.setAttribute('clip-rule', 'evenodd');
+
+      if (isValid) {
+        path.setAttribute('d', 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z');
+      } else {
+        path.setAttribute('d', 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z');
+      }
+
+      svg.appendChild(path);
+      oldSvg.parentNode.replaceChild(svg, oldSvg);
+    }
+
+    // Business name validation
+    const businessNameInput = document.getElementById('businessName');
+    const businessNameFeedback = document.getElementById('businessNameFeedback');
+
+    function validateBusinessName(value) {
+      if (!value || value.trim() === '') {
+        return { valid: false, message: 'Please enter your business name' };
+      }
+      if (value.trim().length < 2) {
+        return { valid: false, message: 'Business name is too short' };
+      }
+      if (value.trim().length > 100) {
+        return { valid: false, message: 'Business name is too long' };
+      }
+      return { valid: true, message: 'Looks good!' };
+    }
+
+    function updateBusinessNameFeedback() {
+      const value = businessNameInput.value;
+      const result = validateBusinessName(value);
+      const feedbackText = businessNameFeedback.querySelector('.feedback-text');
+
+      if (value === '') {
+        businessNameInput.classList.remove('input-valid', 'input-invalid');
+        businessNameFeedback.classList.remove('show', 'valid', 'invalid');
+        return;
+      }
+
+      businessNameFeedback.classList.add('show');
+      feedbackText.textContent = result.message;
+      setValidationIcon(businessNameFeedback, result.valid);
+
+      if (result.valid) {
+        businessNameInput.classList.add('input-valid');
+        businessNameInput.classList.remove('input-invalid');
+        businessNameFeedback.classList.add('valid');
+        businessNameFeedback.classList.remove('invalid');
+      } else {
+        businessNameInput.classList.add('input-invalid');
+        businessNameInput.classList.remove('input-valid');
+        businessNameFeedback.classList.add('invalid');
+        businessNameFeedback.classList.remove('valid');
+      }
+    }
+
+    businessNameInput.addEventListener('blur', updateBusinessNameFeedback);
+
+    // Email validation
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('emailFeedback');
+
+    function validateEmail(value) {
+      if (!value || value.trim() === '') {
+        return { valid: false, message: 'Please enter your email address' };
+      }
+      // Basic email pattern check
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(value)) {
+        return { valid: false, message: 'Please enter a valid email address' };
+      }
+      // Check for common typos
+      const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com'];
+      const domain = value.split('@')[1];
+      if (domain && domain.includes('.')) {
+        const suggestions = commonDomains.filter(d => d !== domain && d.startsWith(domain.substring(0, 3)));
+        if (suggestions.length > 0 && !commonDomains.includes(domain)) {
+          // Don't flag as invalid, just show feedback
+        }
+      }
+      return { valid: true, message: 'Email looks good!' };
+    }
+
+    function updateEmailFeedback() {
+      const value = emailInput.value;
+      const result = validateEmail(value);
+      const feedbackText = emailFeedback.querySelector('.feedback-text');
+
+      if (value === '') {
+        emailInput.classList.remove('input-valid', 'input-invalid');
+        emailFeedback.classList.remove('show', 'valid', 'invalid');
+        return;
+      }
+
+      emailFeedback.classList.add('show');
+      feedbackText.textContent = result.message;
+      setValidationIcon(emailFeedback, result.valid);
+
+      if (result.valid) {
+        emailInput.classList.add('input-valid');
+        emailInput.classList.remove('input-invalid');
+        emailFeedback.classList.add('valid');
+        emailFeedback.classList.remove('invalid');
+      } else {
+        emailInput.classList.add('input-invalid');
+        emailInput.classList.remove('input-valid');
+        emailFeedback.classList.add('invalid');
+        emailFeedback.classList.remove('valid');
+      }
+    }
+
+    emailInput.addEventListener('blur', updateEmailFeedback);
+    emailInput.addEventListener('input', function() {
+      // Clear invalid state while typing
+      if (this.classList.contains('input-invalid')) {
+        updateEmailFeedback();
+      }
+    });
+
+    // Show requirements on focus
+    passwordInput.addEventListener('focus', function() {
+      passwordReqs.classList.add('show');
+    });
+
+    // Update requirement item
+    function updateReq(id, valid) {
+      const el = document.getElementById(id);
+      if (valid) {
+        el.classList.add('valid');
+        el.querySelector('svg').outerHTML = checkSvg;
+      } else {
+        el.classList.remove('valid');
+        el.querySelector('svg').outerHTML = xSvg;
+      }
+    }
 
     passwordInput.addEventListener('input', function() {
       const password = this.value;
       let strength = 0;
+      const progressBar = strengthBar.parentElement;
+      const strengthStatus = document.getElementById('strengthStatus');
 
-      if (password.length >= 12) strength++;
+      // Check individual requirements
+      const hasLength = password.length >= 12;
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+
+      updateReq('req-length', hasLength);
+      updateReq('req-upper', hasUpper);
+      updateReq('req-lower', hasLower);
+      updateReq('req-number', hasNumber);
+
+      // Calculate strength
+      if (hasLength) strength++;
       if (password.length >= 16) strength++;
-      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-      if (/\d/.test(password)) strength++;
+      if (hasLower && hasUpper) strength++;
+      if (hasNumber) strength++;
       if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
       strengthBar.className = 'password-strength-bar';
+      let strengthText = '';
+      let strengthPercent = 0;
 
       if (strength === 0 || strength === 1) {
         strengthBar.classList.add('strength-weak');
+        strengthText = 'Weak password';
+        strengthPercent = 25;
       } else if (strength === 2 || strength === 3) {
         strengthBar.classList.add('strength-fair');
+        strengthText = 'Fair password';
+        strengthPercent = 50;
       } else if (strength === 4) {
         strengthBar.classList.add('strength-good');
+        strengthText = 'Good password';
+        strengthPercent = 75;
       } else {
         strengthBar.classList.add('strength-strong');
+        strengthText = 'Strong password';
+        strengthPercent = 100;
+      }
+
+      // Update ARIA for screen readers
+      progressBar.setAttribute('aria-valuenow', strengthPercent);
+      if (password.length > 0) {
+        strengthStatus.textContent = strengthText;
+      } else {
+        strengthStatus.textContent = '';
       }
     });
 
@@ -331,8 +843,52 @@
       <% } else { %>
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating Account...';
+      // Track signup attempt
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({event: 'sign_up_attempt'});
       <% } %>
     });
   </script>
+
+<% if (typeof showResendVerification !== 'undefined' && showResendVerification) { %>
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  document.getElementById('resend-link').addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    const resendSection = document.getElementById('resend-section');
+    const successMsg = document.getElementById('resend-success');
+    const errorMsg = document.getElementById('resend-error');
+    const link = this;
+
+    // Disable link while sending
+    link.style.pointerEvents = 'none';
+    link.textContent = 'Sending...';
+
+    try {
+      const response = await fetch('/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: '<%= typeof unverifiedEmail !== "undefined" ? unverifiedEmail : "" %>' })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        resendSection.style.display = 'none';
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+      } else {
+        throw new Error(data.message || 'Failed to send');
+      }
+    } catch (error) {
+      resendSection.style.display = 'none';
+      errorMsg.style.display = 'block';
+      successMsg.style.display = 'none';
+    }
+  });
+</script>
+<% } %>
 </body>
 </html>

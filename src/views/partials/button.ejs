@@ -1,0 +1,81 @@
+<%#
+  Button Component
+
+  Usage:
+  <%- include('partials/button', { text: 'Get Started', variant: 'primary' }) %>
+  <%- include('partials/button', { text: 'Learn More', variant: 'outline', href: '/features' }) %>
+
+  @param {string} text - Button text (required)
+  @param {string} variant - 'primary' | 'secondary' | 'outline' | 'ghost' (default: 'primary')
+  @param {string} size - 'sm' | 'md' | 'lg' (default: 'md')
+  @param {string} type - 'button' | 'submit' (default: 'button')
+  @param {string} href - If provided, renders as <a> tag
+  @param {boolean} disabled - Disabled state
+  @param {boolean} fullWidth - Full width button
+  @param {string} id - Optional ID
+  @param {string} className - Additional classes
+  @param {string} icon - Optional icon HTML (will be placed before text)
+  @param {string} loadingText - Text to show when loading
+%>
+<%
+  // Defaults
+  const _variant = typeof variant !== 'undefined' ? variant : 'primary';
+  const _size = typeof size !== 'undefined' ? size : 'md';
+  const _type = typeof type !== 'undefined' ? type : 'button';
+  const _disabled = typeof disabled !== 'undefined' ? disabled : false;
+  const _fullWidth = typeof fullWidth !== 'undefined' ? fullWidth : false;
+  const _id = typeof id !== 'undefined' ? id : '';
+  const _className = typeof className !== 'undefined' ? className : '';
+  const _href = typeof href !== 'undefined' ? href : '';
+  const _icon = typeof icon !== 'undefined' ? icon : '';
+  const _loadingText = typeof loadingText !== 'undefined' ? loadingText : 'Loading...';
+
+  // Base classes
+  const baseClasses = 'inline-flex items-center justify-center font-bold transition-all duration-200 ease-out cursor-pointer border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2';
+
+  // Size classes
+  const sizeClasses = {
+    sm: 'px-4 py-2 text-sm gap-1.5',
+    md: 'px-6 py-3 text-base gap-2',
+    lg: 'px-8 py-4 text-lg gap-2.5'
+  };
+
+  // Variant classes
+  const variantClasses = {
+    primary: 'bg-brand-gold text-brand-dark hover:bg-brand-dark hover:text-white hover:-translate-y-0.5 shadow-gold hover:shadow-goldHover focus:ring-brand-gold',
+    secondary: 'bg-brand-dark text-white hover:bg-brand-gold hover:text-brand-dark hover:-translate-y-0.5 focus:ring-brand-dark',
+    outline: 'bg-transparent text-brand-gold border-2 border-brand-gold hover:bg-brand-gold hover:text-brand-dark focus:ring-brand-gold',
+    ghost: 'bg-transparent text-brand-gold hover:bg-brand-gold/10 focus:ring-brand-gold'
+  };
+
+  // Build final class string
+  let classes = [
+    baseClasses,
+    sizeClasses[_size] || sizeClasses.md,
+    variantClasses[_variant] || variantClasses.primary,
+    _fullWidth ? 'w-full' : '',
+    _disabled ? 'opacity-60 cursor-not-allowed hover:transform-none' : '',
+    _className
+  ].filter(Boolean).join(' ');
+%>
+<% if (_href && !_disabled) { %>
+<a
+  href="<%= _href %>"
+  <% if (_id) { %>id="<%= _id %>"<% } %>
+  class="<%= classes %>"
+>
+  <% if (_icon) { %><%- _icon %><% } %>
+  <%= text %>
+</a>
+<% } else { %>
+<button
+  type="<%= _type %>"
+  <% if (_id) { %>id="<%= _id %>"<% } %>
+  <% if (_disabled) { %>disabled<% } %>
+  class="<%= classes %>"
+  <% if (_loadingText) { %>data-loading-text="<%= _loadingText %>"<% } %>
+>
+  <% if (_icon) { %><%- _icon %><% } %>
+  <%= text %>
+</button>
+<% } %>

@@ -1,798 +1,615 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Privacy Policy for FilterFive - SMS Review Request Platform">
-  <title>Privacy Policy - FilterFive</title>
-  <link rel="stylesheet" href="/css/homepage.css">
-  <style>
-    /* Privacy Policy Page Styles */
-    .privacy-container {
-      min-height: 100vh;
-      background-color: var(--bg-light);
-    }
+<%
+const privacyStyles = `
+  /* TOC Active State */
+  .toc-item { transition: all 0.2s ease; }
+  .toc-item.active { background-color: rgb(243 244 246); color: #500B42; }
+  .toc-item.active .toc-icon { color: #FFBA49; }
 
-    .privacy-header {
-      background: var(--gradient-primary);
-      color: white;
-      padding: 3rem var(--spacing-sm);
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 2px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
 
-    .privacy-header h1 {
-      font-size: 2.5rem;
-      margin: 0 0 1rem 0;
-      color: white;
-    }
+  /* Print Styles */
+  @media print {
+    .no-print { display: none !important; }
+    .privacy-section { page-break-inside: avoid; }
+  }
+`;
+%>
+<%- include('partials/head', {
+  title: 'Privacy Policy - MoreStars',
+  description: 'Privacy Policy for MoreStars - SMS Review Request Platform'
+}) %>
+  <style><%= privacyStyles %></style>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" integrity="sha384-d+vyQ0dYcymoP8ndq2hW7FGC50nqGdXUEgoOUGxbbkAJwZqL7h+jKN0GGgn9hFDS" crossorigin="anonymous" defer></script>
 
-    .privacy-header .last-updated {
-      font-size: 1rem;
-      opacity: 0.95;
-      margin: 0;
-    }
+  <% const activePage = 'privacy'; %>
+  <%- include('partials/navbar') %>
 
-    .privacy-content-wrapper {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 3rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem var(--spacing-sm);
-    }
-
-    /* Table of Contents Sidebar */
-    .privacy-toc {
-      background: var(--bg-white);
-      border-radius: var(--border-radius);
-      padding: 2rem;
-      height: fit-content;
-      position: sticky;
-      top: 100px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .privacy-toc h3 {
-      margin: 0 0 1.5rem 0;
-      font-size: 1.1rem;
-      color: var(--text-dark);
-    }
-
-    .toc-nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .toc-nav > ul > li {
-      margin-bottom: 0.2rem;
-    }
-
-    .toc-nav ul ul {
-      padding-left: 1.25rem;
-      margin-top: 0.1rem;
-    }
-
-    .toc-nav ul ul li {
-      margin-bottom: 0.1rem;
-    }
-
-    .toc-nav a {
-      display: block;
-      color: var(--text-light);
-      text-decoration: none;
-      font-size: 0.95rem;
-      padding: 0.5rem 0;
-      border-left: 2px solid transparent;
-      padding-left: 0.75rem;
-      transition: var(--transition);
-    }
-
-    .toc-nav a:hover {
-      color: var(--primary-color);
-      border-left-color: var(--primary-color);
-    }
-
-    .toc-nav a.active {
-      color: var(--primary-color);
-      font-weight: 600;
-      border-left-color: var(--primary-color);
-    }
-
-    /* Main Content */
-    .privacy-content {
-      background: var(--bg-white);
-      border-radius: var(--border-radius);
-      padding: 3rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .intro-text {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--text-medium);
-      margin-bottom: 1.5rem;
-    }
-
-    .privacy-content section {
-      margin-bottom: 1rem;
-    }
-
-    .privacy-content h2 {
-      font-size: 1.5rem;
-      color: var(--text-dark);
-      margin: 1.5rem 0 0.75rem 0;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    .privacy-content h3 {
-      font-size: 1.1rem;
-      color: var(--text-medium);
-      margin: 1.5rem 0 0.75rem 0;
-    }
-
-    .privacy-content h4 {
-      font-size: 1rem;
-      color: var(--text-medium);
-      margin: 1rem 0 0.5rem 0;
-    }
-
-    .privacy-content p {
-      color: var(--text-medium);
-      line-height: 1.7;
-      margin: 0.75rem 0;
-      font-size: 0.95rem;
-    }
-
-    .privacy-content ul {
-      margin: 1rem 0;
-      padding-left: 2rem;
-      color: var(--text-medium);
-    }
-
-    .privacy-content ul li {
-      margin: 0.5rem 0;
-      line-height: 1.6;
-    }
-
-    .privacy-content ul ul {
-      margin: 0.5rem 0 0.5rem 1rem;
-    }
-
-    .privacy-content table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5rem 0;
-      font-size: 0.95rem;
-    }
-
-    .privacy-content table th,
-    .privacy-content table td {
-      border: 1px solid var(--border-color);
-      padding: 12px 15px;
-      text-align: left;
-    }
-
-    .privacy-content table th {
-      background-color: var(--bg-light);
-      font-weight: 600;
-      color: var(--text-dark);
-    }
-
-    .privacy-content table td {
-      color: var(--text-medium);
-    }
-
-    .privacy-content blockquote {
-      background-color: var(--bg-light);
-      border-left: 4px solid var(--primary-color);
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      font-style: italic;
-      color: var(--text-medium);
-      border-radius: 4px;
-    }
-
-    .privacy-content a {
-      color: var(--primary-color);
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-      transition: var(--transition);
-    }
-
-    .privacy-content a:hover {
-      border-bottom-color: var(--primary-color);
-      text-decoration: underline;
-    }
-
-    .privacy-footer {
-      background-color: var(--bg-light);
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      text-align: center;
-      margin-top: 3rem;
-      border-top: 2px solid var(--border-color);
-    }
-
-    .privacy-footer p {
-      color: var(--text-medium);
-      font-size: 0.95rem;
-      margin: 0;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 968px) {
-      .privacy-content-wrapper {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 1rem var(--spacing-sm);
-      }
-
-      .privacy-toc {
-        position: static;
-        max-height: 400px;
-        overflow-y: auto;
-        margin-bottom: 2rem;
-      }
-
-      .privacy-header h1 {
-        font-size: 2rem;
-      }
-
-      .privacy-content {
-        padding: 2rem;
-      }
-
-      .privacy-content h2 {
-        font-size: 1.25rem;
-      }
-
-      .privacy-content h3 {
-        font-size: 1rem;
-      }
-
-      .privacy-content table {
-        font-size: 0.9rem;
-      }
-
-      .privacy-content table th,
-      .privacy-content table td {
-        padding: 10px 12px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .privacy-container {
-        background-color: var(--bg-white);
-      }
-
-      .privacy-header {
-        padding: 2rem 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .privacy-header h1 {
-        font-size: 1.75rem;
-      }
-
-      .privacy-header .last-updated {
-        font-size: 0.9rem;
-      }
-
-      .privacy-content-wrapper {
-        padding: 0.5rem;
-      }
-
-      .privacy-toc {
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-      }
-
-      .toc-nav a {
-        font-size: 0.9rem;
-      }
-
-      .privacy-content {
-        padding: 1.5rem;
-        border-radius: 4px;
-      }
-
-      .privacy-content h2 {
-        font-size: 1.1rem;
-        margin: 1.5rem 0 0.75rem 0;
-      }
-
-      .privacy-content h3 {
-        font-size: 0.95rem;
-      }
-
-      .privacy-content p {
-        font-size: 0.9rem;
-      }
-
-      .privacy-content table {
-        font-size: 0.85rem;
-      }
-
-      .privacy-content table th,
-      .privacy-content table td {
-        padding: 8px 10px;
-      }
-    }
-
-    /* Print Styles */
-    @media print {
-      .privacy-header {
-        background: var(--bg-white);
-        color: var(--text-dark);
-        border-bottom: 2px solid var(--border-color);
-      }
-
-      .privacy-content-wrapper {
-        grid-template-columns: 1fr;
-        gap: 0;
-        max-width: 100%;
-      }
-
-      .privacy-toc {
-        display: none;
-      }
-
-      .privacy-content {
-        box-shadow: none;
-        padding: 0;
-      }
-
-      .privacy-content section {
-        page-break-inside: avoid;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="/" class="logo">
-        <span class="logo-text">FilterFive</span>
-      </a>
-
-      <div class="nav-links" id="navLinks">
-        <a href="#how-it-works">How It Works</a>
-        <a href="#benefits">Benefits</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="/partners">Become a Partner</a>
-        <a href="/login" class="nav-login">Login</a>
-        <a href="/signup" class="btn-primary-nav">Start Free Trial</a>
+  <main>
+    <!-- Hero Section -->
+    <section class="pt-24 pb-20 bg-gray-50 border-b border-gray-200">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 font-title text-brand-dark">
+          Privacy Policy
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          How we collect, use, and protect your information.
+        </p>
+        <p class="text-sm text-gray-500 mt-4">
+          Last Updated: December 2024
+        </p>
       </div>
+    </section>
 
-      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </nav>
+    <!-- Main Content Layout -->
+    <section class="py-12 md:py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-12 gap-12">
 
-  <div class="privacy-container">
-    <div class="privacy-header">
-      <h1>Privacy Policy</h1>
-      <p class="last-updated">Last Updated: December 2, 2025</p>
-    </div>
+          <!-- Sidebar Navigation (Desktop) -->
+          <div class="hidden lg:block lg:col-span-3 no-print">
+            <div class="sticky top-28 space-y-8 overflow-y-auto max-h-[80vh] pr-2 custom-scrollbar">
 
-    <div class="privacy-content-wrapper">
-      <!-- Table of Contents -->
-      <aside class="privacy-toc">
-        <h3>Table of Contents</h3>
-        <nav class="toc-nav">
-          <ul>
-            <li><a href="#who-we-are">1. Who We Are</a></li>
-            <li><a href="#information-we-collect">2. Information We Collect</a>
-              <ul>
-                <li><a href="#info-subscribers">2.1 Business Subscribers</a></li>
-                <li><a href="#info-customers">2.2 End Customers</a></li>
-                <li><a href="#info-automatically">2.3 Automatically Collected</a></li>
-              </ul>
-            </li>
-            <li><a href="#how-we-use">3. How We Use Information</a></li>
-            <li><a href="#how-we-share">4. How We Share Information</a>
-              <ul>
-                <li><a href="#service-providers">4.1 Service Providers</a></li>
-                <li><a href="#legal-requirements">4.2 Legal Requirements</a></li>
-                <li><a href="#business-transfers">4.3 Business Transfers</a></li>
-                <li><a href="#with-consent">4.4 With Consent</a></li>
-              </ul>
-            </li>
-            <li><a href="#data-retention">5. Data Retention</a>
-              <ul>
-                <li><a href="#account-cancellation">5.1 Account Cancellation</a></li>
-              </ul>
-            </li>
-            <li><a href="#data-security">6. Data Security</a></li>
-            <li><a href="#your-rights">7. Your Rights and Choices</a>
-              <ul>
-                <li><a href="#account-info">7.1 Account Information</a></li>
-                <li><a href="#marketing">7.2 Marketing Communications</a></li>
-                <li><a href="#cookies">7.3 Cookies</a></li>
-                <li><a href="#data-export">7.4 Data Export</a></li>
-                <li><a href="#data-deletion">7.5 Data Deletion</a></li>
-              </ul>
-            </li>
-            <li><a href="#end-customer-rights">8. End Customer Rights</a>
-              <ul>
-                <li><a href="#opt-out">8.1 Opt-Out</a></li>
-                <li><a href="#questions">8.2 Questions</a></li>
-                <li><a href="#data-requests">8.3 Data Requests</a></li>
-              </ul>
-            </li>
-            <li><a href="#california-rights">9. California Privacy Rights</a></li>
-            <li><a href="#international-users">10. International Users</a>
-              <ul>
-                <li><a href="#eea">10.1 European Economic Area</a></li>
-              </ul>
-            </li>
-            <li><a href="#childrens-privacy">11. Children's Privacy</a></li>
-            <li><a href="#third-party-links">12. Third-Party Links</a></li>
-            <li><a href="#changes">13. Changes to This Policy</a></li>
-            <li><a href="#contact-us">14. Contact Us</a></li>
-          </ul>
-        </nav>
-      </aside>
+              <!-- CTA Card -->
+              <div class="bg-[#500A42] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden text-center">
+                <!-- Decorative element -->
+                <div class="absolute top-0 right-0 w-20 h-20 bg-[#FFBA49] rounded-full blur-2xl opacity-20 -mr-10 -mt-10"></div>
 
-      <!-- Main Content -->
-      <main class="privacy-content">
+                <h3 class="font-bold text-lg mb-2">Ready to start?</h3>
+                <p class="text-gray-300 text-xs mb-4 leading-relaxed">Get set up in 5 minutes. No credit card required.</p>
+                <a href="/pricing" class="block w-full py-3 rounded-full bg-[#FFBA49] text-[#500B42] text-sm font-bold hover:bg-white transition-colors">
+                  Start Free Trial
+                </a>
+              </div>
 
-        <p class="intro-text"><strong>This Privacy Policy describes how KREAKTIVE LLC ("Company," "we," "us," or "our") collects, uses, and shares information in connection with FilterFive ("Service"). By using the Service, you agree to the collection and use of information as described in this policy.</strong></p>
+              <!-- Table of Contents -->
+              <div class="space-y-1">
+              <h3 class="font-bold text-gray-400 uppercase tracking-wider text-xs mb-4 px-3">Table of Contents</h3>
 
-        <!-- Section 1 -->
-        <section id="who-we-are">
-          <h2>1. Who We Are</h2>
-          <p>FilterFive is operated by <strong>KREAKTIVE LLC</strong>. Email: <a href="mailto:info@filterfive.io">info@filterfive.io</a></p>
-        </section>
+              <!-- 1. Who We Are - Building icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="who-we-are">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                </span>
+                1. Who We Are
+              </button>
 
-        <!-- Section 2 -->
-        <section id="information-we-collect">
-          <h2>2. Information We Collect</h2>
-          <p>We collect information in three categories:</p>
+              <!-- 2. Info We Collect - Database icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="info-collect">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                </span>
+                2. Info We Collect
+              </button>
 
-          <section id="info-subscribers">
-            <h3>2.1 Information from Business Subscribers</h3>
-            <p>When you register for an account, we collect:</p>
-            <ul>
-              <li><strong>Account Information:</strong> Email address, password (encrypted), business name</li>
-              <li><strong>Business Details:</strong> Google Business Profile link, business category</li>
-              <li><strong>Billing Information:</strong> Payment card details (processed securely by our payment processor)</li>
-            </ul>
-          </section>
+              <!-- 3. How We Use It - Server icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="how-use">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" stroke-width="2"/><rect x="2" y="14" width="20" height="8" rx="2" stroke-width="2"/><line x1="6" y1="6" x2="6.01" y2="6" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="18" x2="6.01" y2="18" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                3. How We Use It
+              </button>
 
-          <section id="info-customers">
-            <h3>2.2 Information About End Customers</h3>
-            <p>When business subscribers submit customer information for review requests, we collect:</p>
-            <ul>
-              <li><strong>Contact Information:</strong> Customer name, phone number, and optionally email address</li>
-              <li><strong>Message Data:</strong> Delivery status, timestamps, and engagement data (e.g., whether a link was clicked)</li>
-            </ul>
-            <p><strong>Important:</strong> We do not collect information directly from end customers. All customer data is provided to us by business subscribers who are responsible for obtaining appropriate consent.</p>
-          </section>
+              <!-- 4. How We Share - Share2 icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="how-share">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke-width="2"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke-width="2"/></svg>
+                </span>
+                4. How We Share
+              </button>
 
-          <section id="info-automatically">
-            <h3>2.3 Information Collected Automatically</h3>
-            <p>When you use the Service, we automatically collect:</p>
-            <ul>
-              <li><strong>Usage Data:</strong> Pages visited, features used, actions taken within the dashboard</li>
-              <li><strong>Device Information:</strong> Browser type, operating system, device identifiers</li>
-              <li><strong>Log Data:</strong> IP addresses, access times, referring URLs</li>
-            </ul>
-            <p>We may use cookies and similar technologies to collect this information.</p>
-          </section>
-        </section>
+              <!-- 5. Data Retention - Clock icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="retention">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12,6 12,12 16,14" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                5. Data Retention
+              </button>
 
-        <!-- Section 3 -->
-        <section id="how-we-use">
-          <h2>3. How We Use Information</h2>
-          <p>We use collected information to:</p>
-          <ul>
-            <li><strong>Provide the Service:</strong> Send SMS messages, track delivery, display analytics</li>
-            <li><strong>Manage Accounts:</strong> Process registrations, authenticate users, handle billing</li>
-            <li><strong>Improve the Service:</strong> Analyze usage patterns, fix bugs, develop new features</li>
-            <li><strong>Communicate:</strong> Send service announcements, respond to inquiries, provide support</li>
-            <li><strong>Ensure Compliance:</strong> Maintain consent records, honor opt-out requests, comply with legal obligations</li>
-            <li><strong>Protect Rights:</strong> Detect fraud, enforce our Terms of Service, protect against misuse</li>
-          </ul>
-        </section>
+              <!-- 6. Data Security - Shield icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="security">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </span>
+                6. Data Security
+              </button>
 
-        <!-- Section 4 -->
-        <section id="how-we-share">
-          <h2>4. How We Share Information</h2>
-          <p>We do not sell personal information. We share information only as follows:</p>
+              <!-- 7. Your Rights - Settings icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="choices">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                </span>
+                7. Your Rights
+              </button>
 
-          <section id="service-providers">
-            <h3>4.1 Service Providers</h3>
-            <p>We share information with third-party service providers who perform services on our behalf:</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>Provider</th>
-                  <th>Purpose</th>
-                  <th>Data Shared</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Twilio</td>
-                  <td>SMS delivery</td>
-                  <td>Customer phone numbers, message content</td>
-                </tr>
-                <tr>
-                  <td>Resend</td>
-                  <td>Email notifications</td>
-                  <td>Business subscriber email addresses</td>
-                </tr>
-                <tr>
-                  <td>Payment Processor</td>
-                  <td>Billing</td>
-                  <td>Payment card information</td>
-                </tr>
-              </tbody>
-            </table>
-            <p>These providers are contractually obligated to protect your information and use it only for the services they provide to us.</p>
-          </section>
+              <!-- 8. End Customer - UserCheck icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="end-customer">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4" stroke-width="2"/><polyline points="17,11 19,13 23,9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                8. End Customer
+              </button>
 
-          <section id="legal-requirements">
-            <h3>4.2 Legal Requirements</h3>
-            <p>We may disclose information if required by law, regulation, legal process, or governmental request, or to protect the rights, property, or safety of KREAKTIVE LLC, our users, or the public.</p>
-          </section>
+              <!-- 9. California - MapPin icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="california">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" stroke-width="2"/></svg>
+                </span>
+                9. California
+              </button>
 
-          <section id="business-transfers">
-            <h3>4.3 Business Transfers</h3>
-            <p>If KREAKTIVE LLC is involved in a merger, acquisition, or sale of assets, information may be transferred as part of that transaction. We will notify you of any such change.</p>
-          </section>
+              <!-- 10. International - Globe icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="international">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                </span>
+                10. International
+              </button>
 
-          <section id="with-consent">
-            <h3>4.4 With Consent</h3>
-            <p>We may share information with your consent or at your direction.</p>
-          </section>
-        </section>
+              <!-- 11. Children - Baby icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="children">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/><path stroke-linecap="round" stroke-width="2" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/></svg>
+                </span>
+                11. Children
+              </button>
 
-        <!-- Section 5 -->
-        <section id="data-retention">
-          <h2>5. Data Retention</h2>
-          <p>We retain information as follows:</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Data Type</th>
-                <th>Retention Period</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Account information</td>
-                <td>Duration of account plus 30 days</td>
-              </tr>
-              <tr>
-                <td>Customer contact data</td>
-                <td>Duration of account plus 30 days</td>
-              </tr>
-              <tr>
-                <td>Message delivery records</td>
-                <td>4 years (regulatory requirement)</td>
-              </tr>
-              <tr>
-                <td>Opt-out records</td>
-                <td>Indefinitely</td>
-              </tr>
-              <tr>
-                <td>Billing records</td>
-                <td>7 years (tax/legal requirement)</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>After the retention period, data is permanently deleted from our systems.</p>
+              <!-- 12. Third-Party - Link icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="third-party">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </span>
+                12. Third-Party
+              </button>
 
-          <section id="account-cancellation">
-            <h3>5.1 Account Cancellation</h3>
-            <p>When you cancel your account:</p>
-            <ul>
-              <li>Your data is retained for 30 days in case you wish to reactivate</li>
-              <li>After 30 days, all data is permanently deleted</li>
-              <li>Certain records (opt-outs, billing) may be retained longer as required by law</li>
-            </ul>
-          </section>
-        </section>
+              <!-- 13. Changes - RefreshCw icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="changes">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="1,20 1,14 7,14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                </span>
+                13. Changes
+              </button>
 
-        <!-- Section 6 -->
-        <section id="data-security">
-          <h2>6. Data Security</h2>
-          <p>We implement appropriate technical and organizational measures to protect your information, including:</p>
-          <ul>
-            <li>Encryption of data in transit (TLS/SSL)</li>
-            <li>Encryption of passwords using industry-standard hashing</li>
-            <li>Access controls limiting who can view data</li>
-            <li>Regular security assessments</li>
-          </ul>
-          <p>However, no method of transmission or storage is 100% secure. We cannot guarantee absolute security.</p>
-        </section>
+              <!-- 14. Contact - Mail icon -->
+              <button class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-3 text-gray-600 hover:bg-gray-50" data-section="contact">
+                <span class="toc-icon text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </span>
+                14. Contact
+              </button>
+              </div><!-- End space-y-1 -->
+            </div>
+          </div>
 
-        <!-- Section 7 -->
-        <section id="your-rights">
-          <h2>7. Your Rights and Choices</h2>
+          <!-- Content Area -->
+          <div class="lg:col-span-9">
+            <div class="prose prose-lg max-w-none text-gray-700">
 
-          <section id="account-info">
-            <h3>7.1 Account Information</h3>
-            <p>You can access, update, or delete your account information through your dashboard or by contacting us at info@filterfive.io.</p>
-          </section>
+              <!-- Blue Intro Box -->
+              <div class="mb-12 bg-[#F9F7FA] p-6 rounded-2xl border border-[rgba(161,67,142,0.2)] text-base not-prose">
+                <p class="mb-0">This Privacy Policy describes how KREAKTIVE LLC ("Company," "we," "us," or "our") collects, uses, and shares information in connection with MoreStars ("Service"). By using the Service, you agree to the collection and use of information as described in this policy.</p>
+              </div>
 
-          <section id="marketing">
-            <h3>7.2 Marketing Communications</h3>
-            <p>We do not send marketing emails. All communications are transactional (account-related).</p>
-          </section>
+              <!-- 1. Who We Are -->
+              <div id="who-we-are" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">01.</span> Who We Are
+                </h2>
+                <p>MoreStars is operated by KREAKTIVE LLC.<br/>Email: <a href="mailto:info@morestars.io" class="text-[#A1438E] hover:underline">info@morestars.io</a></p>
+              </div>
 
-          <section id="cookies">
-            <h3>7.3 Cookies</h3>
-            <p>Most web browsers accept cookies by default. You can configure your browser to reject cookies, though this may affect functionality.</p>
-          </section>
+              <!-- 2. Info We Collect -->
+              <div id="info-collect" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">02.</span> Information We Collect
+                </h2>
+                <p>We collect information in three categories:</p>
 
-          <section id="data-export">
-            <h3>7.4 Data Export</h3>
-            <p>Business subscribers may request an export of their data by contacting info@filterfive.io.</p>
-          </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">2.1 Information from Business Subscribers</h3>
+                <p>When you register for an account, we collect:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li><strong>Account Information:</strong> Email address, password (encrypted), business name</li>
+                  <li><strong>Business Details:</strong> Google Business Profile link, business category</li>
+                  <li><strong>Billing Information:</strong> Payment card details (processed securely by our payment processor)</li>
+                </ul>
 
-          <section id="data-deletion">
-            <h3>7.5 Data Deletion</h3>
-            <p>Business subscribers may request deletion of their account and associated data by contacting info@filterfive.io. Deletion will be completed within 30 days, subject to legal retention requirements.</p>
-          </section>
-        </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">2.2 Information About End Customers</h3>
+                <p>When business subscribers submit customer information for review requests, we collect:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li><strong>Contact Information:</strong> Customer name, phone number, and optionally email address</li>
+                  <li><strong>Message Data:</strong> Delivery status, timestamps, and engagement data (e.g., whether a link was clicked)</li>
+                </ul>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 text-sm my-4 not-prose">
+                  <strong>Important:</strong> We do not collect information directly from end customers. All customer data is provided to us by business subscribers who are responsible for obtaining appropriate consent.
+                </div>
 
-        <!-- Section 8 -->
-        <section id="end-customer-rights">
-          <h2>8. End Customer Rights</h2>
-          <p>If you are an end customer who received an SMS through our Service:</p>
+                <h3 class="text-xl font-bold mt-6 mb-3">2.3 Information Collected Automatically</h3>
+                <p>When you use the Service, we automatically collect:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li><strong>Usage Data:</strong> Pages visited, features used, actions taken within the dashboard</li>
+                  <li><strong>Device Information:</strong> Browser type, operating system, device identifiers</li>
+                  <li><strong>Log Data:</strong> IP addresses, access times, referring URLs</li>
+                </ul>
+                <p>We may use cookies and similar technologies to collect this information.</p>
+              </div>
 
-          <section id="opt-out">
-            <h3>8.1 Opt-Out</h3>
-            <p>Reply <strong>STOP</strong> to any message to immediately stop receiving messages. You can also reply UNSUBSCRIBE, CANCEL, END, or QUIT.</p>
-          </section>
+              <!-- 3. How We Use -->
+              <div id="how-use" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">03.</span> How We Use Information
+                </h2>
+                <p>We use collected information to:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li><strong>Provide the Service:</strong> Send SMS messages, track delivery, display analytics</li>
+                  <li><strong>Manage Accounts:</strong> Process registrations, authenticate users, handle billing</li>
+                  <li><strong>Improve the Service:</strong> Analyze usage patterns, fix bugs, develop new features</li>
+                  <li><strong>Communicate:</strong> Send service announcements, respond to inquiries, provide support</li>
+                  <li><strong>Ensure Compliance:</strong> Maintain consent records, honor opt-out requests, comply with legal obligations</li>
+                  <li><strong>Protect Rights:</strong> Detect fraud, enforce our Terms of Service, protect against misuse</li>
+                </ul>
+              </div>
 
-          <section id="questions">
-            <h3>8.2 Questions</h3>
-            <p>Reply <strong>HELP</strong> to receive assistance information, or contact info@filterfive.io.</p>
-          </section>
+              <!-- 4. How We Share -->
+              <div id="how-share" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">04.</span> How We Share Information
+                </h2>
+                <p>We do not sell personal information. We share information only as follows:</p>
 
-          <section id="data-requests">
-            <h3>8.3 Data Requests</h3>
-            <p>To request information about your data or request deletion, contact info@filterfive.io with:</p>
-            <ul>
-              <li>Your phone number</li>
-              <li>The business that sent you a message (if known)</li>
-              <li>Your request (access, deletion, etc.)</li>
-            </ul>
-            <p>We will respond within 30 days.</p>
-          </section>
-        </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">4.1 Service Providers</h3>
+                <p>We share information with third-party service providers who perform services on our behalf:</p>
+                <div class="overflow-x-auto my-4 not-prose">
+                  <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead>
+                      <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="py-3 px-4 text-left font-bold text-gray-600">Provider</th>
+                        <th class="py-3 px-4 text-left font-bold text-gray-600">Purpose</th>
+                        <th class="py-3 px-4 text-left font-bold text-gray-600">Data Shared</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Twilio</td>
+                        <td class="py-3 px-4">SMS delivery</td>
+                        <td class="py-3 px-4">Customer phone numbers, message content</td>
+                      </tr>
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Resend</td>
+                        <td class="py-3 px-4">Email notifications</td>
+                        <td class="py-3 px-4">Business subscriber email addresses</td>
+                      </tr>
+                      <tr>
+                        <td class="py-3 px-4">Payment Processor</td>
+                        <td class="py-3 px-4">Billing</td>
+                        <td class="py-3 px-4">Payment card information</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>These providers are contractually obligated to protect your information and use it only for the services they provide to us.</p>
 
-        <!-- Section 9 -->
-        <section id="california-rights">
-          <h2>9. California Privacy Rights</h2>
-          <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):</p>
-          <ul>
-            <li><strong>Right to Know:</strong> You can request information about what personal information we collect, use, and disclose.</li>
-            <li><strong>Right to Delete:</strong> You can request deletion of your personal information, subject to exceptions.</li>
-            <li><strong>Right to Opt-Out:</strong> We do not sell personal information, so this right does not apply.</li>
-            <li><strong>Non-Discrimination:</strong> We will not discriminate against you for exercising your rights.</li>
-          </ul>
-          <p>To exercise these rights, contact info@filterfive.io.</p>
-        </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">4.2 Legal Requirements</h3>
+                <p>We may disclose information if required by law, regulation, legal process, or governmental request, or to protect the rights, property, or safety of KREAKTIVE LLC, our users, or the public.</p>
 
-        <!-- Section 10 -->
-        <section id="international-users">
-          <h2>10. International Users</h2>
-          <p>FilterFive is operated from the United States. If you access the Service from outside the United States, your information will be transferred to and processed in the United States.</p>
+                <h3 class="text-xl font-bold mt-6 mb-3">4.3 Business Transfers</h3>
+                <p>If KREAKTIVE LLC is involved in a merger, acquisition, or sale of assets, information may be transferred as part of that transaction. We will notify you of any such change.</p>
 
-          <section id="eea">
-            <h3>10.1 European Economic Area (EEA)</h3>
-            <p>If you are in the EEA, our legal basis for processing personal information includes:</p>
-            <ul>
-              <li><strong>Contract Performance:</strong> To provide the Service you requested</li>
-              <li><strong>Legitimate Interests:</strong> To improve and secure the Service</li>
-              <li><strong>Legal Compliance:</strong> To meet regulatory obligations</li>
-              <li><strong>Consent:</strong> Where you have provided consent</li>
-            </ul>
-            <p>EEA residents have additional rights including access, rectification, erasure, restriction, portability, and objection. Contact info@filterfive.io to exercise these rights.</p>
-          </section>
-        </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">4.4 With Consent</h3>
+                <p>We may share information with your consent or at your direction.</p>
+              </div>
 
-        <!-- Section 11 -->
-        <section id="childrens-privacy">
-          <h2>11. Children's Privacy</h2>
-          <p>The Service is not intended for anyone under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child, we will delete it promptly.</p>
-        </section>
+              <!-- 5. Data Retention -->
+              <div id="retention" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">05.</span> Data Retention
+                </h2>
+                <p>We retain information as follows:</p>
+                <div class="overflow-x-auto my-4 not-prose">
+                  <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead>
+                      <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="py-3 px-4 text-left font-bold text-gray-600">Data Type</th>
+                        <th class="py-3 px-4 text-left font-bold text-gray-600">Retention Period</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Account information</td>
+                        <td class="py-3 px-4">Duration of account plus 30 days</td>
+                      </tr>
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Customer contact data</td>
+                        <td class="py-3 px-4">Duration of account plus 30 days</td>
+                      </tr>
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Message delivery records</td>
+                        <td class="py-3 px-4">4 years (regulatory requirement)</td>
+                      </tr>
+                      <tr class="border-b border-gray-100">
+                        <td class="py-3 px-4">Opt-out records</td>
+                        <td class="py-3 px-4">Indefinitely</td>
+                      </tr>
+                      <tr>
+                        <td class="py-3 px-4">Billing records</td>
+                        <td class="py-3 px-4">7 years (tax/legal requirement)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>After the retention period, data is permanently deleted from our systems.</p>
 
-        <!-- Section 12 -->
-        <section id="third-party-links">
-          <h2>12. Third-Party Links</h2>
-          <p>The Service may contain links to third-party websites (such as Google Business Profile). We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
-        </section>
+                <h3 class="text-xl font-bold mt-6 mb-3">5.1 Account Cancellation</h3>
+                <p>When you cancel your account:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li>Your data is retained for 30 days in case you wish to reactivate</li>
+                  <li>After 30 days, all data is permanently deleted</li>
+                  <li>Certain records (opt-outs, billing) may be retained longer as required by law</li>
+                </ul>
+              </div>
 
-        <!-- Section 13 -->
-        <section id="changes">
-          <h2>13. Changes to This Policy</h2>
-          <p>We may update this Privacy Policy from time to time. We will notify you of material changes by:</p>
-          <ul>
-            <li>Posting the updated policy on our website</li>
-            <li>Updating the "Last Updated" date</li>
-            <li>Sending an email notification for significant changes</li>
-          </ul>
-          <p>Your continued use of the Service after changes constitutes acceptance of the updated policy.</p>
-        </section>
+              <!-- 6. Security -->
+              <div id="security" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">06.</span> Data Security
+                </h2>
+                <p>We implement appropriate technical and organizational measures to protect your information, including:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li>Encryption of data in transit (TLS/SSL)</li>
+                  <li>Encryption of passwords using industry-standard hashing</li>
+                  <li>Access controls limiting who can view data</li>
+                  <li>Regular security assessments</li>
+                </ul>
+                <p>However, no method of transmission or storage is 100% secure. We cannot guarantee absolute security.</p>
+              </div>
 
-        <!-- Section 14 -->
-        <section id="contact-us">
-          <h2>14. Contact Us</h2>
-          <p>If you have questions about this Privacy Policy or our data practices, contact us at <a href="mailto:info@filterfive.io">info@filterfive.io</a></p>
-        </section>
+              <!-- 7. Rights -->
+              <div id="choices" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">07.</span> Your Rights and Choices
+                </h2>
 
-        <div class="privacy-footer">
-          <p><strong>By using FilterFive, you acknowledge that you have read and understood this Privacy Policy.</strong></p>
+                <h3 class="text-xl font-bold mt-6 mb-3">7.1 Account Information</h3>
+                <p>You can access, update, or delete your account information through your dashboard or by contacting us at info@morestars.io.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">7.2 Marketing Communications</h3>
+                <p>We do not send marketing emails. All communications are transactional (account-related).</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">7.3 Cookies</h3>
+                <p>Most web browsers accept cookies by default. You can configure your browser to reject cookies, though this may affect functionality.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">7.4 Data Export</h3>
+                <p>Business subscribers may request an export of their data by contacting info@morestars.io.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">7.5 Data Deletion</h3>
+                <p>Business subscribers may request deletion of their account and associated data by contacting info@morestars.io. Deletion will be completed within 30 days, subject to legal retention requirements.</p>
+              </div>
+
+              <!-- 8. End Customer -->
+              <div id="end-customer" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">08.</span> End Customer Rights
+                </h2>
+                <p>If you are an end customer who received an SMS through our Service:</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">8.1 Opt-Out</h3>
+                <p>Reply STOP to any message to immediately stop receiving messages. You can also reply UNSUBSCRIBE, CANCEL, END, or QUIT.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">8.2 Questions</h3>
+                <p>Reply HELP to receive assistance information, or contact info@morestars.io.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">8.3 Data Requests</h3>
+                <p>To request information about your data or request deletion, contact info@morestars.io with:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li>Your phone number</li>
+                  <li>The business that sent you a message (if known)</li>
+                  <li>Your request (access, deletion, etc.)</li>
+                </ul>
+                <p>We will respond within 30 days.</p>
+              </div>
+
+              <!-- 9. California -->
+              <div id="california" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">09.</span> California Privacy Rights
+                </h2>
+                <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li><strong>Right to Know:</strong> You can request information about what personal information we collect, use, and disclose.</li>
+                  <li><strong>Right to Delete:</strong> You can request deletion of your personal information, subject to exceptions.</li>
+                  <li><strong>Right to Opt-Out:</strong> We do not sell personal information, so this right does not apply.</li>
+                  <li><strong>Non-Discrimination:</strong> We will not discriminate against you for exercising your rights.</li>
+                </ul>
+                <p>To exercise these rights, contact info@morestars.io.</p>
+              </div>
+
+              <!-- 10. International -->
+              <div id="international" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">10.</span> International Users
+                </h2>
+                <p>MoreStars is operated from the United States. If you access the Service from outside the United States, your information will be transferred to and processed in the United States.</p>
+
+                <h3 class="text-xl font-bold mt-6 mb-3">10.1 European Economic Area (EEA)</h3>
+                <p>If you are in the EEA, our legal basis for processing personal information includes:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li>Contract Performance: To provide the Service you requested</li>
+                  <li>Legitimate Interests: To improve and secure the Service</li>
+                  <li>Legal Compliance: To meet regulatory obligations</li>
+                  <li>Consent: Where you have provided consent</li>
+                </ul>
+                <p>EEA residents have additional rights including access, rectification, erasure, restriction, portability, and objection. Contact info@morestars.io to exercise these rights.</p>
+              </div>
+
+              <!-- 11. Children -->
+              <div id="children" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">11.</span> Children's Privacy
+                </h2>
+                <p>The Service is not intended for anyone under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child, we will delete it promptly.</p>
+              </div>
+
+              <!-- 12. Third Party -->
+              <div id="third-party" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">12.</span> Third-Party Links
+                </h2>
+                <p>The Service may contain links to third-party websites (such as Google Business Profile). We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
+              </div>
+
+              <!-- 13. Changes -->
+              <div id="changes" class="privacy-section scroll-mt-28 mb-16 border-b border-gray-100 pb-10">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">13.</span> Changes to This Policy
+                </h2>
+                <p>We may update this Privacy Policy from time to time. We will notify you of material changes by:</p>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                  <li>Posting the updated policy on our website</li>
+                  <li>Updating the "Last Updated" date</li>
+                  <li>Sending an email notification for significant changes</li>
+                </ul>
+                <p>Your continued use of the Service after changes constitutes acceptance of the updated policy.</p>
+              </div>
+
+              <!-- 14. Contact -->
+              <div id="contact" class="privacy-section scroll-mt-28 mb-16">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                  <span class="text-gray-300">14.</span> Contact Us
+                </h2>
+                <p>If you have questions about this Privacy Policy or our data practices, contact us at:</p>
+                <p class="font-bold mt-2">Email: <a href="mailto:info@morestars.io" class="text-[#A1438E] hover:underline">info@morestars.io</a></p>
+              </div>
+
+              <p class="mt-12 pt-8 border-t border-gray-200 text-sm text-gray-500 font-medium italic">By using MoreStars, you acknowledge that you have read and understood this Privacy Policy.</p>
+            </div>
+          </div>
+
         </div>
+      </div>
+    </section>
+  </main>
 
-      </main>
-    </div>
-  </div>
+  <%- include('partials/marketing-footer') %>
 
-  <script>
+  <!-- Mega Menu & Navigation JavaScript -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
     // Mobile menu toggle
     const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
 
-    hamburger.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
-      hamburger.classList.toggle('active');
-    });
-
-    // Smooth scrolling for TOC links
-    document.querySelectorAll('.toc-nav a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
-          // Close mobile menu if open
-          navLinks.classList.remove('active');
-          hamburger.classList.remove('active');
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        if (!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('mobile-menu-enter');
         }
       });
+    }
+
+    // Desktop Mega Menu
+    const megaMenuTrigger = document.getElementById('industriesTrigger');
+    const megaMenu = document.getElementById('industriesMegaMenu');
+
+    if (megaMenuTrigger && megaMenu) {
+      let menuTimeout;
+
+      megaMenuTrigger.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+        megaMenu.classList.add('open');
+        megaMenuTrigger.classList.add('active');
+      });
+
+      megaMenuTrigger.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+
+      megaMenu.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+      });
+
+      megaMenu.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+    }
+
+    // Mobile Industries Accordion
+    const mobileIndustriesTrigger = document.getElementById('mobileIndustriesTrigger');
+    const mobileIndustriesAccordion = document.getElementById('mobileIndustriesAccordion');
+    const mobileIndustriesArrow = document.getElementById('mobileIndustriesArrow');
+
+    if (mobileIndustriesTrigger && mobileIndustriesAccordion) {
+      mobileIndustriesTrigger.addEventListener('click', () => {
+        mobileIndustriesAccordion.classList.toggle('open');
+        mobileIndustriesArrow.style.transform = mobileIndustriesAccordion.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+    }
+
+    // GSAP Animation for sections on load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof gsap !== 'undefined') {
+        gsap.from('.privacy-section', {
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: 'power2.out',
+          delay: 0.2
+        });
+      }
     });
 
-    // Highlight active TOC item on scroll
-    const observerOptions = {
-      rootMargin: '-50% 0px -50% 0px'
-    };
+    // Scroll Spy for TOC
+    const SECTIONS = ['who-we-are', 'info-collect', 'how-use', 'how-share', 'retention', 'security', 'choices', 'end-customer', 'california', 'international', 'children', 'third-party', 'changes', 'contact'];
+    const tocItems = document.querySelectorAll('.toc-item');
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const id = entry.target.getAttribute('id');
-        const link = document.querySelector(`.toc-nav a[href="#${id}"]`);
-        if (link) {
-          document.querySelectorAll('.toc-nav a').forEach(a => a.classList.remove('active'));
-          if (entry.isIntersecting) {
-            link.classList.add('active');
-          }
+    function updateActiveSection() {
+      const scrollPosition = window.scrollY + 200;
+
+      let currentSectionId = SECTIONS[0];
+
+      for (const sectionId of SECTIONS) {
+        const element = document.getElementById(sectionId);
+        if (element && element.offsetTop <= scrollPosition) {
+          currentSectionId = sectionId;
+        }
+      }
+
+      tocItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.section === currentSectionId) {
+          item.classList.add('active');
         }
       });
-    }, observerOptions);
+    }
 
-    document.querySelectorAll('section[id]').forEach(section => {
-      observer.observe(section);
+    window.addEventListener('scroll', updateActiveSection);
+    updateActiveSection();
+
+    // Smooth scroll on TOC click
+    tocItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const sectionId = item.dataset.section;
+        const section = document.getElementById(sectionId);
+        if (section) {
+          const offset = 100;
+          const top = section.offsetTop - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
     });
   </script>
 
-</body>
-</html>
+<%- include('partials/scripts') %>

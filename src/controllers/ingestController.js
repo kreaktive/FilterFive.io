@@ -1,6 +1,8 @@
-const { v4: uuidv4 } = require('uuid');
 const { FeedbackRequest, User } = require('../models');
 const { sendReviewRequest } = require('../services/smsService');
+const analyticsService = require('../services/analyticsService');
+const shortUrlService = require('../services/shortUrlService');
+const logger = require('../services/logger');
 
 const receiveCustomerData = async (req, res) => {
   try {
@@ -33,12 +35,8 @@ const receiveCustomerData = async (req, res) => {
       });
     }
 
-    // Generate UUID for the public link
-    const generatedUuid = uuidv4();
-
-    // Create feedback request
-    const feedbackRequest = await FeedbackRequest.create({
-      uuid: generatedUuid,
+    // Create feedback request with short URL
+    const { feedbackRequest, reviewLink } = await shortUrlService.createFeedbackRequestWithShortUrl({
       userId: tenantId,
       customerName: name || null,
       customerPhone: phone,
@@ -46,19 +44,20 @@ const receiveCustomerData = async (req, res) => {
       source: 'zapier'
     });
 
-    console.log(`✓ Feedback request created: ${feedbackRequest.uuid} for tenant ${tenant.businessName}`);
-
-    // Construct review link and send SMS
-    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
-    const reviewLink = `${baseUrl}/review/${feedbackRequest.uuid}`;
+    logger.info('Feedback request created', {
+      uuid: feedbackRequest.uuid,
+      shortCode: feedbackRequest.shortCode,
+      tenantId
+    });
 
     try {
       const smsResult = await sendReviewRequest(
         phone,
         name || 'there',
-        user.businessName,
+        tenant.businessName,
         reviewLink,
-        user.smsMessageTone || 'friendly'
+        tenant.smsMessageTone || 'friendly',
+        tenant.customSmsMessage
       );
 
       // Update feedback request with SMS sent details
@@ -68,21 +67,56 @@ const receiveCustomerData = async (req, res) => {
         twilioMessageSid: smsResult.messageSid
       });
 
-      console.log(`✓ SMS sent and feedback request updated to 'sent'`);
+      // Invalidate analytics cache
+      await analyticsService.invalidateCache(tenantId);
+
+      logger.sms('sent', phone, { shortCode: feedbackRequest.shortCode });
+
+      return res.status(201).json({
+        success: true,
+        uuid: feedbackRequest.uuid,
+        message: 'Feedback request created and SMS sent successfully'
+      });
 
     } catch (smsError) {
-      console.error(`✗ SMS sending failed, but database record created:`, smsError.message);
-      // Continue - we still return success because the record was created
+      logger.error('SMS sending failed', {
+        uuid: feedbackRequest.uuid,
+        error: smsError.message,
+        errorCode: smsError.code
+      });
+
+      // Update feedback request to reflect SMS failure
+      await feedbackRequest.update({
+        status: 'sms_failed',
+        skipReason: smsError.message
+      });
+
+      // Check if it's a circuit breaker error (Twilio is down)
+      if (smsError.code === 'CIRCUIT_OPEN') {
+        return res.status(503).json({
+          success: false,
+          uuid: feedbackRequest.uuid,
+          error: 'SMS service temporarily unavailable. Record created but SMS not sent.',
+          retryable: true
+        });
+      }
+
+      // For other SMS errors, return 207 Multi-Status (partial success)
+      // Record was created but SMS failed
+      return res.status(207).json({
+        success: true,
+        uuid: feedbackRequest.uuid,
+        message: 'Feedback request created but SMS sending failed',
+        smsError: {
+          message: smsError.message,
+          code: smsError.code,
+          retryable: false
+        }
+      });
     }
 
-    return res.status(201).json({
-      success: true,
-      uuid: feedbackRequest.uuid,
-      message: 'Feedback request created successfully'
-    });
-
   } catch (error) {
-    console.error('Error in receiveCustomerData:', error);
+    logger.error('Error in receiveCustomerData', { error: error.message });
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

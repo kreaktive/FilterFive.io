@@ -1,0 +1,50 @@
+<!-- Mobile Sticky CTA Bar -->
+<div id="mobileCTA" class="fixed bottom-0 left-0 right-0 z-50 md:hidden transform translate-y-full transition-transform duration-300 ease-out">
+  <div class="bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-4 py-3 safe-area-inset-bottom">
+    <a href="/signup" class="w-full py-3.5 rounded-full font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-[#FFBA49] text-[#500B42] active:scale-[0.98] transition-transform" data-track="mobile-sticky-cta">
+      <%= typeof ctaText !== 'undefined' ? ctaText : 'Start Free Trial' %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </a>
+    <p class="text-center text-[10px] text-gray-500 mt-2 font-medium">
+      <%= typeof ctaSubtext !== 'undefined' ? ctaSubtext : '14-day free trial • No credit card • Set up in 5 minutes' %>
+    </p>
+  </div>
+</div>
+
+<!-- Mobile CTA Show/Hide Script -->
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+(function() {
+  const mobileCTA = document.getElementById('mobileCTA');
+  if (!mobileCTA) return;
+
+  let ticking = false;
+
+  function updateCTA() {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+
+    // Show after scrolling past 100px and hide near footer
+    if (scrollY > 100 && scrollY < (docHeight - windowHeight - 300)) {
+      mobileCTA.classList.remove('translate-y-full');
+    } else {
+      mobileCTA.classList.add('translate-y-full');
+    }
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateCTA);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Show CTA after 2 seconds on mobile if user hasn't scrolled
+  setTimeout(function() {
+    if (window.scrollY < 100 && window.innerWidth < 768) {
+      mobileCTA.classList.remove('translate-y-full');
+    }
+  }, 2000);
+})();
+</script>

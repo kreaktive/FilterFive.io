@@ -1,0 +1,51 @@
+<!-- Testimonial Card Component -->
+<!--
+  Usage: <%- include('partials/testimonial-card', {
+    testimonial: {
+      quote: "MoreStars helped us get 50 new reviews in our first month!",
+      author: "Sarah Johnson",
+      role: "Owner",
+      company: "Sarah's Auto Shop",
+      rating: 5,  // 1-5 stars
+      avatar: "/images/testimonials/sarah.jpg"  // optional
+    }
+  }) %>
+-->
+
+<div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-shadow duration-300">
+  <!-- Stars -->
+  <div class="flex gap-1 mb-4">
+    <% for (let i = 0; i < (typeof testimonial.rating !== 'undefined' ? testimonial.rating : 5); i++) { %>
+    <svg class="w-5 h-5 text-[#FFBA49] fill-current" viewBox="0 0 24 24">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+    </svg>
+    <% } %>
+    <% for (let i = (typeof testimonial.rating !== 'undefined' ? testimonial.rating : 5); i < 5; i++) { %>
+    <svg class="w-5 h-5 text-gray-200 fill-current" viewBox="0 0 24 24">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+    </svg>
+    <% } %>
+  </div>
+
+  <!-- Quote -->
+  <blockquote class="text-gray-700 leading-relaxed mb-6">
+    "<%= testimonial.quote %>"
+  </blockquote>
+
+  <!-- Author -->
+  <div class="flex items-center gap-4">
+    <% if (typeof testimonial.avatar !== 'undefined') { %>
+    <img src="<%= testimonial.avatar %>" alt="<%= testimonial.author %>" class="w-12 h-12 rounded-full object-cover border-2 border-gray-100" loading="lazy">
+    <% } else { %>
+    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFBA49] to-orange-400 flex items-center justify-center text-white font-bold text-lg">
+      <%= testimonial.author.charAt(0) %>
+    </div>
+    <% } %>
+    <div>
+      <p class="font-bold text-[#500B42]"><%= testimonial.author %></p>
+      <p class="text-sm text-gray-500">
+        <%= testimonial.role %><% if (typeof testimonial.company !== 'undefined') { %>, <%= testimonial.company %><% } %>
+      </p>
+    </div>
+  </div>
+</div>

@@ -5,6 +5,12 @@ const CsvUpload = require('./CsvUpload');
 const AnalyticsSnapshot = require('./AnalyticsSnapshot');
 const TimingPerformance = require('./TimingPerformance');
 const SmsEvent = require('./SmsEvent');
+const PosIntegration = require('./PosIntegration');
+const PosLocation = require('./PosLocation');
+const PosTransaction = require('./PosTransaction');
+const PosWebhookEvent = require('./PosWebhookEvent');
+const StripeWebhookEvent = require('./StripeWebhookEvent');
+const ContactSubmission = require('./ContactSubmission');
 
 // Define relationships
 
@@ -96,6 +102,51 @@ SmsEvent.belongsTo(FeedbackRequest, {
   as: 'feedbackRequest'
 });
 
+// POS Integration relationships
+// User has many PosIntegrations
+User.hasMany(PosIntegration, {
+  foreignKey: 'user_id',
+  as: 'posIntegrations'
+});
+
+PosIntegration.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// PosIntegration has many PosLocations
+PosIntegration.hasMany(PosLocation, {
+  foreignKey: 'pos_integration_id',
+  as: 'locations'
+});
+
+PosLocation.belongsTo(PosIntegration, {
+  foreignKey: 'pos_integration_id',
+  as: 'integration'
+});
+
+// User has many PosTransactions
+User.hasMany(PosTransaction, {
+  foreignKey: 'user_id',
+  as: 'posTransactions'
+});
+
+PosTransaction.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// PosIntegration has many PosTransactions
+PosIntegration.hasMany(PosTransaction, {
+  foreignKey: 'pos_integration_id',
+  as: 'transactions'
+});
+
+PosTransaction.belongsTo(PosIntegration, {
+  foreignKey: 'pos_integration_id',
+  as: 'integration'
+});
+
 module.exports = {
   User,
   FeedbackRequest,
@@ -103,5 +154,11 @@ module.exports = {
   CsvUpload,
   AnalyticsSnapshot,
   TimingPerformance,
-  SmsEvent
+  SmsEvent,
+  PosIntegration,
+  PosLocation,
+  PosTransaction,
+  PosWebhookEvent,
+  StripeWebhookEvent,
+  ContactSubmission
 };

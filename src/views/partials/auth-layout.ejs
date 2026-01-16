@@ -1,0 +1,372 @@
+<%#
+  Auth Layout Partial
+
+  Common layout for all authentication pages (signup, login, forgot-password, reset-password, etc.)
+
+  Usage:
+  <%- include('partials/auth-layout', {
+    title: 'Sign Up - MoreStars',
+    subtitle: 'Start Your 14-Day Free Trial',
+    showRecaptcha: true,
+    recaptchaSiteKey: recaptchaSiteKey,
+    extraScripts: '<script>...</script>',
+    extraStyles: '.custom { color: red; }'
+  }) %>
+    <!-- Your form content here -->
+  <%- include('partials/auth-layout-end') %>
+
+  @param {string} title - Page title
+  @param {string} subtitle - Subtitle shown below logo
+  @param {boolean} showRecaptcha - Whether to load reCAPTCHA script
+  @param {string} recaptchaSiteKey - reCAPTCHA site key (if showRecaptcha is true)
+  @param {string} extraStyles - Additional CSS to inject
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'MoreStars' %></title>
+
+  <%- include('gtm-head') %>
+
+  <% if (typeof showRecaptcha !== 'undefined' && showRecaptcha && typeof recaptchaSiteKey !== 'undefined' && recaptchaSiteKey) { %>
+  <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchaSiteKey %>"></script>
+  <% } %>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Rubik:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/favicon-morestars.png">
+
+  <style>
+    /* Base Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body - Dark background with dot pattern */
+    body {
+      font-family: 'Inter Tight', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #500B42;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
+    }
+
+    /* Container */
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Card */
+    .auth-card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 25px 50px -12px rgba(255, 186, 73, 0.25);
+    }
+
+    /* Logo */
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo img {
+      height: 32px;
+      margin-bottom: 12px;
+    }
+
+    .auth-logo p {
+      font-size: 14px;
+      color: #718096;
+      margin-top: 8px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #500B42;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="url"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #f9fafb;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="tel"]:focus,
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #FFBA49;
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.1);
+      background: white;
+    }
+
+    /* Messages */
+    .error-message {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      color: #991b1b;
+      font-size: 14px;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      color: #065f46;
+      font-size: 14px;
+    }
+
+    .warning-message {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      color: #92400e;
+      font-size: 14px;
+    }
+
+    .info-message {
+      background: #dbeafe;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      color: #1e40af;
+      font-size: 14px;
+    }
+
+    /* Resend verification specific */
+    .resend-verification {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .resend-verification a {
+      color: #d97706;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .resend-verification a:hover {
+      text-decoration: underline;
+    }
+
+    .resend-success,
+    .resend-error {
+      padding: 12px 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .resend-success {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+
+    .resend-error {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      color: #991b1b;
+    }
+
+    /* Help text */
+    .help-text {
+      font-size: 12px;
+      color: #718096;
+      margin-top: 5px;
+    }
+
+    /* Password strength */
+    .password-strength {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .strength-weak { width: 25%; background: #dc2626; }
+    .strength-fair { width: 50%; background: #f59e0b; }
+    .strength-good { width: 75%; background: #3b82f6; }
+    .strength-strong { width: 100%; background: #10b981; }
+
+    /* Primary Button */
+    .btn-auth {
+      width: 100%;
+      padding: 15px;
+      background: #FFBA49;
+      color: #500B42;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-auth:hover {
+      transform: translateY(-2px);
+      background: #500B42;
+      color: white;
+      box-shadow: 0 10px 25px rgba(255, 186, 73, 0.3);
+    }
+
+    .btn-auth:active {
+      transform: translateY(0);
+    }
+
+    .btn-auth:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Links */
+    .auth-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #718096;
+    }
+
+    .auth-link a {
+      color: #FFBA49;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #718096;
+    }
+
+    .auth-footer a {
+      color: #718096;
+      text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-footer p + p {
+      margin-top: 8px;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: #718096;
+      font-size: 14px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .auth-divider span {
+      padding: 0 16px;
+    }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 32px 24px;
+      }
+    }
+
+    /* Extra styles from page */
+    <% if (typeof extraStyles !== 'undefined') { %>
+    <%= extraStyles %>
+    <% } %>
+  </style>
+</head>
+<body>
+  <%- include('gtm-body') %>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="/images/Logo MoreStars.io.svg" alt="MoreStars Logo">
+        <% if (typeof subtitle !== 'undefined' && subtitle) { %>
+        <p><%= subtitle %></p>
+        <% } %>
+      </div>

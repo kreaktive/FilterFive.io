@@ -1,107 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> | FilterFive</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<%- include('partials/dashboard-head', { title: title }) %>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    .page-title {
+      margin-bottom: var(--space-6);
     }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
-      min-height: 100vh;
+    .page-title h2 {
+      font-size: var(--text-3xl);
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
     }
 
-    .preview-container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 20px;
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: var(--text-base);
     }
 
     .summary-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
     }
 
     .summary-card {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
       text-align: center;
+      box-shadow: var(--shadow-sm);
     }
 
     .summary-card.valid {
-      border-left: 4px solid #10B981;
+      border-left: 4px solid var(--success);
     }
 
     .summary-card.invalid {
-      border-left: 4px solid #EF4444;
+      border-left: 4px solid var(--danger);
     }
 
     .summary-card.duplicate {
-      border-left: 4px solid #F59E0B;
+      border-left: 4px solid var(--warning);
+    }
+
+    .summary-card.total {
+      border-left: 4px solid var(--brand-gold);
     }
 
     .summary-number {
       font-size: 36px;
       font-weight: 700;
-      margin: 10px 0;
+      margin: var(--space-2) 0;
+      color: var(--text-primary);
     }
 
     .summary-label {
-      color: #6B7280;
-      font-size: 14px;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
     }
 
     .selection-controls {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: var(--space-3);
+      box-shadow: var(--shadow-sm);
     }
 
     .selection-buttons button {
       padding: 8px 16px;
-      border: 1px solid #D1D5DB;
-      background: white;
-      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
       cursor: pointer;
-      margin-right: 10px;
-      font-size: 14px;
+      margin-right: var(--space-2);
+      font-size: var(--text-sm);
+      transition: all var(--transition-base);
     }
 
     .selection-buttons button:hover {
-      background: #F3F4F6;
+      background: var(--bg-light);
+      border-color: var(--brand-gold);
     }
 
     .selected-count {
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .preview-table {
       width: 100%;
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      margin: 20px 0;
+      margin-bottom: var(--space-5);
+      box-shadow: var(--shadow-sm);
     }
 
     .preview-table table {
@@ -111,19 +111,20 @@
 
     .preview-table th,
     .preview-table td {
-      padding: 16px;
+      padding: var(--space-4);
       text-align: left;
-      border-bottom: 1px solid #E5E7EB;
+      border-bottom: 1px solid var(--border-light);
     }
 
     .preview-table th {
-      background: #F9FAFB;
+      background: var(--bg-light);
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
+      font-size: var(--text-sm);
     }
 
     .preview-table tr:hover {
-      background: #F9FAFB;
+      background: var(--bg-light);
     }
 
     .preview-table tr:last-child td {
@@ -131,22 +132,22 @@
     }
 
     .confidence-high {
-      color: #059669;
+      color: var(--success);
       font-weight: 600;
     }
 
     .confidence-medium {
-      color: #F59E0B;
+      color: var(--warning);
       font-weight: 600;
     }
 
     .confidence-low {
-      color: #DC2626;
+      color: var(--danger);
       font-weight: 600;
     }
 
     .phone-original {
-      color: #9CA3AF;
+      color: var(--text-muted);
       font-size: 12px;
       font-style: italic;
     }
@@ -161,7 +162,7 @@
       background: #FEF3C7;
       color: #92400E;
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: var(--radius-sm);
       font-size: 11px;
       margin-left: 5px;
     }
@@ -171,7 +172,7 @@
       background: #D1FAE5;
       color: #065F46;
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: var(--radius-sm);
       font-size: 11px;
       margin-left: 5px;
     }
@@ -179,76 +180,98 @@
     .checkbox-cell {
       width: 40px;
       text-align: center;
+      position: relative;
     }
 
     .checkbox-cell input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       cursor: pointer;
+      position: relative;
+      z-index: 10;
+      appearance: auto;
+      -webkit-appearance: checkbox;
+      -moz-appearance: checkbox;
+      pointer-events: auto;
+      opacity: 1;
+      margin: 0;
+      accent-color: var(--brand-gold);
+    }
+
+    .preview-table td,
+    .preview-table th {
+      position: relative;
+    }
+
+    .preview-table tr {
+      position: relative;
     }
 
     .error-message {
-      background: #FEE2E2;
-      border: 1px solid #FCA5A5;
-      color: #991B1B;
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
       padding: 12px 16px;
-      border-radius: 6px;
-      margin-bottom: 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+      color: #991b1b;
+      font-size: var(--text-sm);
     }
 
     .submit-section {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 30px;
-      margin: 30px 0;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
       text-align: center;
+      box-shadow: var(--shadow-sm);
     }
 
     .submit-btn {
-      background: #10B981;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
-      padding: 16px 48px;
+      padding: 14px 40px;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       cursor: pointer;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
-      transition: background 0.2s;
+      transition: all var(--transition-base);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
     }
 
     .submit-btn:hover {
-      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
     .submit-btn:disabled {
-      background: #9CA3AF;
+      background: var(--text-muted);
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .cancel-btn {
-      background: white;
-      color: #6B7280;
-      padding: 16px 48px;
-      border: 1px solid #D1D5DB;
-      border-radius: 6px;
+      background: var(--bg-white);
+      color: var(--text-secondary);
+      padding: 14px 40px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
       cursor: pointer;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       text-decoration: none;
       display: inline-block;
-      margin-right: 20px;
-      transition: background 0.2s;
+      margin-right: var(--space-4);
+      transition: all var(--transition-base);
     }
 
     .cancel-btn:hover {
-      background: #F3F4F6;
-    }
-
-    .cost-estimate {
-      margin-top: 15px;
-      color: #6B7280;
-      font-size: 14px;
+      background: var(--bg-light);
+      border-color: var(--brand-gold);
     }
 
     .error-table {
@@ -257,24 +280,26 @@
 
     .error-row td {
       color: #991B1B;
-      font-size: 14px;
+      font-size: var(--text-sm);
     }
 
     .collapsible-section {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      margin: 20px 0;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-5);
       overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
     .collapsible-header {
-      padding: 20px;
+      padding: var(--space-4);
       cursor: pointer;
-      background: #F9FAFB;
+      background: var(--bg-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background var(--transition-base);
     }
 
     .collapsible-header:hover {
@@ -291,40 +316,207 @@
       max-height: 2000px;
     }
 
+    .empty-state {
+      text-align: center;
+      padding: var(--space-10);
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-state p {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-5);
+    }
+
+    /* SMS Preview Styles */
+    .sms-preview-section {
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-5);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sms-preview-header {
+      padding: var(--space-4);
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sms-preview-header h3 {
+      margin: 0;
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .sms-preview-body {
+      padding: var(--space-5);
+    }
+
+    .sms-bubble {
+      background: #E8F5E9;
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      max-width: 380px;
+      position: relative;
+      font-size: var(--text-sm);
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    .sms-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 20px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid #E8F5E9;
+    }
+
+    .sms-meta {
+      display: flex;
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .sms-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .sms-meta-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+    }
+
+    .sms-tone-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    .sms-tone-badge.friendly { background: #DBEAFE; color: #1E40AF; }
+    .sms-tone-badge.professional { background: #E0E7FF; color: #3730A3; }
+    .sms-tone-badge.grateful { background: #FEF3C7; color: #92400E; }
+    .sms-tone-badge.custom { background: #F3E8FF; color: #6B21A8; }
+
+    /* Phone Confidence Legend */
+    .confidence-legend {
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      font-size: var(--text-sm);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--text-secondary);
+    }
+
+    .legend-icon {
+      width: 18px;
+      text-align: center;
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
+      .checkbox-cell input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+      }
+
+      .checkbox-cell {
+        width: 50px;
+        padding: 10px !important;
+      }
+
       .preview-table {
+        display: block;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .preview-table table {
+        min-width: 600px;
+      }
+
+      .preview-table th,
+      .preview-table td {
+        padding: 12px 10px;
+        font-size: var(--text-sm);
       }
 
       .selection-controls {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--space-3);
       }
 
       .selection-buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: var(--space-2);
+      }
+
+      .selection-buttons button {
+        flex: 1;
+        min-width: 120px;
+        padding: 12px 15px;
       }
 
       .submit-section {
-        padding: 20px;
+        padding: var(--space-5);
       }
 
       .submit-btn,
       .cancel-btn {
         width: 100%;
-        margin: 10px 0;
+        margin: 8px 0;
+        padding: 14px 20px;
+      }
+
+      .summary-card {
+        padding: var(--space-4);
       }
     }
   </style>
 </head>
 <body>
-  <%- include('partials/header', { user }) %>
+  <%- include('partials/dashboard-header', { activePage: 'upload' }) %>
 
-  <div class="preview-container">
-    <h1><%= title %></h1>
-    <p style="color: #6B7280; margin-bottom: 20px;">Review and select customers to send SMS review requests.</p>
+  <main class="container">
+    <div class="page-title">
+      <h2><%= title %></h2>
+      <p>Review and select customers to send SMS review requests</p>
+    </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
       <div class="error-message">
@@ -346,22 +538,92 @@
         <div class="summary-label">Duplicates</div>
         <div class="summary-number"><%= preview.duplicateRows.length %></div>
       </div>
-      <div class="summary-card">
+      <div class="summary-card total">
         <div class="summary-label">Total Rows</div>
         <div class="summary-number"><%= preview.totalRows %></div>
       </div>
     </div>
 
+    <!-- SMS Message Preview -->
+    <%
+      // Generate preview message with sample name
+      const sampleName = preview.validRows.length > 0 && preview.validRows[0].name ? preview.validRows[0].name.split(' ')[0] : 'John';
+      const tone = user.smsTone || 'friendly';
+      const businessName = user.businessName || 'Your Business';
+      const reviewLink = user.googleReviewLink || 'https://g.page/...';
+
+      // Build the preview message based on tone
+      let previewMessage = '';
+      if (tone === 'custom' && user.customSmsMessage) {
+        previewMessage = user.customSmsMessage
+          .replace(/\{\{CustomerName\}\}/gi, sampleName)
+          .replace(/\{\{BusinessName\}\}/gi, businessName)
+          .replace(/\{\{ReviewLink\}\}/gi, reviewLink);
+      } else if (tone === 'professional') {
+        previewMessage = `Hello ${sampleName}, thank you for choosing ${businessName}. Your feedback is valuable to us. Please take a moment to leave a review: ${reviewLink}`;
+      } else if (tone === 'grateful') {
+        previewMessage = `Hi ${sampleName}, we're grateful for your business at ${businessName}! Reviews mean the world to us. Would you share your thoughts? ${reviewLink}`;
+      } else {
+        // Default: friendly
+        previewMessage = `Hi ${sampleName}! Thanks for visiting ${businessName}. Reviews help small businesses like ours thrive! Would you mind sharing your experience? ${reviewLink}`;
+      }
+
+      // Calculate message stats
+      const charCount = previewMessage.length;
+      const segmentCount = Math.ceil(charCount / 160);
+    %>
+    <div class="sms-preview-section">
+      <div class="sms-preview-header">
+        <h3>📱 Message Preview</h3>
+        <span class="sms-tone-badge <%= tone %>"><%= tone %></span>
+      </div>
+      <div class="sms-preview-body">
+        <div class="sms-bubble">
+          <%= previewMessage %>
+        </div>
+        <div class="sms-meta">
+          <div class="sms-meta-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span><%= charCount %> characters</span>
+          </div>
+          <div class="sms-meta-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span><%= segmentCount %> SMS segment<%= segmentCount > 1 ? 's' : '' %></span>
+          </div>
+          <div class="sms-meta-item">
+            <a href="/dashboard/settings#sms-template" style="color: var(--brand-gold); text-decoration: none; font-size: var(--text-xs);">Edit message →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <% if (preview.validRows.length > 0) { %>
     <form id="sendForm" action="/dashboard/upload/send" method="POST">
+      <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
       <!-- Selection Controls -->
       <div class="selection-controls">
         <div>
           <span class="selected-count">Selected: <strong id="selectedCount">0</strong> of <%= preview.validRows.length %></span>
         </div>
         <div class="selection-buttons">
-          <button type="button" onclick="selectAll()">✓ Select All</button>
-          <button type="button" onclick="deselectAll()">✗ Deselect All</button>
+          <button type="button" data-action="select-all">Select All</button>
+          <button type="button" data-action="deselect-all">Deselect All</button>
+        </div>
+      </div>
+
+      <!-- Phone Confidence Legend -->
+      <div class="confidence-legend">
+        <div class="legend-item">
+          <span class="legend-icon confidence-high">&#10003;</span>
+          <span>Valid mobile number</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon confidence-medium">&#9888;</span>
+          <span>May be landline/VoIP (delivery uncertain)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-icon confidence-low">!</span>
+          <span>Invalid format (will be skipped)</span>
         </div>
       </div>
 
@@ -371,7 +633,7 @@
           <thead>
             <tr>
               <th class="checkbox-cell">
-                <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)">
+                <input type="checkbox" id="selectAllCheckbox">
               </th>
               <th>Row #</th>
               <th>Name</th>
@@ -383,7 +645,7 @@
             <% preview.validRows.forEach(row => { %>
             <tr>
               <td class="checkbox-cell">
-                <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox" onchange="updateCount()">
+                <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox">
               </td>
               <td><%= row.rowNumber %></td>
               <td><%= row.name || '-' %></td>
@@ -391,9 +653,9 @@
                 <% if (row.phoneFormatted) { %>
                   <div>
                     <% if (row.phoneFormatted.confidence === 'high') { %>
-                      <span class="confidence-high" title="High confidence">✓</span>
+                      <span class="confidence-high" title="High confidence">&#10003;</span>
                     <% } else if (row.phoneFormatted.confidence === 'medium') { %>
-                      <span class="confidence-medium" title="Medium confidence - please verify">⚠</span>
+                      <span class="confidence-medium" title="Medium confidence - please verify">&#9888;</span>
                     <% } else if (row.phoneFormatted.confidence === 'low') { %>
                       <span class="confidence-low" title="Low confidence - please verify">!</span>
                     <% } %>
@@ -425,30 +687,31 @@
 
       <!-- Submit Section -->
       <div class="submit-section">
-        <a href="/dashboard/upload" class="cancel-btn">← Cancel</a>
+        <a href="/dashboard/upload" class="cancel-btn">Cancel</a>
         <button type="submit" class="submit-btn" id="submitBtn" disabled>
-          📤 Send SMS to Selected
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13"></path>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+          </svg>
+          Send SMS to Selected
         </button>
-        <div class="cost-estimate" id="costEstimate">
-          Select customers to see estimated cost
-        </div>
       </div>
     </form>
     <% } else { %>
-      <div style="text-align: center; padding: 40px; background: white; border-radius: 8px;">
-        <p style="color: #6B7280; margin-bottom: 20px;">No valid customers to send SMS.</p>
-        <a href="/dashboard/upload" class="cancel-btn">← Upload New File</a>
+      <div class="empty-state">
+        <p>No valid customers to send SMS.</p>
+        <a href="/dashboard/upload" class="cancel-btn">Upload New File</a>
       </div>
     <% } %>
 
     <!-- Invalid Rows Section (Collapsible) -->
     <% if (preview.invalidRows.length > 0 || preview.duplicateRows.length > 0) { %>
     <div class="collapsible-section">
-      <div class="collapsible-header" onclick="toggleCollapsible(this)">
-        <strong>⚠️ Skipped Rows (<%= preview.invalidRows.length + preview.duplicateRows.length %>)</strong>
-        <span>▼</span>
+      <div class="collapsible-header" id="skippedHeader">
+        <strong>Skipped Rows (<%= preview.invalidRows.length + preview.duplicateRows.length %>)</strong>
+        <span id="collapseArrow">&#9660;</span>
       </div>
-      <div class="collapsible-content">
+      <div class="collapsible-content" id="skippedContent">
         <div class="preview-table error-table">
           <table>
             <thead>
@@ -474,82 +737,127 @@
       </div>
     </div>
     <% } %>
-  </div>
+  </main>
 
-  <script>
-    const SMS_COST_PER_MESSAGE = 0.0079; // Twilio cost per SMS
+  <%- include('partials/dashboard-footer') %>
 
-    function updateCount() {
-      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-      const count = checkboxes.length;
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+      var selectAllCheckbox = document.getElementById('selectAllCheckbox');
+      var rowCheckboxes = document.querySelectorAll('.row-checkbox');
+      var selectAllBtn = document.querySelector('[data-action="select-all"]');
+      var deselectAllBtn = document.querySelector('[data-action="deselect-all"]');
 
-      document.getElementById('selectedCount').textContent = count;
-      document.getElementById('submitBtn').disabled = count === 0;
+      // Update count function
+      function updateCount() {
+        var checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        var count = checkedBoxes.length;
 
-      // Update select all checkbox
-      const allCheckboxes = document.querySelectorAll('.row-checkbox');
-      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-      selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
-      selectAllCheckbox.indeterminate = count > 0 && count < allCheckboxes.length;
+        document.getElementById('selectedCount').textContent = count;
+        var submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+          submitBtn.disabled = count === 0;
+        }
 
-      // Update cost estimate
-      const estimatedCost = (count * SMS_COST_PER_MESSAGE).toFixed(2);
-      document.getElementById('costEstimate').textContent =
-        count > 0
-          ? `Estimated cost: $${estimatedCost} (${count} × $${SMS_COST_PER_MESSAGE.toFixed(4)})`
-          : 'Select customers to see estimated cost';
-    }
-
-    function selectAll() {
-      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = true);
-      updateCount();
-    }
-
-    function deselectAll() {
-      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
-      updateCount();
-    }
-
-    function toggleAll(checkbox) {
-      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checkbox.checked);
-      updateCount();
-    }
-
-    function toggleCollapsible(header) {
-      const content = header.nextElementSibling;
-      const arrow = header.querySelector('span');
-
-      if (content.classList.contains('open')) {
-        content.classList.remove('open');
-        arrow.textContent = '▼';
-      } else {
-        content.classList.add('open');
-        arrow.textContent = '▲';
-      }
-    }
-
-    // Handle form submission
-    document.getElementById('sendForm')?.addEventListener('submit', function(e) {
-      const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
-
-      if (selectedCount === 0) {
-        e.preventDefault();
-        alert('Please select at least one customer to send SMS.');
-        return;
+        // Update select all checkbox
+        if (selectAllCheckbox) {
+          selectAllCheckbox.checked = count === rowCheckboxes.length && count > 0;
+          selectAllCheckbox.indeterminate = count > 0 && count < rowCheckboxes.length;
+        }
       }
 
-      if (!confirm(`Are you sure you want to send SMS to ${selectedCount} customer(s)? This will cost approximately $${(selectedCount * SMS_COST_PER_MESSAGE).toFixed(2)}.`)) {
-        e.preventDefault();
-        return;
+      // Add click handler to each row checkbox
+      rowCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+        checkbox.addEventListener('change', function() {
+          updateCount();
+        });
+      });
+
+      // Select all checkbox handler
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+        selectAllCheckbox.addEventListener('change', function() {
+          rowCheckboxes.forEach(function(cb) {
+            cb.checked = selectAllCheckbox.checked;
+          });
+          updateCount();
+        });
       }
 
-      // Disable submit button and show loading
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('submitBtn').textContent = '📤 Sending...';
+      // Select All button handler
+      if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          rowCheckboxes.forEach(function(cb) {
+            cb.checked = true;
+          });
+          updateCount();
+        });
+      }
+
+      // Deselect All button handler
+      if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          rowCheckboxes.forEach(function(cb) {
+            cb.checked = false;
+          });
+          updateCount();
+        });
+      }
+
+      // Handle form submission
+      var sendForm = document.getElementById('sendForm');
+      if (sendForm) {
+        sendForm.addEventListener('submit', function(e) {
+          var selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
+
+          if (selectedCount === 0) {
+            e.preventDefault();
+            alert('Please select at least one customer to send SMS.');
+            return;
+          }
+
+          if (!confirm('Are you sure you want to send SMS to ' + selectedCount + ' customer(s)?')) {
+            e.preventDefault();
+            return;
+          }
+
+          // Disable submit button and show loading
+          var submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+          }
+        });
+      }
+
+      // Collapsible section handler
+      var skippedHeader = document.getElementById('skippedHeader');
+      if (skippedHeader) {
+        skippedHeader.addEventListener('click', function() {
+          var content = document.getElementById('skippedContent');
+          var arrow = document.getElementById('collapseArrow');
+
+          if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            arrow.textContent = '\u25BC'; // Down arrow
+          } else {
+            content.classList.add('open');
+            arrow.textContent = '\u25B2'; // Up arrow
+          }
+        });
+      }
+
+      // Initialize count
+      updateCount();
     });
-
-    // Initialize count on page load
-    updateCount();
   </script>
 </body>
 </html>

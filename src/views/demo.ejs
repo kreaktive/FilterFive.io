@@ -1,684 +1,433 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Demo: SMS Consent Collection Flow - See how FilterFive-powered businesses collect SMS consent from customers">
-  <title>Demo: SMS Consent Collection - FilterFive</title>
-  <link rel="stylesheet" href="/css/homepage.css">
-  <style>
-    /* Demo Page Specific Styles */
-    .demo-container {
-      min-height: 100vh;
-      background-color: var(--bg-light);
-      padding: var(--spacing-lg) 0;
-    }
-
-    .demo-banner {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      padding: var(--spacing-md) var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
-      border-radius: var(--border-radius);
-      text-align: center;
-    }
-
-    .demo-banner p {
-      font-size: 16px;
-      margin: 0;
-      font-weight: 500;
-    }
-
-    .demo-content-wrapper {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 0 var(--spacing-sm);
-    }
-
-    /* Form Styles */
-    .demo-form-card {
-      background: var(--bg-white);
-      border-radius: var(--border-radius);
-      padding: var(--spacing-lg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .form-header {
-      text-align: center;
-      margin-bottom: var(--spacing-lg);
-      border-bottom: 2px solid var(--border-color);
-      padding-bottom: var(--spacing-md);
-    }
-
-    .form-header h1 {
-      font-size: 28px;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-header p {
-      color: var(--text-light);
-      font-size: 14px;
-      margin: 0;
-    }
-
-    .form-group {
-      margin-bottom: var(--spacing-md);
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      color: var(--text-dark);
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    label.optional {
-      font-weight: 500;
-      color: var(--text-light);
-    }
-
-    label.optional::after {
-      content: " (optional)";
-      color: var(--text-lighter);
-      font-size: 12px;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 14px;
-      font-family: inherit;
-      transition: var(--transition);
-    }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="tel"]:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Consent Section */
-    .consent-section {
-      background-color: var(--bg-light);
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .consent-section h3 {
-      font-size: 16px;
-      margin-bottom: 1rem;
-      margin-top: 0;
-    }
-
-    .checkbox-wrapper {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    input[type="checkbox"] {
-      margin-top: 4px;
-      cursor: pointer;
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-    }
-
-    .consent-text {
-      flex: 1;
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-medium);
-    }
-
-    .consent-text a {
-      color: var(--primary-color);
-      text-decoration: none;
-      border-bottom: 1px solid var(--primary-color);
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    .consent-text a:hover {
-      color: var(--primary-dark);
-      border-bottom-color: var(--primary-dark);
-    }
-
-    /* Form Actions */
-    .form-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: var(--spacing-lg);
-    }
-
-    .btn-submit {
-      flex: 1;
-      padding: 14px;
-      background: var(--gradient-primary);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-reset {
-      padding: 14px 28px;
-      background: white;
-      color: var(--primary-color);
-      border: 2px solid var(--primary-color);
-      border-radius: var(--border-radius);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .btn-reset:hover {
-      background: var(--bg-light);
-    }
-
-    /* Hidden - Shown on submission */
-    #demoForm {
-      display: block;
-    }
-
-    #confirmationScreen {
-      display: none;
-    }
-
-    /* Confirmation Screen */
-    .confirmation-container {
-      text-align: center;
-    }
-
-    .success-icon {
-      font-size: 64px;
-      margin-bottom: 1rem;
-    }
-
-    .confirmation-title {
-      font-size: 28px;
-      margin-bottom: 0.5rem;
-      color: var(--success-color);
-    }
-
-    .confirmation-subtitle {
-      color: var(--text-light);
-      font-size: 16px;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    /* Consent Record */
-    .consent-record {
-      background: white;
-      border: 2px solid var(--success-color);
-      border-radius: var(--border-radius);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      text-align: left;
-    }
-
-    .consent-record h4 {
-      color: var(--text-dark);
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.5rem;
-    }
-
-    .record-item {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-
-    .record-label {
-      font-weight: 600;
-      color: var(--text-medium);
-      min-width: 100px;
-    }
-
-    .record-value {
-      color: var(--text-dark);
-      word-break: break-word;
-    }
-
-    /* SMS Mockup */
-    .sms-mockup {
-      background: white;
-      border: 2px solid var(--border-color);
-      border-radius: var(--border-radius);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      text-align: left;
-    }
-
-    .sms-mockup h4 {
-      margin-bottom: 1rem;
-      color: var(--text-dark);
-    }
-
-    .sms-bubble {
-      background: #e5e5ea;
-      border-radius: 18px;
-      padding: 12px 16px;
-      display: inline-block;
-      max-width: 90%;
-      word-wrap: break-word;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--text-dark);
-    }
-
-    .sms-bubble a {
-      color: var(--primary-color);
-      text-decoration: underline;
-    }
-
-    .sms-label {
-      font-size: 12px;
-      color: var(--text-light);
-      margin-bottom: 8px;
-    }
-
-    /* Compliance Section */
-    .compliance-section {
-      background: white;
-      border-radius: var(--border-radius);
-      padding: var(--spacing-lg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .compliance-section h2 {
-      font-size: 22px;
-      margin-bottom: 1rem;
-      border-bottom: 2px solid var(--border-color);
-      padding-bottom: 1rem;
-    }
-
-    .compliance-subsection {
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .compliance-subsection h3 {
-      font-size: 16px;
-      margin-bottom: 0.5rem;
-      color: var(--primary-color);
-    }
-
-    .compliance-subsection p {
-      color: var(--text-medium);
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 0.5rem;
-    }
-
-    .compliance-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .compliance-list li {
-      padding-left: 24px;
-      position: relative;
-      color: var(--text-medium);
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 0.75rem;
-    }
-
-    .compliance-list li::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: var(--success-color);
-      font-weight: bold;
-    }
-
-    .compliance-cta {
-      margin-top: var(--spacing-md);
-    }
-
-    .compliance-cta a {
-      display: inline-block;
-      padding: 12px 24px;
-      background: var(--primary-color);
-      color: white;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 14px;
-      text-decoration: none;
-      transition: var(--transition);
-    }
-
-    .compliance-cta a:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Validation Errors */
-    .error-message {
-      color: var(--error-color);
-      font-size: 13px;
-      margin-top: 4px;
-      display: none;
-    }
-
-    .error-message.show {
-      display: block;
-    }
-
-    input.error,
-    select.error {
-      border-color: var(--error-color);
-      background-color: rgba(245, 101, 101, 0.05);
-    }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      .demo-content-wrapper {
-        padding: 0 var(--spacing-xs);
-      }
-
-      .demo-form-card {
-        padding: var(--spacing-md);
-      }
-
-      .form-header h1 {
-        font-size: 22px;
-      }
-
-      .form-actions {
-        flex-direction: column;
-      }
-
-      .btn-submit,
-      .btn-reset {
-        width: 100%;
-      }
-
-      .record-item {
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .compliance-section {
-        padding: var(--spacing-md);
-      }
-
-      .compliance-section h2 {
-        font-size: 18px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="/" class="logo">
-        <span class="logo-text">FilterFive</span>
-      </a>
-
-      <div class="nav-links" id="navLinks">
-        <a href="#how-it-works">How It Works</a>
-        <a href="#benefits">Benefits</a>
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="/partners">Become a Partner</a>
-        <a href="/login" class="nav-login">Login</a>
-        <a href="/signup" class="btn-primary-nav">Start Free Trial</a>
+<%
+const demoStyles = `
+  /* Demo Form Styles */
+  .demo-form-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .demo-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  .consent-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #D1D5DB;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+  }
+  .consent-checkbox:checked {
+    background-color: #FFBA49;
+    border-color: #FFBA49;
+  }
+  .consent-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #500B42;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .consent-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.3);
+  }
+
+  .sms-bubble {
+    position: relative;
+  }
+  .sms-bubble::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 12px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #E5E7EB transparent transparent;
+  }
+
+  /* Error states */
+  .input-error {
+    border-color: #EF4444 !important;
+    background-color: rgba(239, 68, 68, 0.05);
+  }
+  .error-message {
+    display: none;
+    color: #EF4444;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .error-message.show {
+    display: block;
+  }
+`;
+%>
+<%- include('partials/head', {
+  title: 'Demo: SMS Consent Collection - MoreStars',
+  description: 'Demo: SMS Consent Collection Flow - See how MoreStars-powered businesses collect SMS consent from customers'
+}) %>
+  <style><%= demoStyles %></style>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" integrity="sha384-d+vyQ0dYcymoP8ndq2hW7FGC50nqGdXUEgoOUGxbbkAJwZqL7h+jKN0GGgn9hFDS" crossorigin="anonymous" defer></script>
+
+  <% const activePage = 'demo'; %>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 bg-gray-50 border-b border-gray-200">
+      <div class="max-w-4xl mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 font-title text-brand-dark">
+          SMS Consent Demo
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          See how MoreStars-powered businesses collect SMS consent from customers.
+        </p>
       </div>
+    </section>
 
-      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </nav>
+    <!-- Demo Content -->
+    <section class="py-12 md:py-20 bg-white">
+      <div class="max-w-2xl mx-auto px-4 sm:px-6">
 
-  <div class="demo-container">
-    <div class="demo-content-wrapper">
+        <!-- Demo Banner -->
+        <div class="bg-[#F9F7FA] border border-[rgba(161,67,142,0.2)] rounded-2xl p-5 mb-8 text-center">
+          <p class="text-[#500B42] font-medium text-sm">
+            This is a demonstration of how MoreStars-powered businesses collect SMS consent. This form does not send real messages.
+          </p>
+        </div>
 
-      <!-- Blue Banner -->
-      <div class="demo-banner">
-        <p>📋 This is a demonstration of how FilterFive-powered businesses collect SMS consent from customers. This form does not send real messages.</p>
-      </div>
+        <!-- Demo Form Card -->
+        <div class="demo-form-card bg-white border border-gray-200 rounded-3xl p-8 shadow-lg mb-10">
 
-      <!-- Demo Form -->
-      <div class="demo-form-card">
-        <form id="demoForm">
-          <div class="form-header">
-            <h1>✂️ Joe's Barbershop</h1>
-            <p>Book an Appointment</p>
-          </div>
+          <form id="demoForm">
+            <!-- Form Header -->
+            <div class="text-center mb-8 pb-6 border-b border-gray-100">
+              <div class="text-4xl mb-3">&#9986;</div>
+              <h2 class="text-2xl font-bold text-brand-dark mb-1">Joe's Barbershop</h2>
+              <p class="text-gray-500 text-sm">Book an Appointment</p>
+            </div>
 
-          <!-- Customer Name -->
-          <div class="form-group">
-            <label for="customerName">Customer Name *</label>
-            <input type="text" id="customerName" name="customerName" placeholder="John Smith" required>
-            <div class="error-message" id="nameError">Please enter your name</div>
-          </div>
-
-          <!-- Phone Number -->
-          <div class="form-group">
-            <label for="phoneNumber">Phone Number *</label>
-            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="(555) 123-4567" required>
-            <div class="error-message" id="phoneError">Please enter a valid phone number</div>
-          </div>
-
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email" class="optional">Email</label>
-            <input type="email" id="email" name="email" placeholder="john@example.com">
-            <div class="error-message" id="emailError">Please enter a valid email address</div>
-          </div>
-
-          <!-- Service Selection -->
-          <div class="form-group">
-            <label for="service">Select a Service *</label>
-            <select id="service" name="service" required>
-              <option value="">Choose a service...</option>
-              <option value="haircut">Classic Haircut</option>
-              <option value="fade">Fade</option>
-              <option value="beard">Beard Trim</option>
-              <option value="lineup">Line Up</option>
-              <option value="full-service">Full Service (Haircut + Beard)</option>
-              <option value="kids">Kids Haircut</option>
-            </select>
-            <div class="error-message" id="serviceError">Please select a service</div>
-          </div>
-
-          <!-- Consent Checkbox -->
-          <div class="consent-section">
-            <h3>Feedback Consent</h3>
-            <div class="checkbox-wrapper">
-              <input type="checkbox" id="smsConsent" name="smsConsent" required>
-              <label for="smsConsent" style="font-weight: 400; margin: 0; cursor: pointer;">
-                <span class="consent-text">I agree to receive marketing messages from Joe's Barbershop, including a one-time review request after my visit. Message and data rates may apply. Reply STOP to opt out. <a href="/terms" target="_blank">Terms</a> | <a href="/privacy" target="_blank">Privacy</a></span>
+            <!-- Customer Name -->
+            <div class="mb-5">
+              <label for="customerName" class="block text-sm font-semibold text-gray-700 mb-2">
+                Customer Name <span class="text-red-500">*</span>
               </label>
-            </div>
-            <div class="error-message" id="consentError">You must agree to receive an SMS review request</div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button type="submit" class="btn-submit">Book Appointment & Opt In</button>
-            <button type="reset" class="btn-reset">Clear</button>
-          </div>
-        </form>
-
-        <!-- Confirmation Screen -->
-        <div id="confirmationScreen">
-          <div class="confirmation-container">
-            <div class="success-icon">✅</div>
-            <h2 class="confirmation-title">Appointment Confirmed!</h2>
-            <p class="confirmation-subtitle">Your appointment has been booked and your SMS consent has been recorded.</p>
-
-            <!-- Consent Record -->
-            <div class="consent-record">
-              <h4>📋 Consent Record</h4>
-              <div class="record-item">
-                <span class="record-label">Timestamp:</span>
-                <span class="record-value" id="recordTimestamp">—</span>
-              </div>
-              <div class="record-item">
-                <span class="record-label">Phone:</span>
-                <span class="record-value" id="recordPhone">—</span>
-              </div>
-              <div class="record-item">
-                <span class="record-label">Method:</span>
-                <span class="record-value">Web Form</span>
-              </div>
-              <div class="record-item">
-                <span class="record-label">Consent Text:</span>
-                <span class="record-value">I agree to receive marketing messages from Joe's Barbershop, including a one-time review request after my visit. Message and data rates may apply. Reply STOP to opt out.</span>
-              </div>
+              <input
+                type="text"
+                id="customerName"
+                name="customerName"
+                placeholder="John Smith"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition-all"
+                required
+              >
+              <div class="error-message" id="nameError">Please enter your name</div>
             </div>
 
-            <!-- SMS Mockup -->
-            <div class="sms-mockup">
-              <h4>📱 Sample SMS They'll Receive</h4>
-              <div class="sms-label">Joe's Barbershop (Incoming Message)</div>
-              <div class="sms-bubble">
-                Hi <span id="smsName">John</span>! Thanks for visiting Joe's Barbershop. We'd love your feedback: <a href="https://g.page/r/CVASdxR-ATBCEAE/review" target="_blank">https://g.page/r/CVASdxR-ATBCEAE/review</a> Msg&data rates may apply. Reply STOP to opt out.
+            <!-- Phone Number -->
+            <div class="mb-5">
+              <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                Phone Number <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="(555) 123-4567"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition-all"
+                required
+              >
+              <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+            </div>
+
+            <!-- Email (Optional) -->
+            <div class="mb-5">
+              <label for="email" class="block text-sm font-medium text-gray-500 mb-2">
+                Email <span class="text-gray-400 text-xs">(optional)</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="john@example.com"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition-all"
+              >
+              <div class="error-message" id="emailError">Please enter a valid email address</div>
+            </div>
+
+            <!-- Service Selection -->
+            <div class="mb-6">
+              <label for="service" class="block text-sm font-semibold text-gray-700 mb-2">
+                Select a Service <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="service"
+                name="service"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold transition-all bg-white"
+                required
+              >
+                <option value="">Choose a service...</option>
+                <option value="haircut">Classic Haircut</option>
+                <option value="fade">Fade</option>
+                <option value="beard">Beard Trim</option>
+                <option value="lineup">Line Up</option>
+                <option value="full-service">Full Service (Haircut + Beard)</option>
+                <option value="kids">Kids Haircut</option>
+              </select>
+              <div class="error-message" id="serviceError">Please select a service</div>
+            </div>
+
+            <!-- Consent Section -->
+            <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 mb-6">
+              <h3 class="font-bold text-gray-800 mb-4 text-sm">Feedback Consent</h3>
+              <div class="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="smsConsent"
+                  name="smsConsent"
+                  class="consent-checkbox mt-1 flex-shrink-0"
+                  required
+                >
+                <label for="smsConsent" class="text-sm text-gray-600 leading-relaxed cursor-pointer">
+                  I agree to receive marketing messages from Joe's Barbershop, including a one-time review request after my visit. Message and data rates may apply. Reply STOP to opt out.
+                  <a href="/terms" target="_blank" class="text-[#A1438E] hover:underline font-medium">Terms</a> |
+                  <a href="/privacy" target="_blank" class="text-[#A1438E] hover:underline font-medium">Privacy</a>
+                </label>
               </div>
+              <div class="error-message mt-2" id="consentError">You must agree to receive an SMS review request</div>
             </div>
 
-            <div class="form-actions">
-              <button type="button" class="btn-reset" onclick="resetDemo()" style="flex: 1;">Start Over</button>
+            <!-- Form Actions -->
+            <div class="flex gap-3">
+              <button
+                type="submit"
+                class="flex-1 py-4 px-6 bg-brand-gold text-brand-dark font-bold rounded-xl hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Book Appointment & Opt In
+              </button>
+              <button
+                type="reset"
+                class="py-4 px-6 border-2 border-gray-300 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+
+          <!-- Confirmation Screen (Hidden by default) -->
+          <div id="confirmationScreen" class="hidden">
+            <div class="text-center">
+              <div class="text-6xl mb-4">&#9989;</div>
+              <h2 class="text-2xl font-bold text-green-600 mb-2">Appointment Confirmed!</h2>
+              <p class="text-gray-500 mb-8">Your appointment has been booked and your SMS consent has been recorded.</p>
+
+              <!-- Consent Record -->
+              <div class="bg-white border-2 border-green-200 rounded-2xl p-5 mb-6 text-left">
+                <h4 class="font-bold text-gray-800 mb-4 pb-3 border-b border-gray-100 flex items-center gap-2">
+                  <span>&#128203;</span> Consent Record
+                </h4>
+                <div class="space-y-3 text-sm">
+                  <div class="flex gap-4">
+                    <span class="font-semibold text-gray-500 min-w-[100px]">Timestamp:</span>
+                    <span class="text-gray-800" id="recordTimestamp">-</span>
+                  </div>
+                  <div class="flex gap-4">
+                    <span class="font-semibold text-gray-500 min-w-[100px]">Phone:</span>
+                    <span class="text-gray-800" id="recordPhone">-</span>
+                  </div>
+                  <div class="flex gap-4">
+                    <span class="font-semibold text-gray-500 min-w-[100px]">Method:</span>
+                    <span class="text-gray-800">Web Form</span>
+                  </div>
+                  <div class="flex gap-4">
+                    <span class="font-semibold text-gray-500 min-w-[100px]">Consent Text:</span>
+                    <span class="text-gray-800 text-xs leading-relaxed">I agree to receive marketing messages from Joe's Barbershop, including a one-time review request after my visit. Message and data rates may apply. Reply STOP to opt out.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SMS Mockup -->
+              <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6 text-left">
+                <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <span>&#128241;</span> Sample SMS They'll Receive
+                </h4>
+                <p class="text-xs text-gray-400 mb-2">Joe's Barbershop (Incoming Message)</p>
+                <div class="sms-bubble bg-gray-200 rounded-2xl px-4 py-3 inline-block max-w-[90%] text-sm text-gray-800 leading-relaxed">
+                  Hi <span id="smsName">John</span>! Thanks for visiting Joe's Barbershop. We'd love your feedback: <a href="https://g.page/r/CVASdxR-ATBCEAE/review" target="_blank" class="text-[#A1438E] underline">https://g.page/r/...</a> Msg&data rates may apply. Reply STOP to opt out.
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onclick="resetDemo()"
+                class="w-full py-4 px-6 border-2 border-gray-300 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Start Over
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Compliance Section -->
-      <div class="compliance-section">
-        <h2>📚 For Compliance Reviewers</h2>
+        <!-- Compliance Section -->
+        <div class="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+          <h2 class="text-xl font-bold text-brand-dark mb-6 pb-4 border-b border-gray-100 flex items-center gap-2">
+            <span>&#128218;</span> For Compliance Reviewers
+          </h2>
 
-        <div class="compliance-subsection">
-          <h3>What This Demonstrates</h3>
-          <p>This page shows how FilterFive-powered businesses collect SMS consent from customers before sending review requests. The form captures explicit consent with clear messaging about the review request, message rates, and opt-out instructions.</p>
-        </div>
+          <div class="space-y-6">
+            <div>
+              <h3 class="font-bold text-brand-gold mb-2">What This Demonstrates</h3>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                This page shows how MoreStars-powered businesses collect SMS consent from customers before sending review requests. The form captures explicit consent with clear messaging about the review request, message rates, and opt-out instructions.
+              </p>
+            </div>
 
-        <div class="compliance-subsection">
-          <h3>Consent Requirements</h3>
-          <ul class="compliance-list">
-            <li>Businesses collect explicit written consent (checkbox) before messaging</li>
-            <li>Consent language includes business identification and clear opt-out instructions</li>
-            <li>Message frequency is limited to one (1) per customer per 30 days</li>
-            <li>All messages include "Reply STOP to opt out" compliance language</li>
-            <li>Businesses maintain records of consent (timestamp, method, consent text)</li>
-            <li>Links to Terms of Service and Privacy Policy are provided during consent</li>
-          </ul>
-        </div>
+            <div>
+              <h3 class="font-bold text-brand-gold mb-3">Consent Requirements</h3>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Businesses collect explicit written consent (checkbox) before messaging</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Consent language includes business identification and clear opt-out instructions</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Message frequency is limited to one (1) per customer per 30 days</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>All messages include "Reply STOP to opt out" compliance language</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Businesses maintain records of consent (timestamp, method, consent text)</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Links to Terms of Service and Privacy Policy are provided during consent</span>
+                </li>
+              </ul>
+            </div>
 
-        <div class="compliance-subsection">
-          <h3>FilterFive Terms of Service</h3>
-          <p>All FilterFive subscribing businesses are contractually required to:</p>
-          <ul class="compliance-list">
-            <li>Obtain prior express written consent before submitting phone numbers</li>
-            <li>Use FilterFive-approved consent language (or substantially similar)</li>
-            <li>Maintain consent records for minimum 4 years</li>
-            <li>Comply with TCPA, CTIA guidelines, and carrier requirements</li>
-            <li>Respect customer opt-out requests immediately</li>
-          </ul>
-        </div>
+            <div>
+              <h3 class="font-bold text-brand-gold mb-3">MoreStars Terms of Service</h3>
+              <p class="text-gray-600 text-sm mb-3">All MoreStars subscribing businesses are contractually required to:</p>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Obtain prior express written consent before submitting phone numbers</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Use MoreStars-approved consent language (or substantially similar)</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Maintain consent records for minimum 4 years</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Comply with TCPA, CTIA guidelines, and carrier requirements</span>
+                </li>
+                <li class="flex items-start gap-2 text-sm text-gray-600">
+                  <span class="text-green-500 font-bold">&#10003;</span>
+                  <span>Respect customer opt-out requests immediately</span>
+                </li>
+              </ul>
+            </div>
 
-        <div class="compliance-subsection">
-          <p style="font-size: 15px; font-weight: 500; margin-top: var(--spacing-md);">For full compliance documentation, carrier requirements, and regulatory information:</p>
-          <div class="compliance-cta">
-            <a href="/sms-compliance" target="_blank">View Full Compliance Documentation →</a>
+            <div class="pt-4 border-t border-gray-100">
+              <p class="text-gray-600 text-sm font-medium mb-4">For full compliance documentation, carrier requirements, and regulatory information:</p>
+              <a
+                href="/sms-compliance"
+                target="_blank"
+                class="inline-block px-6 py-3 bg-brand-dark text-white font-semibold rounded-xl hover:bg-gray-800 transition-all"
+              >
+                View Full Compliance Documentation &rarr;
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-
-        <div class="footer-col">
-          <h4>Product</h4>
-          <ul>
-            <li><a href="/#how-it-works">How It Works</a></li>
-            <li><a href="/#features">Features</a></li>
-            <li><a href="/#pricing">Pricing</a></li>
-            <li><a href="/#faq">FAQ</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/partners">Agency Partners</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/terms">Terms of Service</a></li>
-            <li><a href="/sms-compliance">SMS Compliance</a></li>
-            <li><a href="/demo">SMS Consent Demo</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="mailto:support@filterfive.io">support@filterfive.io</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-          </ul>
-        </div>
 
       </div>
+    </section>
+  </main>
 
-      <div class="footer-bottom">
-        <p>&copy; 2025 FilterFive. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+  <%- include('partials/marketing-footer') %>
 
-  <!-- Scripts -->
-  <script>
+  <!-- Mega Menu & Form JavaScript -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        if (!mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('mobile-menu-enter');
+        }
+      });
+    }
+
+    // Desktop Mega Menu
+    const megaMenuTrigger = document.getElementById('industriesTrigger');
+    const megaMenu = document.getElementById('industriesMegaMenu');
+
+    if (megaMenuTrigger && megaMenu) {
+      let menuTimeout;
+
+      megaMenuTrigger.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+        megaMenu.classList.add('open');
+        megaMenuTrigger.classList.add('active');
+      });
+
+      megaMenuTrigger.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+
+      megaMenu.addEventListener('mouseenter', () => {
+        clearTimeout(menuTimeout);
+      });
+
+      megaMenu.addEventListener('mouseleave', () => {
+        menuTimeout = setTimeout(() => {
+          megaMenu.classList.remove('open');
+          megaMenuTrigger.classList.remove('active');
+        }, 150);
+      });
+    }
+
+    // Mobile Industries Accordion
+    const mobileIndustriesTrigger = document.getElementById('mobileIndustriesTrigger');
+    const mobileIndustriesAccordion = document.getElementById('mobileIndustriesAccordion');
+    const mobileIndustriesArrow = document.getElementById('mobileIndustriesArrow');
+
+    if (mobileIndustriesTrigger && mobileIndustriesAccordion) {
+      mobileIndustriesTrigger.addEventListener('click', () => {
+        mobileIndustriesAccordion.classList.toggle('open');
+        mobileIndustriesArrow.style.transform = mobileIndustriesAccordion.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+    }
+
     // Form Submission Handler
     const demoForm = document.getElementById('demoForm');
     const confirmationScreen = document.getElementById('confirmationScreen');
@@ -697,7 +446,6 @@
       // Get form data
       const name = document.getElementById('customerName').value;
       const phone = document.getElementById('phoneNumber').value;
-      const service = document.getElementById('service').value;
 
       // Update confirmation screen
       const timestamp = new Date().toLocaleString('en-US', {
@@ -714,8 +462,8 @@
       document.getElementById('smsName').textContent = name.split(' ')[0];
 
       // Show confirmation screen
-      demoForm.style.display = 'none';
-      confirmationScreen.style.display = 'block';
+      demoForm.classList.add('hidden');
+      confirmationScreen.classList.remove('hidden');
 
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -770,40 +518,38 @@
     function showError(errorId, inputElement) {
       const errorElement = document.getElementById(errorId);
       errorElement.classList.add('show');
-      inputElement.classList.add('error');
+      inputElement.classList.add('input-error');
     }
 
     function clearErrors() {
       document.querySelectorAll('.error-message').forEach(el => {
         el.classList.remove('show');
       });
-      document.querySelectorAll('input.error, select.error').forEach(el => {
-        el.classList.remove('error');
+      document.querySelectorAll('.input-error').forEach(el => {
+        el.classList.remove('input-error');
       });
     }
 
     function resetDemo() {
       demoForm.reset();
-      demoForm.style.display = 'block';
-      confirmationScreen.style.display = 'none';
+      demoForm.classList.remove('hidden');
+      confirmationScreen.classList.add('hidden');
       clearErrors();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Mobile hamburger menu (from homepage)
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    hamburger.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
-    });
-
-    document.querySelectorAll('.nav-links a').forEach((link) => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-      });
+    // GSAP Animation
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof gsap !== 'undefined') {
+        gsap.from('.demo-form-card', {
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          delay: 0.2
+        });
+      }
     });
   </script>
 
-</body>
-</html>
+<%- include('partials/scripts') %>

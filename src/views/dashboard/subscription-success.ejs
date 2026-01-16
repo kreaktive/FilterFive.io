@@ -4,7 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <!-- Google Tag Manager -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W6336VRQ');</script>
+  <!-- End Google Tag Manager -->
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --brand-dark: #500B42;
+      --brand-gold: #FFBA49;
+      --brand-accent: #A1438E;
+      --brand-positive: #20A39E;
+      --brand-negative: #EF5B5B;
+      --bg-light: #F9F7FA;
+      --text-primary: #500B42;
+      --text-secondary: #64748b;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,9 +34,9 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -61,13 +83,13 @@
 
     h1 {
       font-size: 32px;
-      color: #2d3748;
+      color: var(--brand-dark);
       margin-bottom: 15px;
     }
 
     .subtitle {
       font-size: 18px;
-      color: #718096;
+      color: var(--text-secondary);
       margin-bottom: 30px;
       line-height: 1.6;
     }
@@ -110,8 +132,8 @@
     .btn-dashboard {
       display: inline-block;
       padding: 15px 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       text-decoration: none;
       border-radius: 8px;
       font-size: 16px;
@@ -122,7 +144,7 @@
 
     .btn-dashboard:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 5px 15px rgba(255, 186, 73, 0.4);
     }
 
     .features-list {
@@ -164,12 +186,35 @@
   </style>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W6336VRQ"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <!-- Track purchase conversion -->
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'purchase',
+    ecommerce: {
+      transaction_id: '<%= session ? session.id : "" %>',
+      value: <%= session ? (session.amount_total / 100).toFixed(2) : 0 %>,
+      currency: 'USD',
+      items: [{
+        item_name: 'MoreStars Subscription',
+        price: <%= session ? (session.amount_total / 100).toFixed(2) : 0 %>,
+        quantity: 1
+      }]
+    }
+  });
+  </script>
+
   <div class="success-container">
     <div class="success-icon">✓</div>
 
     <h1>Subscription Activated!</h1>
     <p class="subtitle">
-      Thank you, <%= businessName %>! Your FilterFive subscription is now active.
+      Thank you, <%= businessName %>! Your MoreStars subscription is now active.
     </p>
 
     <div class="info-box">
@@ -210,8 +255,8 @@
       Go to Dashboard
     </a>
 
-    <p style="margin-top: 30px; color: #a0aec0; font-size: 13px;">
-      Need help? Contact us at <a href="mailto:info@filterfive.io" style="color: #667eea;">info@filterfive.io</a>
+    <p style="margin-top: 30px; color: var(--text-secondary); font-size: 13px;">
+      Need help? Contact us at <a href="mailto:support@morestars.io" style="color: var(--brand-gold);">support@morestars.io</a>
     </p>
   </div>
 </body>

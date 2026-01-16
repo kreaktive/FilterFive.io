@@ -1,0 +1,93 @@
+<%#
+  Form Input Component
+
+  Usage:
+  <%- include('partials/form-input', { name: 'email', label: 'Email', type: 'email', required: true }) %>
+  <%- include('partials/form-input', { name: 'password', label: 'Password', type: 'password', help: 'At least 8 characters' }) %>
+
+  @param {string} name - Input name (required)
+  @param {string} label - Label text (required)
+  @param {string} type - 'text' | 'email' | 'password' | 'tel' | 'url' | 'number' (default: 'text')
+  @param {string} placeholder - Placeholder text
+  @param {boolean} required - Required field
+  @param {string} error - Error message to display
+  @param {string} help - Help text below input
+  @param {string} value - Current value
+  @param {string} autocomplete - Autocomplete attribute
+  @param {string} id - Custom ID (defaults to name)
+  @param {string} className - Additional classes for the input
+  @param {string} minlength - Minimum length
+  @param {string} maxlength - Maximum length
+  @param {string} pattern - Validation pattern
+  @param {boolean} disabled - Disabled state
+  @param {boolean} showPasswordStrength - Show password strength indicator (for password fields)
+%>
+<%
+  // Defaults
+  const _type = typeof type !== 'undefined' ? type : 'text';
+  const _placeholder = typeof placeholder !== 'undefined' ? placeholder : '';
+  const _required = typeof required !== 'undefined' ? required : false;
+  const _error = typeof error !== 'undefined' ? error : '';
+  const _help = typeof help !== 'undefined' ? help : '';
+  const _value = typeof value !== 'undefined' ? value : '';
+  const _autocomplete = typeof autocomplete !== 'undefined' ? autocomplete : '';
+  const _id = typeof id !== 'undefined' ? id : name;
+  const _className = typeof className !== 'undefined' ? className : '';
+  const _minlength = typeof minlength !== 'undefined' ? minlength : '';
+  const _maxlength = typeof maxlength !== 'undefined' ? maxlength : '';
+  const _pattern = typeof pattern !== 'undefined' ? pattern : '';
+  const _disabled = typeof disabled !== 'undefined' ? disabled : false;
+  const _showPasswordStrength = typeof showPasswordStrength !== 'undefined' ? showPasswordStrength : false;
+
+  // Input classes
+  const inputClasses = [
+    'w-full px-4 py-3.5 border-2 rounded-xl text-base font-sans transition-all duration-200',
+    'bg-neutral-gray50 border-neutral-gray200',
+    'focus:outline-none focus:border-brand-gold focus:ring-4 focus:ring-brand-gold/10 focus:bg-white',
+    _error ? 'border-status-error focus:border-status-error focus:ring-status-error/10' : '',
+    _disabled ? 'opacity-60 cursor-not-allowed bg-neutral-gray100' : '',
+    _className
+  ].filter(Boolean).join(' ');
+%>
+<div class="mb-5">
+  <label for="<%= _id %>" class="block text-sm font-semibold text-brand-dark mb-2">
+    <%= label %>
+    <% if (_required) { %><span class="text-status-error">*</span><% } %>
+  </label>
+
+  <input
+    type="<%= _type %>"
+    id="<%= _id %>"
+    name="<%= name %>"
+    <% if (_placeholder) { %>placeholder="<%= _placeholder %>"<% } %>
+    <% if (_required) { %>required<% } %>
+    <% if (_value) { %>value="<%= _value %>"<% } %>
+    <% if (_autocomplete) { %>autocomplete="<%= _autocomplete %>"<% } %>
+    <% if (_minlength) { %>minlength="<%= _minlength %>"<% } %>
+    <% if (_maxlength) { %>maxlength="<%= _maxlength %>"<% } %>
+    <% if (_pattern) { %>pattern="<%= _pattern %>"<% } %>
+    <% if (_disabled) { %>disabled<% } %>
+    <% if (_error) { %>aria-invalid="true" aria-describedby="<%= _id %>-error"<% } %>
+    <% if (_help && !_error) { %>aria-describedby="<%= _id %>-help"<% } %>
+    class="<%= inputClasses %>"
+  />
+
+  <% if (_showPasswordStrength && _type === 'password') { %>
+  <div class="h-1 bg-neutral-gray200 rounded mt-2 overflow-hidden" id="<%= _id %>-strength">
+    <div class="h-full w-0 transition-all duration-300" id="<%= _id %>-strength-bar"></div>
+  </div>
+  <p class="text-xs text-neutral-gray500 mt-1" id="<%= _id %>-strength-text"></p>
+  <% } %>
+
+  <% if (_error) { %>
+  <p class="text-sm text-status-error mt-1.5" id="<%= _id %>-error" role="alert">
+    <%= _error %>
+  </p>
+  <% } %>
+
+  <% if (_help && !_error) { %>
+  <p class="text-xs text-neutral-gray500 mt-1.5" id="<%= _id %>-help">
+    <%= _help %>
+  </p>
+  <% } %>
+</div>

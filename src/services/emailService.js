@@ -356,11 +356,43 @@ const sendTrialExpiredEmail = async (email, businessName) => {
   }
 };
 
+
+/**
+ * Send Business Event Alert (for admin notifications)
+ */
+const sendBusinessEventAlert = async (eventType, eventData = {}) => {
+  try {
+    const alertEmail = process.env.BUSINESS_ALERTS_EMAIL || "kristian@kreaktive.design";
+    const templates = require("./emailTemplates");
+    const eventTitles = {
+      new_signup: "New Account Signup",
+      email_verified: "Email Verified",
+      subscription_created: "New Subscription",
+      subscription_cancelled: "Subscription Cancelled",
+      trial_converted: "Trial Converted"
+    };
+    const subject = `[MoreStars] ${eventTitles[eventType] || "Business Event"}: ${eventData.businessName || eventData.email || "Unknown"}`;
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: alertEmail,
+      subject,
+      html: templates.businessEventAlert(eventType, eventData)
+    });
+    if (result.error) throw new Error(result.error.message);
+    console.log("Business event alert sent:", eventType, eventData.businessName || eventData.email);
+    return { success: true, emailId: result?.data?.id };
+  } catch (error) {
+    console.error("Business event alert failed:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendNegativeFeedbackAlert,
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendTrialEndingEmail,
-  sendTrialExpiredEmail
+  sendTrialExpiredEmail,
+  sendBusinessEventAlert
 };

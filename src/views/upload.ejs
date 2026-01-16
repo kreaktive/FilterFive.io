@@ -1,201 +1,298 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> | FilterFive</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<%- include('partials/dashboard-head', { title: title }) %>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    .page-title {
+      margin-bottom: var(--space-6);
     }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
-      min-height: 100vh;
+    .page-title h2 {
+      font-size: var(--text-3xl);
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
     }
 
-    .upload-container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
+    .page-title p {
+      color: var(--text-secondary);
+      font-size: var(--text-base);
     }
+
+    .upload-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      margin-bottom: var(--space-6);
+    }
+
     .upload-box {
-      border: 2px dashed #7C3AED;
-      border-radius: 8px;
-      padding: 40px;
+      border: 2px dashed var(--brand-gold);
+      border-radius: var(--radius-lg);
+      padding: 48px;
       text-align: center;
-      background: #F9FAFB;
-      margin-bottom: 30px;
+      background: rgba(255, 186, 73, 0.05);
+      margin-bottom: var(--space-6);
+      transition: all var(--transition-base);
+      position: relative;
+      cursor: pointer;
     }
+
+    .upload-box:hover {
+      background: rgba(255, 186, 73, 0.1);
+      border-color: var(--brand-gold-dark);
+    }
+
     .upload-box.dragover {
-      background: #EDE9FE;
-      border-color: #5B21B6;
+      background: rgba(255, 186, 73, 0.15);
+      border-color: var(--brand-gold-dark);
+      transform: scale(1.01);
     }
+
+    .upload-box svg {
+      stroke: var(--brand-gold);
+      margin-bottom: var(--space-4);
+    }
+
+    .upload-box h3 {
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .upload-box p {
+      color: var(--text-secondary);
+    }
+
     .file-input {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
+
     .upload-btn {
-      background: #7C3AED;
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       padding: 12px 24px;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       cursor: pointer;
-      font-size: 16px;
-      margin-top: 20px;
-    }
-    .upload-btn:hover {
-      background: #6D28D9;
-    }
-    .upload-btn:disabled {
-      background: #9CA3AF;
-      cursor: not-allowed;
-    }
-    .instructions {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .instructions h3 {
-      margin-top: 0;
-      color: #111827;
-    }
-    .instructions ul {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-    .instructions li {
-      margin: 8px 0;
-      color: #4B5563;
-    }
-    .error-message {
-      background: #FEE2E2;
-      border: 1px solid #FCA5A5;
-      color: #991B1B;
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-    }
-    .file-name {
-      margin-top: 15px;
+      font-size: 15px;
       font-weight: 600;
-      color: #374151;
+      margin-top: var(--space-4);
+      transition: all var(--transition-base);
     }
+
+    .upload-btn:hover {
+      background: var(--brand-gold-dark);
+      transform: translateY(-1px);
+    }
+
+    .upload-btn:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .instructions {
+      background: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+
+    .instructions h3 {
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      margin-bottom: var(--space-3);
+    }
+
+    .instructions ul {
+      margin: var(--space-3) 0;
+      padding-left: var(--space-5);
+    }
+
+    .instructions li {
+      margin: var(--space-2) 0;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .instructions li strong {
+      color: var(--text-primary);
+    }
+
+    .sample-link {
+      color: var(--brand-gold);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+
+    .sample-link:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+      color: #991b1b;
+      font-size: 14px;
+    }
+
+    .file-name {
+      margin-top: var(--space-4);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
     .submit-btn {
-      background: #10B981;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
       padding: 14px 32px;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: all var(--transition-base);
     }
+
     .submit-btn:hover {
-      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
+
     .submit-btn:disabled {
-      background: #9CA3AF;
+      background: var(--text-muted);
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
+
     .loading {
       display: none;
-      margin-top: 20px;
+      margin-top: var(--space-6);
       text-align: center;
     }
+
     .loading.active {
       display: block;
     }
+
     .spinner {
-      border: 4px solid #E5E7EB;
-      border-top: 4px solid #7C3AED;
+      border: 4px solid var(--border-light);
+      border-top: 4px solid var(--brand-gold);
       border-radius: 50%;
       width: 40px;
       height: 40px;
       animation: spin 1s linear infinite;
       margin: 0 auto;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .sample-link {
-      color: #7C3AED;
-      text-decoration: underline;
-      cursor: pointer;
+
+    .history-link {
+      color: var(--brand-gold);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
     }
+
+    .history-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Blocked Overlay */
     .blocked-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
+      backdrop-filter: blur(4px);
     }
+
     .blocked-message {
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      max-width: 500px;
+      background: var(--bg-white);
+      padding: 48px;
+      border-radius: var(--radius-xl);
+      max-width: 480px;
       text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
+
     .blocked-message .icon {
       font-size: 64px;
-      margin-bottom: 20px;
+      margin-bottom: var(--space-5);
     }
+
     .blocked-message h2 {
-      color: #111827;
-      margin-bottom: 15px;
+      color: var(--text-primary);
+      margin-bottom: var(--space-4);
+      font-size: var(--text-2xl);
     }
+
     .blocked-message p {
-      color: #6B7280;
-      margin-bottom: 25px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
       line-height: 1.6;
     }
+
     .blocked-message a {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       padding: 12px 24px;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       text-decoration: none;
       font-weight: 600;
       display: inline-block;
-      transition: transform 0.2s;
+      transition: all var(--transition-base);
     }
+
     .blocked-message a:hover {
+      background: var(--brand-gold-dark);
       transform: translateY(-2px);
+    }
+
+    .blurred {
+      filter: blur(4px);
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <%- include('partials/header', { user }) %>
+  <%- include('partials/dashboard-header', { activePage: 'upload' }) %>
 
-  <% if (typeof blocked !== 'undefined' && blocked) { %>
-    <div class="blocked-overlay">
-      <div class="blocked-message">
-        <div class="icon">⚠️</div>
-        <h2>Setup Required</h2>
-        <p><%= message || 'You must configure your review platform URL before uploading customers.' %></p>
-        <a href="/dashboard/settings">Configure Review URL</a>
-      </div>
+  <main id="main-content" class="container">
+    <div class="page-title">
+      <h2>Upload Customers</h2>
+      <p>Upload a CSV file to send review requests to multiple customers at once</p>
     </div>
-  <% } %>
-
-  <div class="upload-container" <%= (typeof blocked !== 'undefined' && blocked) ? 'style="filter: blur(4px); pointer-events: none;"' : '' %>>
-    <h1><%= title %></h1>
-    <p style="color: #6B7280; margin-bottom: 30px;">Upload a CSV file to send review requests to multiple customers at once.</p>
 
     <% if (typeof error !== 'undefined' && error) { %>
       <div class="error-message">
@@ -203,58 +300,79 @@
       </div>
     <% } %>
 
-    <div class="instructions">
-      <h3>📋 CSV Format Instructions</h3>
-      <ul>
-        <li><strong>Required columns:</strong> name, phone</li>
-        <li><strong>Optional column:</strong> email</li>
-        <li><strong>Phone format:</strong> Must start with + (E.164 format), e.g., +1234567890</li>
-        <li><strong>Maximum:</strong> 500 rows per upload</li>
-        <li><strong>File size:</strong> Maximum 5MB</li>
-        <li><strong>Duplicates:</strong> Customers contacted in the last 30 days will be skipped</li>
-      </ul>
-      <p><a href="/sample-customers.csv" class="sample-link" download>📥 Download Sample CSV Template</a></p>
+    <div class="upload-card">
+      <div class="instructions">
+        <h3>CSV Format Instructions</h3>
+        <ul>
+          <li><strong>Required columns:</strong> name, phone</li>
+          <li><strong>Optional column:</strong> email</li>
+          <li><strong>Phone format:</strong> US numbers (10 digits) - we'll format them automatically</li>
+          <li><strong>Maximum:</strong> 500 rows per upload</li>
+          <li><strong>File size:</strong> Maximum 5MB</li>
+          <li><strong>Duplicates:</strong> Customers contacted in the last 30 days will be skipped</li>
+        </ul>
+        <a href="/sample-customers.csv" class="sample-link" download>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Sample CSV Template
+        </a>
+      </div>
+
+      <form id="uploadForm" action="/dashboard/upload" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+        <div class="upload-box" id="uploadBox">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <h3>Drag & Drop CSV File Here</h3>
+          <p>or</p>
+          <input type="file" name="csvFile" id="csvFile" class="file-input" accept=".csv" required>
+          <label for="csvFile" class="upload-btn" id="chooseFileBtn" style="cursor: pointer;">
+            Select Recipients File
+          </label>
+          <div class="file-name" id="fileName"></div>
+        </div>
+
+        <div style="text-align: center;">
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload and Preview
+          </button>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p style="margin-top: var(--space-4); color: var(--text-secondary);">
+            <strong>Processing your upload...</strong><br>
+            This may take a moment for large files.
+          </p>
+        </div>
+      </form>
     </div>
 
-    <form id="uploadForm" action="/dashboard/upload" method="POST" enctype="multipart/form-data">
-      <div class="upload-box" id="uploadBox">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="17 8 12 3 7 8"></polyline>
-          <line x1="12" y1="3" x2="12" y2="15"></line>
+    <div style="text-align: center;">
+      <a href="/dashboard/uploads" class="history-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <h3 style="margin: 15px 0;">Drag & Drop CSV File Here</h3>
-        <p style="color: #6B7280;">or</p>
-        <input type="file" name="csvFile" id="csvFile" class="file-input" accept=".csv" required>
-        <button type="button" class="upload-btn" onclick="document.getElementById('csvFile').click()">
-          Choose File
-        </button>
-        <div class="file-name" id="fileName"></div>
-      </div>
-
-      <div style="text-align: center;">
-        <button type="submit" class="submit-btn" id="submitBtn" disabled>
-          📤 Upload and Send SMS
-        </button>
-      </div>
-
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <p style="margin-top: 15px; color: #6B7280;">
-          <strong>Processing your upload...</strong><br>
-          This may take several minutes for large files.
-        </p>
-      </div>
-    </form>
-
-    <div style="margin-top: 30px; text-align: center;">
-      <a href="/dashboard/uploads" style="color: #7C3AED; text-decoration: underline;">
-        📊 View Upload History
+        View Upload History
       </a>
     </div>
-  </div>
+  </main>
 
-  <script>
+  <%- include('partials/dashboard-footer') %>
+
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
     const uploadBox = document.getElementById('uploadBox');
     const fileInput = document.getElementById('csvFile');
     const fileName = document.getElementById('fileName');
@@ -262,11 +380,19 @@
     const uploadForm = document.getElementById('uploadForm');
     const loading = document.getElementById('loading');
 
+    // Make entire upload box clickable
+    uploadBox.addEventListener('click', function(e) {
+      // Don't trigger if clicking on the label (it handles itself)
+      if (e.target.tagName !== 'LABEL' && !e.target.closest('label')) {
+        fileInput.click();
+      }
+    });
+
     // Handle file selection
     fileInput.addEventListener('change', function(e) {
       if (e.target.files.length > 0) {
         const file = e.target.files[0];
-        fileName.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileName.textContent = 'Selected: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
         submitBtn.disabled = false;
       }
     });
@@ -290,7 +416,7 @@
       if (files.length > 0) {
         fileInput.files = files;
         const file = files[0];
-        fileName.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileName.textContent = 'Selected: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
         submitBtn.disabled = false;
       }
     });

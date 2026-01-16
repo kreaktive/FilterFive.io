@@ -1,0 +1,129 @@
+<!-- Skip to main content link for keyboard users -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:bg-[#FFBA49] focus:text-[#500B42] focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:outline-none">
+  Skip to main content
+</a>
+
+<!-- Pill Navbar -->
+<div class="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 sm:px-6 pointer-events-none">
+  <nav class="w-full max-w-7xl bg-white/95 backdrop-blur-lg border border-gray-200/60 rounded-full shadow-lg pointer-events-auto" role="navigation" aria-label="Main navigation">
+    <div class="flex items-center justify-between h-16 px-4 md:px-8">
+
+      <!-- Logo (Left) -->
+      <a href="/" class="flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#FFBA49] focus:ring-offset-2 rounded-lg" aria-label="MoreStars home">
+        <img src="/images/Logo MoreStars.io.svg" alt="MoreStars" class="h-6 w-auto">
+      </a>
+
+      <!-- Navigation (Center) - Desktop -->
+      <div class="hidden md:flex items-center justify-center space-x-8 absolute left-1/2 transform -translate-x-1/2">
+        <a href="/how-it-works" class="text-sm font-medium <% if (typeof activePage !== 'undefined' && activePage === 'how-it-works') { %>text-[#FFBA49]<% } else { %>text-gray-700 hover:text-gray-900<% } %> transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFBA49] focus:ring-offset-2 rounded-lg px-2 py-1"<% if (typeof activePage !== 'undefined' && activePage === 'how-it-works') { %> aria-current="page"<% } %>>How it Works</a>
+        <a href="/pricing" class="text-sm font-medium <% if (typeof activePage !== 'undefined' && activePage === 'pricing') { %>text-[#FFBA49]<% } else { %>text-gray-700 hover:text-gray-900<% } %> transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFBA49] focus:ring-offset-2 rounded-lg px-2 py-1"<% if (typeof activePage !== 'undefined' && activePage === 'pricing') { %> aria-current="page"<% } %>>Pricing</a>
+        <a href="/faq" class="text-sm font-medium <% if (typeof activePage !== 'undefined' && activePage === 'faq') { %>text-[#FFBA49]<% } else { %>text-gray-700 hover:text-gray-900<% } %> transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFBA49] focus:ring-offset-2 rounded-lg px-2 py-1"<% if (typeof activePage !== 'undefined' && activePage === 'faq') { %> aria-current="page"<% } %>>FAQ</a>
+      </div>
+
+      <!-- CTA + Mobile Menu (Right) -->
+      <div class="flex items-center gap-3">
+        <a href="/login" class="hidden md:block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFBA49] focus:ring-offset-2 rounded-lg px-2 py-1">Login</a>
+        <a href="/signup" class="hidden md:inline-flex px-8 py-3 bg-[#FFBA49] text-[#500B42] text-base font-bold rounded-full hover:bg-[#f0ad3d] transition-all hover:shadow-lg shadow-md focus:outline-none focus:ring-2 focus:ring-[#500B42] focus:ring-offset-2">
+          Start Free Trial
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button
+          id="mobileMenuBtn"
+          class="md:hidden p-2 text-[#500A42] hover:text-[#500A42]/80 focus:outline-none focus:ring-2 focus:ring-[#FFBA49] rounded-lg"
+          aria-expanded="false"
+          aria-controls="mobileMenu"
+          aria-label="Toggle navigation menu"
+        >
+          <svg id="menuIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden absolute top-full left-0 right-0 mt-2 mx-4 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[80vh] overflow-y-auto" role="menu" aria-labelledby="mobileMenuBtn">
+      <div class="p-4 space-y-1">
+        <a href="/how-it-works" class="block px-4 py-3 <% if (typeof activePage !== 'undefined' && activePage === 'how-it-works') { %>text-[#FFBA49] bg-[#FFBA49]/10<% } else { %>text-gray-700 hover:bg-gray-50<% } %> rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#FFBA49]" role="menuitem"<% if (typeof activePage !== 'undefined' && activePage === 'how-it-works') { %> aria-current="page"<% } %>>How it Works</a>
+        <a href="/pricing" class="block px-4 py-3 <% if (typeof activePage !== 'undefined' && activePage === 'pricing') { %>text-[#FFBA49] bg-[#FFBA49]/10<% } else { %>text-gray-700 hover:bg-gray-50<% } %> rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#FFBA49]" role="menuitem"<% if (typeof activePage !== 'undefined' && activePage === 'pricing') { %> aria-current="page"<% } %>>Pricing</a>
+        <a href="/faq" class="block px-4 py-3 <% if (typeof activePage !== 'undefined' && activePage === 'faq') { %>text-[#FFBA49] bg-[#FFBA49]/10<% } else { %>text-gray-700 hover:bg-gray-50<% } %> rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#FFBA49]" role="menuitem"<% if (typeof activePage !== 'undefined' && activePage === 'faq') { %> aria-current="page"<% } %>>FAQ</a>
+        <a href="/login" class="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#FFBA49]" role="menuitem">Login</a>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<!-- Navbar Spacer -->
+<div class="h-24"></div>
+
+<!-- Screen reader only styles -->
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .sr-only:focus, .focus\:not-sr-only:focus {
+    position: absolute;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+</style>
+
+<!-- Mobile Menu Script with Accessibility -->
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+  (function() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', function() {
+        const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+
+        // Update aria-expanded
+        mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+
+        // Focus first menu item when opening
+        if (!isExpanded) {
+          const firstMenuItem = mobileMenu.querySelector('a, button');
+          if (firstMenuItem) {
+            setTimeout(() => firstMenuItem.focus(), 100);
+          }
+        }
+      });
+
+      // Close menu on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+          menuIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+          mobileMenuBtn.setAttribute('aria-expanded', 'false');
+          mobileMenuBtn.focus();
+        }
+      });
+    }
+
+  })();
+</script>

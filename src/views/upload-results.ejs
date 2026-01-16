@@ -1,121 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> | FilterFive</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<%- include('partials/dashboard-head', { title: title }) %>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
-      min-height: 100vh;
-    }
-
-    .results-container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 20px;
+    .page-header {
+      text-align: center;
+      margin-bottom: var(--space-8);
     }
 
     .success-icon {
       font-size: 48px;
-      margin-bottom: 10px;
+      margin-bottom: var(--space-3);
+    }
+
+    .page-header h1 {
+      font-size: var(--text-3xl);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
     }
 
     .results-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
     }
 
     .result-card {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
       text-align: center;
+      box-shadow: var(--shadow-sm);
     }
 
     .result-card.success {
-      border-left: 4px solid #10B981;
+      border-left: 4px solid var(--success);
     }
 
     .result-card.failed {
-      border-left: 4px solid #EF4444;
+      border-left: 4px solid var(--danger);
     }
 
     .result-card.duplicate {
-      border-left: 4px solid #F59E0B;
+      border-left: 4px solid var(--warning);
+    }
+
+    .result-card.total {
+      border-left: 4px solid var(--brand-gold);
     }
 
     .result-card h2 {
       font-size: 36px;
-      margin: 10px 0;
+      margin: var(--space-2) 0;
       font-weight: 700;
+      color: var(--text-primary);
     }
 
     .result-card p {
-      color: #6B7280;
+      color: var(--text-secondary);
       margin: 0;
-      font-size: 14px;
+      font-size: var(--text-sm);
     }
 
     .processing-time {
       text-align: center;
-      color: #6B7280;
-      margin: 20px 0;
-      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
+      font-size: var(--text-sm);
     }
 
     /* Search/Filter Section */
     .search-section {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin-bottom: var(--space-5);
+      box-shadow: var(--shadow-sm);
     }
 
     .search-input {
       width: 100%;
       padding: 12px 16px;
-      border: 1px solid #D1D5DB;
-      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
       font-size: 16px;
+      transition: all var(--transition-base);
     }
 
     .search-input:focus {
       outline: none;
-      border-color: #7C3AED;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+      border-color: var(--brand-gold);
+      box-shadow: 0 0 0 3px rgba(255, 186, 73, 0.15);
     }
 
     /* Collapsible Sections */
     .collapsible-section {
-      background: white;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      margin: 20px 0;
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-4);
       overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
     .collapsible-header {
-      padding: 20px;
+      padding: var(--space-4);
       cursor: pointer;
-      background: #F9FAFB;
+      background: var(--bg-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
       user-select: none;
+      transition: background var(--transition-base);
     }
 
     .collapsible-header:hover {
@@ -123,19 +123,19 @@
     }
 
     .collapsible-header.success {
-      border-left: 4px solid #10B981;
+      border-left: 4px solid var(--success);
     }
 
     .collapsible-header.failed {
-      border-left: 4px solid #EF4444;
+      border-left: 4px solid var(--danger);
     }
 
     .collapsible-header.duplicate {
-      border-left: 4px solid #F59E0B;
+      border-left: 4px solid var(--warning);
     }
 
     .collapsible-header.invalid {
-      border-left: 4px solid #9CA3AF;
+      border-left: 4px solid var(--text-muted);
     }
 
     .collapsible-content {
@@ -167,25 +167,25 @@
     .data-table td {
       padding: 12px 16px;
       text-align: left;
-      border-bottom: 1px solid #E5E7EB;
+      border-bottom: 1px solid var(--border-light);
     }
 
     .data-table th {
-      background: #F9FAFB;
+      background: var(--bg-light);
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .data-table tr:hover {
-      background: #F9FAFB;
+      background: var(--bg-light);
     }
 
     .data-table td {
-      color: #6B7280;
-      font-size: 14px;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
     }
 
     .data-table tr:last-child td {
@@ -194,26 +194,30 @@
 
     .timestamp {
       font-size: 12px;
-      color: #9CA3AF;
+      color: var(--text-muted);
     }
 
     .link-button {
       display: inline-block;
       padding: 4px 12px;
-      background: #7C3AED;
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
       text-decoration: none;
-      border-radius: 4px;
+      border-radius: var(--radius-sm);
       font-size: 12px;
-      transition: background 0.2s;
+      font-weight: 600;
+      transition: all var(--transition-base);
+      border: none;
+      cursor: pointer;
     }
 
     .link-button:hover {
-      background: #6D28D9;
+      background: var(--brand-gold-dark);
     }
 
     .link-button.secondary {
-      background: #10B981;
+      background: var(--success);
+      color: white;
     }
 
     .link-button.secondary:hover {
@@ -221,7 +225,8 @@
     }
 
     .link-button.danger {
-      background: #EF4444;
+      background: var(--danger);
+      color: white;
     }
 
     .link-button.danger:hover {
@@ -231,59 +236,225 @@
     .twilio-sid {
       font-family: monospace;
       font-size: 11px;
-      color: #9CA3AF;
+      color: var(--text-muted);
     }
 
     .error-text {
-      color: #DC2626;
+      color: var(--danger);
       font-size: 13px;
     }
 
     .no-results {
-      padding: 40px;
+      padding: var(--space-8);
       text-align: center;
-      color: #9CA3AF;
+      color: var(--text-muted);
     }
 
     /* Action Buttons */
     .action-buttons {
-      margin-top: 30px;
+      margin-top: var(--space-8);
       display: flex;
-      gap: 15px;
+      gap: var(--space-4);
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .btn {
       padding: 12px 24px;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       text-decoration: none;
       font-weight: 600;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: all var(--transition-base);
     }
 
     .btn-primary {
-      background: #7C3AED;
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
     }
 
     .btn-primary:hover {
-      background: #6D28D9;
+      background: var(--brand-gold-dark);
+      transform: translateY(-2px);
     }
 
     .btn-secondary {
-      background: white;
-      color: #374151;
-      border: 1px solid #D1D5DB;
+      background: var(--bg-white);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
     }
 
     .btn-secondary:hover {
-      background: #F9FAFB;
+      background: var(--bg-light);
+      border-color: var(--brand-gold);
+    }
+
+    /* Bulk Resend Button */
+    .bulk-resend-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition-base);
+    }
+
+    .bulk-resend-btn:hover {
+      background: #DC2626;
+      transform: translateY(-1px);
+    }
+
+    .bulk-resend-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .bulk-resend-btn .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .bulk-resend-btn.loading .spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--radius-xl);
+      max-width: 450px;
+      width: 100%;
+      padding: var(--space-6);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .modal h3 {
+      text-align: center;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .modal p {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-5);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      border: none;
+    }
+
+    .modal-btn.cancel {
+      background: var(--bg-light);
+      color: var(--text-primary);
+    }
+
+    .modal-btn.cancel:hover {
+      background: #e2e8f0;
+    }
+
+    .modal-btn.confirm {
+      background: var(--danger);
+      color: white;
+    }
+
+    .modal-btn.confirm:hover {
+      background: #DC2626;
+    }
+
+    /* Bulk Progress */
+    .bulk-progress {
+      margin-top: var(--space-4);
+      display: none;
+    }
+
+    .bulk-progress.show {
+      display: block;
+    }
+
+    .bulk-progress-bar {
+      height: 8px;
+      background: var(--bg-light);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: var(--space-2);
+    }
+
+    .bulk-progress-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .bulk-progress-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      text-align: center;
     }
 
     @media (max-width: 768px) {
       .results-summary {
         grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+      }
+
+      .result-card {
+        padding: var(--space-4);
+      }
+
+      .result-card h2 {
+        font-size: 28px;
       }
 
       .action-buttons {
@@ -292,18 +463,88 @@
 
       .btn {
         width: 100%;
+        justify-content: center;
+      }
+
+      /* Table to Card Conversion */
+      .data-table {
+        display: block;
+      }
+
+      .data-table thead {
+        display: none;
+      }
+
+      .data-table tbody {
+        display: block;
+      }
+
+      .data-table tr {
+        display: block;
+        background: var(--bg-white);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid var(--border-light);
+        border-left: 4px solid var(--success);
+      }
+
+      .data-table td {
+        display: block;
+        padding: 6px 0;
+        border: none;
+        font-size: var(--text-sm);
+      }
+
+      .data-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 600;
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      .twilio-sid {
+        font-size: 10px;
+        word-break: break-all;
+      }
+
+      .link-button {
+        display: block;
+        text-align: center;
+        margin-top: 8px;
+      }
+
+      .collapsible-header {
+        padding: 12px 15px;
+        font-size: var(--text-sm);
+      }
+
+      .collapsible-content {
+        padding: 10px;
+      }
+
+      .search-section {
+        padding: var(--space-4);
+      }
+
+      .timestamp {
+        display: none;
       }
     }
   </style>
 </head>
 <body>
-  <%- include('partials/header', { user }) %>
+  <%- include('partials/dashboard-header', { activePage: 'upload' }) %>
 
-  <div class="results-container">
-    <div style="text-align: center; margin-bottom: 30px;">
-      <div class="success-icon">✅</div>
+  <main class="container">
+    <div class="page-header">
+      <div class="success-icon">&#9989;</div>
       <h1>Upload Complete!</h1>
-      <p style="color: #6B7280;">File: <strong><%= results.filename %></strong></p>
+      <p>File: <strong><%= results.filename %></strong></p>
     </div>
 
     <!-- Summary Cards -->
@@ -320,14 +561,14 @@
         <h2><%= results.duplicateCount %></h2>
         <p>Duplicates Skipped</p>
       </div>
-      <div class="result-card">
+      <div class="result-card total">
         <h2><%= results.totalRows %></h2>
         <p>Total Rows Processed</p>
       </div>
     </div>
 
     <div class="processing-time">
-      ⏱️ Processing time: <%= results.processingTimeSeconds %> seconds
+      Processing time: <%= results.processingTimeSeconds %> seconds
     </div>
 
     <!-- Search/Filter -->
@@ -336,19 +577,19 @@
         type="text"
         id="searchInput"
         class="search-input"
-        placeholder="🔍 Search by name, phone number, or error..."
-        onkeyup="filterTables()"
+        placeholder="Search by name, phone number, or error..."
+        aria-label="Search results by name, phone, or error"
       >
     </div>
 
     <!-- Successfully Sent SMS Table -->
     <% if (results.successfulSends && results.successfulSends.length > 0) { %>
     <div class="collapsible-section">
-      <div class="collapsible-header success" onclick="toggleSection(this)">
-        <strong>✅ Successfully Sent SMS (<%= results.successfulSends.length %>)</strong>
-        <span class="arrow">▼</span>
+      <div class="collapsible-header success" id="successHeader">
+        <strong>Successfully Sent SMS (<%= results.successfulSends.length %>)</strong>
+        <span class="arrow rotated" id="successArrow">&#9660;</span>
       </div>
-      <div class="collapsible-content open">
+      <div class="collapsible-content open" id="successContent">
         <table class="data-table" id="successTable">
           <thead>
             <tr>
@@ -362,19 +603,16 @@
           <tbody>
             <% results.successfulSends.forEach(function(send) { %>
               <tr>
-                <td><%= send.name %></td>
-                <td><%= send.phone %></td>
-                <td>
+                <td data-label="Name"><%= send.name %></td>
+                <td data-label="Phone"><%= send.phone %></td>
+                <td data-label="Time Sent">
                   <%= new Date(send.sentAt).toLocaleString() %>
                   <div class="timestamp"><%= new Date(send.sentAt).toLocaleTimeString() %></div>
                 </td>
-                <td><span class="twilio-sid"><%= send.twilioSid %></span></td>
-                <td>
+                <td data-label="Twilio SID"><span class="twilio-sid"><%= send.twilioSid %></span></td>
+                <td data-label="Actions">
                   <a href="<%= send.reviewLink %>" target="_blank" class="link-button">
                     View Link
-                  </a>
-                  <a href="/dashboard/feedback/<%= send.uuid %>" class="link-button secondary">
-                    Details
                   </a>
                 </td>
               </tr>
@@ -388,11 +626,17 @@
     <!-- Failed SMS Table -->
     <% if (results.failedSends && results.failedSends.length > 0) { %>
     <div class="collapsible-section">
-      <div class="collapsible-header failed" onclick="toggleSection(this)">
-        <strong>❌ Failed SMS (<%= results.failedSends.length %>)</strong>
-        <span class="arrow">▼</span>
+      <div class="collapsible-header failed" id="failedHeader">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+          <strong>Failed SMS (<%= results.failedSends.length %>)</strong>
+          <button class="bulk-resend-btn" id="bulkResendBtn" onclick="event.stopPropagation();">
+            <span class="spinner"></span>
+            Resend All Failed (<span id="failedCountBulk"><%= results.failedSends.length %></span>)
+          </button>
+        </div>
+        <span class="arrow" id="failedArrow">&#9660;</span>
       </div>
-      <div class="collapsible-content">
+      <div class="collapsible-content" id="failedContent">
         <table class="data-table" id="failedTable">
           <thead>
             <tr>
@@ -406,12 +650,12 @@
           <tbody>
             <% results.failedSends.forEach(function(send) { %>
               <tr>
-                <td><%= send.row %></td>
-                <td><%= send.name || '-' %></td>
-                <td><%= send.phone || '-' %></td>
-                <td class="error-text"><%= send.error %></td>
-                <td>
-                  <button onclick="resendSMS('<%= send.phone %>', '<%= send.name %>')" class="link-button danger">
+                <td data-label="Row #"><%= send.row %></td>
+                <td data-label="Name"><%= send.name || '-' %></td>
+                <td data-label="Phone"><%= send.phone || '-' %></td>
+                <td data-label="Error" class="error-text"><%= send.error %></td>
+                <td data-label="Actions">
+                  <button class="link-button danger resend-btn" data-phone="<%= send.phone %>" data-name="<%= send.name %>">
                     Resend
                   </button>
                 </td>
@@ -426,11 +670,11 @@
     <!-- Duplicates Skipped Table -->
     <% if (results.duplicates && results.duplicates.length > 0) { %>
     <div class="collapsible-section">
-      <div class="collapsible-header duplicate" onclick="toggleSection(this)">
-        <strong>⚠️ Duplicates Skipped (<%= results.duplicates.length %>)</strong>
-        <span class="arrow">▼</span>
+      <div class="collapsible-header duplicate" id="duplicatesHeader">
+        <strong>Duplicates Skipped (<%= results.duplicates.length %>)</strong>
+        <span class="arrow" id="duplicatesArrow">&#9660;</span>
       </div>
-      <div class="collapsible-content">
+      <div class="collapsible-content" id="duplicatesContent">
         <table class="data-table" id="duplicatesTable">
           <thead>
             <tr>
@@ -443,10 +687,10 @@
           <tbody>
             <% results.duplicates.forEach(function(dup) { %>
               <tr>
-                <td><%= dup.rowNumber %></td>
-                <td><%= dup.name || '-' %></td>
-                <td><%= dup.phone || '-' %></td>
-                <td class="error-text"><%= dup.error || 'Already sent in last 30 days' %></td>
+                <td data-label="Row #"><%= dup.rowNumber %></td>
+                <td data-label="Name"><%= dup.name || '-' %></td>
+                <td data-label="Phone"><%= dup.phone || '-' %></td>
+                <td data-label="Reason" class="error-text"><%= dup.error || 'Already sent in last 30 days' %></td>
               </tr>
             <% }); %>
           </tbody>
@@ -458,11 +702,11 @@
     <!-- Invalid Rows Table -->
     <% if (results.invalidRows && results.invalidRows.length > 0) { %>
     <div class="collapsible-section">
-      <div class="collapsible-header invalid" onclick="toggleSection(this)">
-        <strong>🚫 Invalid Rows (<%= results.invalidRows.length %>)</strong>
-        <span class="arrow">▼</span>
+      <div class="collapsible-header invalid" id="invalidHeader">
+        <strong>Invalid Rows (<%= results.invalidRows.length %>)</strong>
+        <span class="arrow" id="invalidArrow">&#9660;</span>
       </div>
-      <div class="collapsible-content">
+      <div class="collapsible-content" id="invalidContent">
         <table class="data-table" id="invalidTable">
           <thead>
             <tr>
@@ -475,10 +719,10 @@
           <tbody>
             <% results.invalidRows.forEach(function(invalid) { %>
               <tr>
-                <td><%= invalid.rowNumber %></td>
-                <td><%= invalid.name || '-' %></td>
-                <td><%= invalid.phone || '-' %></td>
-                <td class="error-text"><%= invalid.error || 'Invalid data format' %></td>
+                <td data-label="Row #"><%= invalid.rowNumber %></td>
+                <td data-label="Name"><%= invalid.name || '-' %></td>
+                <td data-label="Phone"><%= invalid.phone || '-' %></td>
+                <td data-label="Reason" class="error-text"><%= invalid.error || 'Invalid data format' %></td>
               </tr>
             <% }); %>
           </tbody>
@@ -490,110 +734,369 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
       <a href="/dashboard/upload" class="btn btn-primary">
-        📤 Upload Another File
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        Upload Another File
       </a>
       <a href="/dashboard/uploads" class="btn btn-secondary">
-        📊 View Upload History
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        View Upload History
       </a>
       <a href="/dashboard" class="btn btn-secondary">
-        🏠 Back to Dashboard
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Back to Dashboard
       </a>
+    </div>
+  </main>
+
+  <!-- Bulk Resend Confirmation Modal -->
+  <div class="modal-overlay" id="bulkResendModal">
+    <div class="modal">
+      <div class="modal-icon">&#128172;</div>
+      <h3>Resend Failed Messages?</h3>
+      <p id="bulkResendMessage">This will resend SMS to <strong><span id="modalFailedCount">0</span></strong> contacts that previously failed.</p>
+
+      <div class="bulk-progress" id="bulkProgress">
+        <div class="bulk-progress-bar">
+          <div class="bulk-progress-fill" id="bulkProgressFill"></div>
+        </div>
+        <div class="bulk-progress-text" id="bulkProgressText">Sending 0 / 0...</div>
+      </div>
+
+      <div class="modal-actions" id="modalActions">
+        <button class="modal-btn cancel" id="cancelBulkResend">Cancel</button>
+        <button class="modal-btn confirm" id="confirmBulkResend">Resend All</button>
+      </div>
     </div>
   </div>
 
-  <script>
-    // Toggle collapsible sections
-    function toggleSection(header) {
-      const content = header.nextElementSibling;
-      const arrow = header.querySelector('.arrow');
+  <%- include('partials/dashboard-footer') %>
 
-      if (content.classList.contains('open')) {
-        content.classList.remove('open');
-        arrow.classList.remove('rotated');
-      } else {
-        content.classList.add('open');
-        arrow.classList.add('rotated');
-      }
-    }
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Toggle collapsible sections
+      var headers = ['success', 'failed', 'duplicates', 'invalid'];
+      headers.forEach(function(id) {
+        var header = document.getElementById(id + 'Header');
+        if (header) {
+          header.addEventListener('click', function() {
+            var content = document.getElementById(id + 'Content');
+            var arrow = document.getElementById(id + 'Arrow');
 
-    // Filter tables by search input
-    function filterTables() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const tables = ['successTable', 'failedTable', 'duplicatesTable', 'invalidTable'];
-
-      tables.forEach(tableId => {
-        const table = document.getElementById(tableId);
-        if (!table) return;
-
-        const rows = table.getElementsByTagName('tr');
-        let visibleCount = 0;
-
-        // Skip header row (index 0)
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i];
-          const text = row.textContent.toLowerCase();
-
-          if (text.includes(searchTerm)) {
-            row.style.display = '';
-            visibleCount++;
-          } else {
-            row.style.display = 'none';
-          }
-        }
-
-        // Show "No results" message if all rows hidden
-        const tbody = table.getElementsByTagName('tbody')[0];
-        let noResultsRow = tbody.querySelector('.no-results-row');
-
-        if (visibleCount === 0 && searchTerm !== '') {
-          if (!noResultsRow) {
-            noResultsRow = tbody.insertRow();
-            noResultsRow.className = 'no-results-row';
-            const cell = noResultsRow.insertCell(0);
-            cell.colSpan = 100;
-            cell.innerHTML = '<div class="no-results">No results found</div>';
-          }
-        } else if (noResultsRow) {
-          noResultsRow.remove();
+            if (content.classList.contains('open')) {
+              content.classList.remove('open');
+              arrow.classList.remove('rotated');
+            } else {
+              content.classList.add('open');
+              arrow.classList.add('rotated');
+            }
+          });
         }
       });
-    }
 
-    // Resend SMS function
-    function resendSMS(phone, name) {
-      if (!confirm(`Resend SMS to ${name || phone}?`)) {
-        return;
+      // Filter tables by search input
+      var searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+          var searchTerm = this.value.toLowerCase();
+          var tables = ['successTable', 'failedTable', 'duplicatesTable', 'invalidTable'];
+
+          tables.forEach(function(tableId) {
+            var table = document.getElementById(tableId);
+            if (!table) return;
+
+            var rows = table.getElementsByTagName('tr');
+            var visibleCount = 0;
+
+            // Skip header row (index 0)
+            for (var i = 1; i < rows.length; i++) {
+              var row = rows[i];
+              if (row.classList.contains('no-results-row')) continue;
+
+              var text = row.textContent.toLowerCase();
+
+              if (text.indexOf(searchTerm) !== -1) {
+                row.style.display = '';
+                visibleCount++;
+              } else {
+                row.style.display = 'none';
+              }
+            }
+
+            // Show "No results" message if all rows hidden
+            var tbody = table.getElementsByTagName('tbody')[0];
+            var noResultsRow = tbody.querySelector('.no-results-row');
+
+            if (visibleCount === 0 && searchTerm !== '') {
+              if (!noResultsRow) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.className = 'no-results-row';
+                var cell = document.createElement('td');
+                cell.colSpan = 100;
+
+                var div = document.createElement('div');
+                div.className = 'no-results';
+                div.textContent = 'No results found';
+                cell.appendChild(div);
+                noResultsRow.appendChild(cell);
+                tbody.appendChild(noResultsRow);
+              }
+            } else if (noResultsRow) {
+              noResultsRow.parentNode.removeChild(noResultsRow);
+            }
+          });
+        });
       }
 
-      // Create form and submit to send single SMS
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '/dashboard/send-single';
+      // Resend SMS buttons (single)
+      var resendButtons = document.querySelectorAll('.resend-btn');
+      resendButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var phone = this.getAttribute('data-phone');
+          var name = this.getAttribute('data-name');
+          var row = this.closest('tr');
+          var button = this;
 
-      const phoneInput = document.createElement('input');
-      phoneInput.type = 'hidden';
-      phoneInput.name = 'phone';
-      phoneInput.value = phone;
-      form.appendChild(phoneInput);
+          if (!confirm('Resend SMS to ' + (name || phone) + '?')) {
+            return;
+          }
 
-      const nameInput = document.createElement('input');
-      nameInput.type = 'hidden';
-      nameInput.name = 'name';
-      nameInput.value = name || '';
-      form.appendChild(nameInput);
+          // Disable button during send
+          button.disabled = true;
+          button.textContent = 'Sending...';
 
-      document.body.appendChild(form);
-      form.submit();
-    }
+          // Send via AJAX
+          fetch('/dashboard/send-single', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ phone: phone, name: name || '' })
+          })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.success) {
+              // Remove row from failed table
+              row.style.background = '#D1FAE5';
+              setTimeout(function() {
+                row.remove();
+                updateFailedCount();
+              }, 500);
 
-    // Initialize - open success table by default
-    document.addEventListener('DOMContentLoaded', function() {
-      const successHeader = document.querySelector('.collapsible-header.success');
-      if (successHeader) {
-        const arrow = successHeader.querySelector('.arrow');
-        if (arrow) {
-          arrow.classList.add('rotated');
+              // Show toast
+              if (window.showToast) {
+                window.showToast('SMS sent successfully!', 'success');
+              }
+            } else {
+              button.disabled = false;
+              button.textContent = 'Resend';
+              if (window.showToast) {
+                window.showToast(data.error || 'Failed to send SMS', 'error');
+              } else {
+                alert(data.error || 'Failed to send SMS');
+              }
+            }
+          })
+          .catch(function(err) {
+            button.disabled = false;
+            button.textContent = 'Resend';
+            if (window.showToast) {
+              window.showToast('Network error. Please try again.', 'error');
+            } else {
+              alert('Network error. Please try again.');
+            }
+          });
+        });
+      });
+
+      // Update failed count after removing rows
+      function updateFailedCount() {
+        var failedTable = document.getElementById('failedTable');
+        if (!failedTable) return;
+
+        var rows = failedTable.querySelectorAll('tbody tr:not(.no-results-row)');
+        var count = rows.length;
+
+        // Update header count
+        var headerStrong = document.querySelector('#failedHeader strong');
+        if (headerStrong) {
+          headerStrong.textContent = 'Failed SMS (' + count + ')';
         }
+
+        // Update bulk button count
+        var bulkCount = document.getElementById('failedCountBulk');
+        if (bulkCount) {
+          bulkCount.textContent = count;
+        }
+
+        // Update summary card
+        var failedCard = document.querySelector('.result-card.failed h2');
+        if (failedCard) {
+          failedCard.textContent = count;
+        }
+
+        // Hide bulk resend button if no more failures
+        var bulkBtn = document.getElementById('bulkResendBtn');
+        if (bulkBtn && count === 0) {
+          bulkBtn.style.display = 'none';
+        }
+      }
+
+      // Bulk Resend functionality
+      var bulkResendBtn = document.getElementById('bulkResendBtn');
+      var bulkResendModal = document.getElementById('bulkResendModal');
+      var cancelBulkResend = document.getElementById('cancelBulkResend');
+      var confirmBulkResend = document.getElementById('confirmBulkResend');
+      var modalFailedCount = document.getElementById('modalFailedCount');
+      var bulkProgress = document.getElementById('bulkProgress');
+      var bulkProgressFill = document.getElementById('bulkProgressFill');
+      var bulkProgressText = document.getElementById('bulkProgressText');
+      var modalActions = document.getElementById('modalActions');
+
+      if (bulkResendBtn) {
+        bulkResendBtn.addEventListener('click', function() {
+          // Get current failed count
+          var failedTable = document.getElementById('failedTable');
+          var rows = failedTable ? failedTable.querySelectorAll('tbody tr:not(.no-results-row)') : [];
+          modalFailedCount.textContent = rows.length;
+
+          // Reset modal state
+          bulkProgress.classList.remove('show');
+          modalActions.style.display = 'flex';
+          confirmBulkResend.disabled = false;
+
+          // Show modal
+          bulkResendModal.classList.add('show');
+        });
+      }
+
+      if (cancelBulkResend) {
+        cancelBulkResend.addEventListener('click', function() {
+          bulkResendModal.classList.remove('show');
+        });
+      }
+
+      // Close modal on overlay click
+      if (bulkResendModal) {
+        bulkResendModal.addEventListener('click', function(e) {
+          if (e.target === bulkResendModal) {
+            bulkResendModal.classList.remove('show');
+          }
+        });
+      }
+
+      // Helper to reset modal actions with close button
+      function showCloseButton() {
+        // Clear existing buttons
+        while (modalActions.firstChild) {
+          modalActions.removeChild(modalActions.firstChild);
+        }
+        // Add close button
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'modal-btn cancel';
+        closeBtn.textContent = 'Close';
+        closeBtn.addEventListener('click', function() {
+          bulkResendModal.classList.remove('show');
+        });
+        modalActions.appendChild(closeBtn);
+        modalActions.style.display = 'flex';
+      }
+
+      if (confirmBulkResend) {
+        confirmBulkResend.addEventListener('click', async function() {
+          var failedTable = document.getElementById('failedTable');
+          var rows = failedTable ? Array.from(failedTable.querySelectorAll('tbody tr:not(.no-results-row)')) : [];
+
+          if (rows.length === 0) {
+            bulkResendModal.classList.remove('show');
+            return;
+          }
+
+          // Show progress, hide actions
+          bulkProgress.classList.add('show');
+          modalActions.style.display = 'none';
+
+          var total = rows.length;
+          var sent = 0;
+          var succeeded = 0;
+          var failed = 0;
+
+          // Process each row sequentially
+          for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var btn = row.querySelector('.resend-btn');
+            if (!btn) continue;
+
+            var phone = btn.getAttribute('data-phone');
+            var name = btn.getAttribute('data-name');
+
+            // Update progress
+            sent++;
+            var percent = (sent / total) * 100;
+            bulkProgressFill.style.width = percent + '%';
+            bulkProgressText.textContent = 'Sending ' + sent + ' / ' + total + '...';
+
+            try {
+              var response = await fetch('/dashboard/send-single', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ phone: phone, name: name || '' })
+              });
+
+              var data = await response.json();
+
+              if (data.success) {
+                succeeded++;
+                row.style.background = '#D1FAE5';
+                setTimeout((function(r) {
+                  return function() { r.remove(); };
+                })(row), 300);
+              } else {
+                failed++;
+              }
+            } catch (err) {
+              failed++;
+            }
+
+            // Small delay between sends to avoid rate limiting
+            await new Promise(function(resolve) { setTimeout(resolve, 200); });
+          }
+
+          // Update counts
+          updateFailedCount();
+
+          // Show completion
+          bulkProgressText.textContent = 'Done! ' + succeeded + ' sent, ' + failed + ' failed.';
+          bulkProgressFill.style.background = succeeded > 0 ? 'var(--success)' : 'var(--danger)';
+
+          // Show close button after completion
+          setTimeout(function() {
+            showCloseButton();
+          }, 1000);
+
+          // Show toast
+          if (window.showToast) {
+            if (succeeded > 0) {
+              window.showToast(succeeded + ' SMS resent successfully!', 'success');
+            }
+            if (failed > 0) {
+              window.showToast(failed + ' SMS failed to send', 'error');
+            }
+          }
+        });
       }
     });
   </script>

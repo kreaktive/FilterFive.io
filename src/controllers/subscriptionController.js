@@ -5,6 +5,8 @@
 
 const { User } = require('../models');
 const stripeService = require('../services/stripeService');
+const { buildTrialStatus } = require('../middleware/trialManager');
+const logger = require('../services/logger');
 
 /**
  * GET /dashboard/subscription
@@ -19,15 +21,7 @@ const showSubscription = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    const trialStatus = req.trialStatus || {
-      isActive: user.isTrialActive(),
-      isInGracePeriod: user.isInGracePeriod(),
-      isHardLocked: user.isHardLocked(),
-      canSendSms: user.canSendSms(),
-      hasActiveSubscription: user.subscriptionStatus === 'active',
-      trialEndsAt: user.trialEndsAt,
-      subscriptionStatus: user.subscriptionStatus
-    };
+    const trialStatus = req.trialStatus || buildTrialStatus(user);
 
     // Get subscription details if user has one
     let subscriptionDetails = null;
@@ -35,21 +29,22 @@ const showSubscription = async (req, res) => {
       try {
         subscriptionDetails = await stripeService.getSubscription(user.stripeSubscriptionId);
       } catch (error) {
-        console.error('Error fetching subscription:', error);
+        logger.error('Error fetching subscription', { error: error.message });
       }
     }
 
     res.render('dashboard/subscription', {
-      title: 'Subscription - FilterFive',
+      title: 'Subscription - MoreStars',
       businessName: req.session.businessName,
       user,
       trialStatus,
       subscriptionDetails,
-      stripePubKey: process.env.STRIPE_PUBLISHABLE_KEY
+      stripePubKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      cspNonce: res.locals.cspNonce
     });
 
   } catch (error) {
-    console.error('Error in showSubscription:', error);
+    logger.error('Error in showSubscription', { error: error.message });
     res.status(500).send('Something went wrong');
   }
 };
@@ -90,8 +85,8 @@ const createCheckout = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating checkout:', error);
-    console.error('Error details:', {
+    logger.error('Error creating checkout', {
+      error: error.message,
       message: error.message,
       type: error.type,
       code: error.code,
@@ -122,7 +117,7 @@ const checkoutSuccess = async (req, res) => {
 
     if (session.payment_status === 'paid') {
       res.render('dashboard/subscription-success', {
-        title: 'Subscription Activated - FilterFive',
+        title: 'Subscription Activated - MoreStars',
         businessName: req.session.businessName,
         session
       });
@@ -131,7 +126,7 @@ const checkoutSuccess = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Error in checkoutSuccess:', error);
+    logger.error('Error in checkoutSuccess', { error: error.message });
     res.redirect('/dashboard/subscription?error=session_invalid');
   }
 };
@@ -142,7 +137,7 @@ const checkoutSuccess = async (req, res) => {
  */
 const checkoutCancel = (req, res) => {
   res.render('dashboard/subscription-cancel', {
-    title: 'Checkout Cancelled - FilterFive',
+    title: 'Checkout Cancelled - MoreStars',
     businessName: req.session.businessName
   });
 };
@@ -177,7 +172,7 @@ const cancelSubscription = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error cancelling subscription:', error);
+    logger.error('Error cancelling subscription', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to cancel subscription'
@@ -211,7 +206,7 @@ const reactivateSubscription = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error reactivating subscription:', error);
+    logger.error('Error reactivating subscription', { error: error.message });
     res.status(500).json({
       success: false,
       error: 'Failed to reactivate subscription'
@@ -242,7 +237,7 @@ const customerPortal = async (req, res) => {
     res.redirect(session.url);
 
   } catch (error) {
-    console.error('Error accessing customer portal:', error);
+    logger.error('Error accessing customer portal', { error: error.message });
     res.redirect('/dashboard/subscription?error=portal_failed');
   }
 };
@@ -263,17 +258,35 @@ const handleWebhook = async (req, res) => {
       event = require('stripe')(process.env.STRIPE_SECRET_KEY)
         .webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
+      logger.error('Webhook signature verification failed', { error: err.message });
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
+    // Handle subscription-related events
     await stripeService.handleWebhookEvent(event);
+
+    // Also process POS-related events (Checkout and Terminal payments)
+    // These events trigger SMS review requests
+    const posEventTypes = [
+      'checkout.session.completed',
+      'payment_intent.succeeded',
+      'charge.succeeded'
+    ];
+
+    if (posEventTypes.includes(event.type)) {
+      try {
+        const stripePosService = require('../services/stripePosService');
+        await stripePosService.processEvent(event);
+      } catch (posError) {
+        // Log but don't fail the webhook - subscription handling already succeeded
+        logger.error('Stripe POS processing error', { error: posError.message });
+      }
+    }
 
     res.json({ received: true });
 
   } catch (error) {
-    console.error('Error handling webhook:', error);
+    logger.error('Error handling webhook', { error: error.message });
     res.status(500).json({
       error: 'Webhook handler failed'
     });

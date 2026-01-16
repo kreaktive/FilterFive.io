@@ -1,14 +1,16 @@
 /**
  * Stripe Service
  * Handles Stripe customer management, subscriptions, and payments
- * Phase 2: $77/month subscription with 6-month or 12-month plans
+ * With idempotency for webhook handling
  */
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { User } = require('../models');
+const { User, StripeWebhookEvent } = require('../models');
+const logger = require('./logger');
+const { sendBusinessEventAlert } = require('./emailService');
 
 /**
- * Price IDs for FilterFive subscriptions
+ * Price IDs for MoreStars subscriptions
  * - Monthly: $77/month
  * - Annual: $770/year
  */
@@ -34,10 +36,10 @@ class StripeService {
         }
       });
 
-      console.log(`✓ Stripe customer created: ${customer.id} for user ${user.id}`);
+      logger.info('Stripe customer created', { customerId: customer.id, userId: user.id });
       return customer;
     } catch (error) {
-      console.error('Error creating Stripe customer:', error);
+      logger.error('Error creating Stripe customer', { userId: user.id, error: error.message });
       throw new Error('Failed to create Stripe customer');
     }
   }
@@ -80,25 +82,16 @@ class StripeService {
         }
       });
 
-      console.log(`✓ Checkout session created: ${session.id} for user ${user.id}`);
+      logger.info('Checkout session created', { sessionId: session.id, userId: user.id, plan });
       return session;
     } catch (error) {
-      console.error('Error creating checkout session:', error);
-      console.error('Stripe error details:', {
-        message: error.message,
-        type: error.type,
-        code: error.code,
-        param: error.param,
-        statusCode: error.statusCode
-      });
-      console.error('Request details:', {
+      logger.error('Error creating checkout session', {
         userId: user.id,
-        plan: plan,
-        priceId: priceId,
-        customerId: user.stripeCustomerId,
-        appUrl: process.env.APP_URL
+        plan,
+        error: error.message,
+        errorCode: error.code
       });
-      throw error; // Re-throw the original error instead of a generic one
+      throw error;
     }
   }
 
@@ -112,7 +105,7 @@ class StripeService {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       return session;
     } catch (error) {
-      console.error('Error retrieving checkout session:', error);
+      logger.error('Error retrieving checkout session', { sessionId, error: error.message });
       throw new Error('Failed to retrieve checkout session');
     }
   }
@@ -127,7 +120,7 @@ class StripeService {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       return subscription;
     } catch (error) {
-      console.error('Error retrieving subscription:', error);
+      logger.error('Error retrieving subscription', { subscriptionId, error: error.message });
       throw new Error('Failed to retrieve subscription');
     }
   }
@@ -141,20 +134,18 @@ class StripeService {
   async cancelSubscription(subscriptionId, immediately = false) {
     try {
       if (immediately) {
-        // Cancel immediately
         const subscription = await stripe.subscriptions.cancel(subscriptionId);
-        console.log(`✓ Subscription cancelled immediately: ${subscriptionId}`);
+        logger.info('Subscription cancelled immediately', { subscriptionId });
         return subscription;
       } else {
-        // Cancel at period end
         const subscription = await stripe.subscriptions.update(subscriptionId, {
           cancel_at_period_end: true
         });
-        console.log(`✓ Subscription set to cancel at period end: ${subscriptionId}`);
+        logger.info('Subscription set to cancel at period end', { subscriptionId });
         return subscription;
       }
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
+      logger.error('Error cancelling subscription', { subscriptionId, error: error.message });
       throw new Error('Failed to cancel subscription');
     }
   }
@@ -169,24 +160,56 @@ class StripeService {
       const subscription = await stripe.subscriptions.update(subscriptionId, {
         cancel_at_period_end: false
       });
-      console.log(`✓ Subscription reactivated: ${subscriptionId}`);
+      logger.info('Subscription reactivated', { subscriptionId });
       return subscription;
     } catch (error) {
-      console.error('Error reactivating subscription:', error);
+      logger.error('Error reactivating subscription', { subscriptionId, error: error.message });
       throw new Error('Failed to reactivate subscription');
     }
   }
 
   /**
-   * Handle subscription webhook events
+   * Handle subscription webhook events with idempotency
+   * D4 FIX: Uses atomic findOrCreate to prevent race conditions
    * @param {Object} event - Stripe webhook event
-   * @returns {Promise<void>}
+   * @returns {Promise<Object>} Result of handling
    */
   async handleWebhookEvent(event) {
+    // Extract customer ID for logging
+    const customerId = event.data.object.customer || event.data.object.id;
+    let userId = null;
+
+    // Try to get userId from metadata or lookup
+    if (event.data.object.metadata?.userId) {
+      userId = parseInt(event.data.object.metadata.userId);
+    }
+
+    // D4 FIX: Atomic idempotency check using findOrCreate
+    // This prevents race conditions where two concurrent webhooks
+    // could both pass the "isProcessed" check before either marks it as processed
+    const [webhookEvent, created] = await StripeWebhookEvent.findOrCreate({
+      where: { eventId: event.id },
+      defaults: {
+        eventType: event.type,
+        stripeCustomerId: customerId,
+        userId: userId,
+        processedAt: new Date()
+      }
+    });
+
+    if (!created) {
+      logger.info('Stripe webhook already processed, skipping', {
+        eventId: event.id,
+        eventType: event.type
+      });
+      return { skipped: true, reason: 'already_processed' };
+    }
+
     try {
       switch (event.type) {
         case 'checkout.session.completed':
           await this.handleCheckoutCompleted(event.data.object);
+          userId = parseInt(event.data.object.metadata?.userId);
           break;
 
         case 'customer.subscription.created':
@@ -210,10 +233,29 @@ class StripeService {
           break;
 
         default:
-          console.log(`Unhandled webhook event type: ${event.type}`);
+          logger.debug('Unhandled webhook event type', { eventType: event.type });
       }
+
+      // Update userId if we got it from the handler
+      if (userId && !webhookEvent.userId) {
+        await webhookEvent.update({ userId });
+      }
+
+      logger.info('Stripe webhook processed', {
+        eventId: event.id,
+        eventType: event.type,
+        userId
+      });
+
+      return { success: true };
     } catch (error) {
-      console.error('Error handling webhook event:', error);
+      logger.error('Error handling webhook event', {
+        eventId: event.id,
+        eventType: event.type,
+        error: error.message
+      });
+      // Note: We don't delete the webhook event record on error
+      // This prevents retries from reprocessing. Stripe will retry the webhook.
       throw error;
     }
   }
@@ -231,6 +273,9 @@ class StripeService {
       throw new Error(`User not found: ${userId}`);
     }
 
+    // Check if this is a trial conversion (user was previously on trial)
+    const wasOnTrial = user.subscriptionStatus === 'trial';
+
     await user.update({
       stripeCustomerId: session.customer,
       stripeSubscriptionId: session.subscription,
@@ -238,10 +283,23 @@ class StripeService {
       subscriptionStatus: 'active',
       smsUsageCount: 0, // Reset SMS count
       smsUsageLimit: 1000, // Set to active limit
-      marketingStatus: 'active'
+      marketingStatus: 'active',
+      // Clear abandoned checkout tracking
+      checkoutStartedAt: null,
+      checkoutSessionId: null,
+      checkoutRecoveryEmailSentAt: null
     });
 
-    console.log(`✓ Checkout completed for user ${userId}: ${plan} plan`);
+    logger.info('Checkout completed', { userId, plan });
+
+    // Send business event alert (non-blocking)
+    sendBusinessEventAlert(wasOnTrial ? 'trial_converted' : 'subscription_created', {
+      businessName: user.businessName,
+      email: user.email,
+      userId: user.id,
+      plan: plan === 'annual' ? 'Annual ($770/yr)' : 'Monthly ($77/mo)',
+      previousStatus: wasOnTrial ? 'Trial' : 'None'
+    }).catch(err => logger.error('Business alert failed', { error: err.message }));
   }
 
   /**
@@ -254,7 +312,7 @@ class StripeService {
     });
 
     if (!user) {
-      console.warn(`User not found for Stripe customer: ${subscription.customer}`);
+      logger.warn('User not found for subscription created', { customerId: subscription.customer });
       return;
     }
 
@@ -267,7 +325,7 @@ class StripeService {
       marketingStatus: 'active'
     });
 
-    console.log(`✓ Subscription created for user ${user.id}`);
+    logger.info('Subscription created', { userId: user.id, subscriptionId: subscription.id });
   }
 
   /**
@@ -280,23 +338,30 @@ class StripeService {
     });
 
     if (!user) {
-      console.warn(`User not found for subscription: ${subscription.id}`);
+      logger.warn('User not found for subscription update', { subscriptionId: subscription.id });
       return;
     }
 
     let subscriptionStatus = 'active';
+    let smsUsageLimit = user.smsUsageLimit;
+
     if (subscription.status === 'past_due') {
       subscriptionStatus = 'past_due';
+      smsUsageLimit = 0; // Block SMS when past due
     } else if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
       subscriptionStatus = 'cancelled';
+      smsUsageLimit = 10; // Revert to trial limit
+    } else if (subscription.status === 'active') {
+      smsUsageLimit = 1000; // Restore full limit
     }
 
     await user.update({
-      subscriptionStatus: subscriptionStatus,
-      subscriptionPeriodEnd: new Date(subscription.current_period_end * 1000)
+      subscriptionStatus,
+      subscriptionPeriodEnd: new Date(subscription.current_period_end * 1000),
+      smsUsageLimit
     });
 
-    console.log(`✓ Subscription updated for user ${user.id}: ${subscriptionStatus}`);
+    logger.info('Subscription updated', { userId: user.id, status: subscriptionStatus });
   }
 
   /**
@@ -309,7 +374,7 @@ class StripeService {
     });
 
     if (!user) {
-      console.warn(`User not found for subscription: ${subscription.id}`);
+      logger.warn('User not found for subscription deleted', { subscriptionId: subscription.id });
       return;
     }
 
@@ -319,11 +384,20 @@ class StripeService {
       smsUsageLimit: 10 // Revert to trial limit
     });
 
-    console.log(`✓ Subscription deleted for user ${user.id}`);
+    logger.info('Subscription deleted', { userId: user.id });
+
+    // Send business event alert (non-blocking)
+    sendBusinessEventAlert('subscription_cancelled', {
+      businessName: user.businessName,
+      email: user.email,
+      userId: user.id,
+      plan: user.subscriptionPlan === 'annual' ? 'Annual' : 'Monthly'
+    }).catch(err => logger.error('Business alert failed', { error: err.message }));
   }
 
   /**
    * Handle invoice.payment_succeeded event
+   * B6 FIX: Only reset SMS count for subscription billing invoices
    * @param {Object} invoice - Invoice object
    */
   async handlePaymentSucceeded(invoice) {
@@ -332,18 +406,41 @@ class StripeService {
     });
 
     if (!user) {
-      console.warn(`User not found for Stripe customer: ${invoice.customer}`);
+      logger.warn('User not found for payment succeeded', { customerId: invoice.customer });
       return;
     }
 
-    // Reset SMS usage on successful payment (new billing period)
-    await user.update({
-      smsUsageCount: 0,
-      subscriptionStatus: 'active',
-      marketingStatus: 'active'
-    });
+    // B6 FIX: Only reset SMS usage for subscription invoices (not one-time charges)
+    // billing_reason can be: subscription_create, subscription_cycle, subscription_update,
+    // subscription_threshold, manual, upcoming, or null (for one-time invoices)
+    const isSubscriptionBilling = invoice.billing_reason &&
+      ['subscription_create', 'subscription_cycle'].includes(invoice.billing_reason);
 
-    console.log(`✓ Payment succeeded for user ${user.id}`);
+    const updateData = {
+      subscriptionStatus: 'active',
+      marketingStatus: 'active',
+      // Clear payment failure tracking
+      paymentFailedAt: null,
+      paymentFailedEmailSentAt: null
+    };
+
+    // Only reset SMS count for new billing cycles or new subscriptions
+    if (isSubscriptionBilling) {
+      updateData.smsUsageCount = 0;
+      updateData.smsUsageLimit = 1000;
+      logger.info('SMS usage reset for billing cycle', {
+        userId: user.id,
+        billingReason: invoice.billing_reason
+      });
+    }
+
+    await user.update(updateData);
+
+    logger.info('Payment succeeded', {
+      userId: user.id,
+      billingReason: invoice.billing_reason,
+      smsReset: isSubscriptionBilling
+    });
   }
 
   /**
@@ -356,16 +453,37 @@ class StripeService {
     });
 
     if (!user) {
-      console.warn(`User not found for Stripe customer: ${invoice.customer}`);
+      logger.warn('User not found for payment failed', { customerId: invoice.customer });
       return;
     }
 
     await user.update({
       subscriptionStatus: 'past_due',
-      marketingStatus: 'trial_expired'
+      marketingStatus: 'trial_expired',
+      smsUsageLimit: 0, // Block SMS sending when payment fails
+      paymentFailedAt: new Date()
     });
 
-    console.log(`✓ Payment failed for user ${user.id} - Status: past_due`);
+    logger.info('Payment failed - SMS blocked', { userId: user.id });
+
+    // Send payment failed email (if not sent in last 3 hours)
+    // Reduced from 24h to 3h for more aggressive recovery prompts
+    const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+    if (!user.paymentFailedEmailSentAt ||
+        (new Date() - user.paymentFailedEmailSentAt) > THREE_HOURS_MS) {
+      try {
+        const { sendPaymentFailedEmail } = require('./emailService');
+        const portalUrl = `${process.env.APP_URL}/dashboard/subscription/portal`;
+        await sendPaymentFailedEmail(user.email, user.businessName, portalUrl);
+        await user.update({ paymentFailedEmailSentAt: new Date() });
+        logger.info('Payment failed email sent', { userId: user.id });
+      } catch (emailError) {
+        logger.error('Failed to send payment failed email', {
+          userId: user.id,
+          error: emailError.message
+        });
+      }
+    }
   }
 
   /**
@@ -386,7 +504,7 @@ class StripeService {
 
       return session;
     } catch (error) {
-      console.error('Error creating portal session:', error);
+      logger.error('Error creating portal session', { userId: user.id, error: error.message });
       throw new Error('Failed to create portal session');
     }
   }

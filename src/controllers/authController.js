@@ -8,6 +8,20 @@ const User = require('../models/User');
 const emailService = require('../services/emailService');
 const validation = require('../services/validationService');
 const stripeService = require('../services/stripeService');
+const logger = require('../services/logger');
+const { invalidateUserSessionCache } = require('../middleware/auth');
+const { rotateToken: rotateCsrfToken } = require('../middleware/csrf');
+const { TRIAL_DURATION_DAYS } = require('../config/constants');
+
+/**
+ * Helper to get reCAPTCHA site key (null if CAPTCHA is disabled)
+ */
+const getRecaptchaSiteKey = () => {
+  if (process.env.DISABLE_CAPTCHA === 'true') {
+    return null;
+  }
+  return process.env.RECAPTCHA_SITE_KEY || null;
+};
 
 /**
  * GET /signup
@@ -15,11 +29,11 @@ const stripeService = require('../services/stripeService');
  */
 const showSignup = (req, res) => {
   res.render('auth/signup', {
-    title: 'Sign Up - FilterFive',
+    title: 'Sign Up - MoreStars',
     error: null,
     businessName: '',
     email: '',
-    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY
+    recaptchaSiteKey: getRecaptchaSiteKey()
   });
 };
 
@@ -44,11 +58,11 @@ const signup = async (req, res) => {
 
     if (!validationResult.isValid) {
       return res.status(400).render('auth/signup', {
-        title: 'Sign Up - FilterFive',
+        title: 'Sign Up - MoreStars',
         error: validationResult.errors.join('. '),
         businessName: sanitizedBusinessName,
         email: sanitizedEmail,
-        recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY
+        recaptchaSiteKey: getRecaptchaSiteKey()
       });
     }
 
@@ -56,22 +70,27 @@ const signup = async (req, res) => {
     const existingUser = await User.findOne({ where: { email: sanitizedEmail } });
 
     if (existingUser) {
+      // Check if the existing user hasn't verified their email yet
+      const showResendOption = !existingUser.isVerified;
+
       return res.status(400).render('auth/signup', {
-        title: 'Sign Up - FilterFive',
+        title: 'Sign Up - MoreStars',
         error: 'An account with this email already exists',
         businessName: sanitizedBusinessName,
         email: sanitizedEmail,
-        recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY
+        recaptchaSiteKey: getRecaptchaSiteKey(),
+        showResendVerification: showResendOption,
+        unverifiedEmail: showResendOption ? sanitizedEmail : null
       });
     }
 
     // Generate verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const verificationExpires = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
 
     // Set trial dates
     const trialStartsAt = new Date();
-    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+    const trialEndsAt = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
 
     // Create user (password will be hashed by Sequelize hook)
     const newUser = await User.create({
@@ -92,11 +111,19 @@ const signup = async (req, res) => {
     try {
       const stripeCustomer = await stripeService.createCustomer(newUser);
       await newUser.update({ stripeCustomerId: stripeCustomer.id });
-      console.log(`✓ Stripe customer created: ${stripeCustomer.id} for user ${newUser.id}`);
+      logger.stripe('customer_created', { userId: newUser.id });
     } catch (stripeError) {
-      console.error('Stripe customer creation failed:', stripeError);
+      logger.error('Stripe customer creation failed', { userId: newUser.id, error: stripeError.message });
       // Don't block signup if Stripe fails - user can still use trial
     }
+
+    // Send business event alert (non-blocking)
+    emailService.sendBusinessEventAlert('new_signup', {
+      businessName: sanitizedBusinessName,
+      email: sanitizedEmail,
+      userId: newUser.id,
+      trialEnds: trialEndsAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }).catch(err => logger.error('Business alert failed', { error: err.message }));
 
     // Send verification email
     try {
@@ -106,7 +133,7 @@ const signup = async (req, res) => {
         verificationToken
       );
 
-      console.log(`✓ New user created: ${sanitizedEmail} (ID: ${newUser.id})`);
+      logger.auth('signup_success', null, true, { userId: newUser.id });
 
       // Redirect to "check your inbox" page
       res.render('auth/verify-pending', {
@@ -116,7 +143,7 @@ const signup = async (req, res) => {
       });
 
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
+      logger.error('Verification email sending failed', { error: emailError.message });
 
       // User created but email failed - allow manual resend
       res.render('auth/verify-pending', {
@@ -128,14 +155,14 @@ const signup = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Signup error:', error);
+    logger.error('Signup error', { error: error.message });
 
     res.status(500).render('auth/signup', {
-      title: 'Sign Up - FilterFive',
+      title: 'Sign Up - MoreStars',
       error: 'An error occurred during signup. Please try again.',
       businessName: req.body.businessName || '',
       email: req.body.email || '',
-      recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY
+      recaptchaSiteKey: getRecaptchaSiteKey()
     });
   }
 };
@@ -179,30 +206,64 @@ const verifyEmail = async (req, res) => {
       verificationTokenExpires: null
     });
 
-    console.log(`✓ User verified: ${user.email} (ID: ${user.id})`);
+    // Invalidate any cached session data for this user
+    await invalidateUserSessionCache(user.id);
+
+    logger.auth('email_verified', null, true, { userId: user.id });
+
+    // Send business event alert for verified email (non-blocking)
+    emailService.sendBusinessEventAlert('email_verified', {
+      businessName: user.businessName,
+      email: user.email,
+      userId: user.id
+    }).catch(err => logger.error('Business alert failed', { error: err.message }));
 
     // Send welcome email
     try {
       await emailService.sendWelcomeEmail(user.email, user.businessName);
     } catch (emailError) {
-      console.error('Welcome email failed:', emailError);
+      logger.error('Welcome email failed', { userId: user.id, error: emailError.message });
       // Don't block verification if welcome email fails
     }
 
-    // Auto-login: Set session
-    req.session.userId = user.id;
-    req.session.userEmail = user.email;
-    req.session.businessName = user.businessName;
+    // Auto-login: Regenerate session first to prevent session fixation (S1 fix)
+    req.session.regenerate((err) => {
+      if (err) {
+        logger.error('Session regeneration failed during verification', { error: err.message, userId: user.id });
+        // Still show success page but without auto-login
+        return res.render('auth/verify-success', {
+          title: 'Welcome to MoreStars!',
+          businessName: user.businessName,
+          dashboardUrl: '/dashboard/login',
+          message: 'Please log in to continue.'
+        });
+      }
 
-    // Redirect to dashboard with welcome message
-    res.render('auth/verify-success', {
-      title: 'Welcome to FilterFive!',
-      businessName: user.businessName,
-      dashboardUrl: '/dashboard'
+      // Set session data AFTER regeneration
+      req.session.userId = user.id;
+      req.session.userEmail = user.email;
+      req.session.businessName = user.businessName;
+
+      // Rotate CSRF token after authentication to prevent session fixation attacks
+      rotateCsrfToken(req);
+
+      // Save session explicitly before rendering
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          logger.error('Session save failed during verification', { error: saveErr.message, userId: user.id });
+        }
+
+        // Redirect to dashboard with welcome message
+        res.render('auth/verify-success', {
+          title: 'Welcome to MoreStars!',
+          businessName: user.businessName,
+          dashboardUrl: '/dashboard'
+        });
+      });
     });
 
   } catch (error) {
-    console.error('Email verification error:', error);
+    logger.error('Email verification error', { error: error.message });
 
     res.status(500).render('auth/verify-error', {
       title: 'Verification Failed',
@@ -244,16 +305,24 @@ const resendVerification = async (req, res) => {
       });
     }
 
-    // Generate new token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Reuse existing token if still valid, otherwise generate new one
+    let verificationToken = user.verificationToken;
+    const tokenStillValid = user.verificationToken &&
+                            user.verificationTokenExpires &&
+                            user.verificationTokenExpires > new Date();
 
-    await user.update({
-      verificationToken: verificationToken,
-      verificationTokenExpires: verificationExpires
-    });
+    if (!tokenStillValid) {
+      // Generate new token only if current one is expired or missing
+      verificationToken = crypto.randomBytes(32).toString('hex');
+      const verificationExpires = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
 
-    // Send email
+      await user.update({
+        verificationToken: verificationToken,
+        verificationTokenExpires: verificationExpires
+      });
+    }
+
+    // Send email with current valid token
     await emailService.sendVerificationEmail(
       sanitizedEmail,
       user.businessName,
@@ -266,7 +335,7 @@ const resendVerification = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Resend verification error:', error);
+    logger.error('Resend verification error', { error: error.message });
 
     res.status(500).json({
       success: false,
@@ -320,8 +389,9 @@ const forgotPassword = async (req, res) => {
     }
 
     // Generate reset token
+    // S5 fix: Reduced expiry from 1 hour to 30 minutes for better security
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const resetExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
     await user.update({
       resetPasswordToken: resetToken,
@@ -342,7 +412,7 @@ const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Forgot password error:', error);
+    logger.error('Forgot password error', { error: error.message });
 
     res.status(500).render('auth/forgot-password', {
       title: 'Forgot Password',
@@ -389,7 +459,7 @@ const showResetPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Show reset password error:', error);
+    logger.error('Show reset password error', { error: error.message });
 
     res.status(500).render('auth/reset-error', {
       title: 'Error',
@@ -447,7 +517,7 @@ const resetPassword = async (req, res) => {
       resetPasswordTokenExpires: null
     });
 
-    console.log(`✓ Password reset for: ${user.email}`);
+    logger.auth('password_reset', null, true, { userId: user.id });
 
     // Show success page
     res.render('auth/reset-success', {
@@ -456,7 +526,7 @@ const resetPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Reset password error:', error);
+    logger.error('Reset password error', { error: error.message });
 
     res.status(500).render('auth/reset-error', {
       title: 'Error',

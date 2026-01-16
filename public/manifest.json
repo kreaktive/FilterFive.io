@@ -1,0 +1,45 @@
+{
+  "name": "MoreStars - Get More Google Reviews",
+  "short_name": "MoreStars",
+  "description": "Send review requests via SMS or QR code. Get more 5-star reviews for your business.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#23001E",
+  "theme_color": "#FFBA49",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your review statistics",
+      "url": "/dashboard",
+      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Send SMS",
+      "short_name": "Send SMS",
+      "description": "Send a review request",
+      "url": "/dashboard/feedback",
+      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

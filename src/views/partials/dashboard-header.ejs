@@ -1,0 +1,489 @@
+<!-- Dashboard Header Partial -->
+<%
+  // Support both currentPage and activePage for backwards compatibility
+  const _activePage = typeof activePage !== 'undefined' ? activePage : (typeof currentPage !== 'undefined' ? currentPage : '');
+%>
+
+<!-- Skip to main content link for keyboard/screen reader users -->
+<a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+<!-- Pill Navbar (matches marketing site style) -->
+<div class="dash-navbar-wrapper" role="banner">
+  <nav class="dash-navbar" role="navigation" aria-label="Dashboard navigation">
+    <div class="dash-navbar-content">
+
+      <!-- Logo (Left) -->
+      <a href="/dashboard" class="dash-navbar-logo" aria-label="MoreStars Dashboard Home">
+        <img src="/images/Logo MoreStars.io.svg" alt="" height="24" aria-hidden="true">
+        <span class="sr-only">MoreStars</span>
+      </a>
+
+      <!-- Navigation (Center) - Desktop -->
+      <div class="dash-navbar-links">
+        <a
+          href="/dashboard"
+          class="<%= _activePage === 'dashboard' ? 'active' : '' %>"
+          <%= _activePage === 'dashboard' ? 'aria-current="page"' : '' %>
+        >Dashboard</a>
+        <a
+          href="/dashboard/feedback"
+          class="<%= _activePage === 'feedback' ? 'active' : '' %>"
+          <%= _activePage === 'feedback' ? 'aria-current="page"' : '' %>
+        >Feedback</a>
+        <a
+          href="/dashboard/qr"
+          class="<%= _activePage === 'qr' ? 'active' : '' %>"
+          <%= _activePage === 'qr' ? 'aria-current="page"' : '' %>
+        >QR Codes</a>
+        <a
+          href="/dashboard/analytics"
+          class="<%= _activePage === 'analytics' ? 'active' : '' %>"
+          <%= _activePage === 'analytics' ? 'aria-current="page"' : '' %>
+        >Analytics</a>
+        <a
+          href="/dashboard/settings"
+          class="<%= _activePage === 'settings' ? 'active' : '' %>"
+          <%= _activePage === 'settings' ? 'aria-current="page"' : '' %>
+        >Settings</a>
+        <a
+          href="/dashboard/subscription"
+          class="<%= _activePage === 'subscription' ? 'active' : '' %>"
+          <%= _activePage === 'subscription' ? 'aria-current="page"' : '' %>
+        >Subscription</a>
+      </div>
+
+      <!-- Logout Button (Right) -->
+      <div class="dash-navbar-right">
+        <a href="/dashboard/logout" class="dash-logout-btn" role="button">Logout</a>
+
+        <!-- Mobile Menu Button -->
+        <button
+          class="dash-mobile-btn"
+          id="hamburgerBtn"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="dashMobileMenu"
+        >
+          <svg id="dashMenuIcon" class="dash-menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="dashCloseIcon" class="dash-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="dashMobileMenu" class="dash-mobile-menu" role="menu" aria-labelledby="hamburgerBtn">
+      <a
+        href="/dashboard"
+        class="<%= _activePage === 'dashboard' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'dashboard' ? 'aria-current="page"' : '' %>
+      >Dashboard</a>
+      <a
+        href="/dashboard/feedback"
+        class="<%= _activePage === 'feedback' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'feedback' ? 'aria-current="page"' : '' %>
+      >Feedback</a>
+      <a
+        href="/dashboard/qr"
+        class="<%= _activePage === 'qr' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'qr' ? 'aria-current="page"' : '' %>
+      >QR Codes</a>
+      <a
+        href="/dashboard/analytics"
+        class="<%= _activePage === 'analytics' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'analytics' ? 'aria-current="page"' : '' %>
+      >Analytics</a>
+      <a
+        href="/dashboard/settings"
+        class="<%= _activePage === 'settings' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'settings' ? 'aria-current="page"' : '' %>
+      >Settings</a>
+      <a
+        href="/dashboard/subscription"
+        class="<%= _activePage === 'subscription' ? 'active' : '' %>"
+        role="menuitem"
+        <%= _activePage === 'subscription' ? 'aria-current="page"' : '' %>
+      >Subscription</a>
+      <a href="/dashboard/logout" class="dash-mobile-logout" role="menuitem">Logout</a>
+    </div>
+  </nav>
+</div>
+
+<!-- Navbar Spacer -->
+<div class="dash-navbar-spacer"></div>
+
+<style>
+  /* Skip to main content link - visible only on focus */
+  .skip-to-main {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--brand-gold);
+    color: var(--brand-dark);
+    padding: 8px 16px;
+    z-index: 10000;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 0 0 8px 8px;
+    transition: top 0.2s ease;
+  }
+
+  .skip-to-main:focus {
+    top: 0;
+    outline: 2px solid var(--brand-dark);
+    outline-offset: 2px;
+  }
+
+  /* Screen reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ===================== */
+  /* Pill Navbar Styles */
+  /* ===================== */
+  .dash-navbar-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    padding: 16px 16px 0;
+    pointer-events: none;
+  }
+
+  .dash-navbar {
+    width: 100%;
+    max-width: 1200px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 9999px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    pointer-events: auto;
+  }
+
+  .dash-navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 24px;
+  }
+
+  /* Logo */
+  .dash-navbar-logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: opacity 0.2s;
+  }
+
+  .dash-navbar-logo:hover {
+    opacity: 0.8;
+  }
+
+  .dash-navbar-logo:focus {
+    outline: 2px solid var(--brand-gold);
+    outline-offset: 4px;
+  }
+
+  .dash-navbar-logo img {
+    height: 24px;
+    width: auto;
+  }
+
+  /* Center Navigation Links */
+  .dash-navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dash-navbar-links a {
+    color: var(--neutral-600);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .dash-navbar-links a:hover {
+    color: var(--brand-dark);
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .dash-navbar-links a.active {
+    color: var(--brand-gold);
+    background: rgba(255, 186, 73, 0.1);
+  }
+
+  .dash-navbar-links a:focus {
+    outline: 2px solid var(--brand-gold);
+    outline-offset: 2px;
+  }
+
+  /* Right side */
+  .dash-navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Logout Button */
+  .dash-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 24px;
+    background: var(--brand-gold);
+    color: var(--brand-dark);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-gold);
+  }
+
+  .dash-logout-btn:hover {
+    background: #F59E0B;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-gold-hover);
+  }
+
+  .dash-logout-btn:focus {
+    outline: 2px solid var(--brand-dark);
+    outline-offset: 2px;
+  }
+
+  /* Mobile Menu Button */
+  .dash-mobile-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--brand-dark);
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .dash-mobile-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .dash-mobile-btn:focus {
+    outline: 2px solid var(--brand-gold);
+    outline-offset: 2px;
+  }
+
+  .dash-menu-icon,
+  .dash-close-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dash-close-icon {
+    display: none;
+  }
+
+  /* Mobile Menu */
+  .dash-mobile-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 16px;
+    right: 16px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 12px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .dash-mobile-menu a {
+    display: block;
+    padding: 14px 20px;
+    color: var(--neutral-600);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.2s;
+  }
+
+  .dash-mobile-menu a:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--brand-dark);
+  }
+
+  .dash-mobile-menu a.active {
+    color: var(--brand-gold);
+    background: rgba(255, 186, 73, 0.1);
+  }
+
+  .dash-mobile-menu a:focus {
+    outline: 2px solid var(--brand-gold);
+    outline-offset: -2px;
+  }
+
+  .dash-mobile-logout {
+    margin-top: 8px;
+    border-top: 1px solid var(--neutral-200);
+    padding-top: 20px !important;
+    color: var(--brand-gold) !important;
+    font-weight: 600 !important;
+  }
+
+  /* Navbar Spacer */
+  .dash-navbar-spacer {
+    height: 96px;
+  }
+
+  /* ===================== */
+  /* Responsive Styles */
+  /* ===================== */
+
+  /* Medium screens - compact links */
+  @media (max-width: 1100px) and (min-width: 769px) {
+    .dash-navbar-links a {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    .dash-navbar-links {
+      gap: 2px;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .dash-navbar-wrapper {
+      padding: 12px 12px 0;
+    }
+
+    .dash-navbar {
+      border-radius: 20px;
+    }
+
+    .dash-navbar-content {
+      height: 56px;
+      padding: 0 16px;
+    }
+
+    .dash-navbar-links {
+      display: none;
+    }
+
+    .dash-logout-btn {
+      display: none;
+    }
+
+    .dash-mobile-btn {
+      display: block;
+    }
+
+    .dash-mobile-menu.active {
+      display: block;
+    }
+
+    .dash-mobile-btn.active .dash-menu-icon {
+      display: none;
+    }
+
+    .dash-mobile-btn.active .dash-close-icon {
+      display: block;
+    }
+
+    .dash-navbar-spacer {
+      height: 80px;
+    }
+  }
+</style>
+
+<script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+(function() {
+  var hamburgerBtn = document.getElementById('hamburgerBtn');
+  var mobileMenu = document.getElementById('dashMobileMenu');
+  var menuIcon = document.getElementById('dashMenuIcon');
+  var closeIcon = document.getElementById('dashCloseIcon');
+
+  if (hamburgerBtn && mobileMenu) {
+    hamburgerBtn.addEventListener('click', function() {
+      var isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
+
+      mobileMenu.classList.toggle('active');
+      hamburgerBtn.classList.toggle('active');
+
+      // Toggle icons
+      if (menuIcon && closeIcon) {
+        menuIcon.style.display = isExpanded ? 'block' : 'none';
+        closeIcon.style.display = isExpanded ? 'none' : 'block';
+      }
+
+      // Update aria-expanded
+      hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
+
+      // Focus first menu item when opening
+      if (!isExpanded) {
+        var firstMenuItem = mobileMenu.querySelector('a');
+        if (firstMenuItem) {
+          setTimeout(function() { firstMenuItem.focus(); }, 100);
+        }
+      }
+    });
+
+    // Close menu on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+        hamburgerBtn.classList.remove('active');
+        if (menuIcon) menuIcon.style.display = 'block';
+        if (closeIcon) closeIcon.style.display = 'none';
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        hamburgerBtn.focus();
+      }
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!mobileMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+        if (mobileMenu.classList.contains('active')) {
+          mobileMenu.classList.remove('active');
+          hamburgerBtn.classList.remove('active');
+          if (menuIcon) menuIcon.style.display = 'block';
+          if (closeIcon) closeIcon.style.display = 'none';
+          hamburgerBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  }
+})();
+</script>

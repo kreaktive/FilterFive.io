@@ -1,0 +1,629 @@
+<%- include('partials/dashboard-head', { title: title }) %>
+  <style>
+    .sending-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .progress-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: var(--space-10);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .progress-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-5);
+    }
+
+    .progress-card h1 {
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+      font-size: var(--text-2xl);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    .progress-bar-container {
+      background: var(--bg-light);
+      border-radius: 10px;
+      height: 20px;
+      margin: var(--space-6) 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--brand-gold), var(--success));
+      height: 100%;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .progress-count {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .current-customer {
+      color: var(--brand-gold);
+      font-weight: 500;
+      min-height: 24px;
+    }
+
+    .status-log {
+      margin-top: var(--space-6);
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+      background: var(--bg-light);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+    }
+
+    .status-item {
+      padding: 8px 10px;
+      margin: 5px 0;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .status-item.sending {
+      background: rgba(255, 186, 73, 0.15);
+      color: #92400E;
+    }
+
+    .status-item.success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .status-item.failed {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .status-item .icon {
+      font-size: 16px;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+      margin-top: var(--space-5);
+    }
+
+    .stat-box {
+      padding: var(--space-5);
+      border-radius: var(--radius-lg);
+      text-align: center;
+    }
+
+    .stat-box.success {
+      background: #D1FAE5;
+    }
+
+    .stat-box.failed {
+      background: #FEE2E2;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .stat-box.success .stat-number {
+      color: #065F46;
+    }
+
+    .stat-box.failed .stat-number {
+      color: #991B1B;
+    }
+
+    .stat-label {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .complete-actions {
+      margin-top: var(--space-6);
+    }
+
+    .view-results-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 14px 32px;
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all var(--transition-base);
+    }
+
+    .view-results-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .retry-btn {
+      background: var(--text-muted);
+      color: white;
+      padding: 14px 32px;
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all var(--transition-base);
+    }
+
+    .retry-btn:hover {
+      background: #6B7280;
+    }
+
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Disconnection UI */
+    .disconnected-banner {
+      background: #FEF3C7;
+      border: 1px solid #F59E0B;
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      margin-bottom: var(--space-5);
+      display: none;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .disconnected-banner.show {
+      display: flex;
+    }
+
+    .disconnected-banner .icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .disconnected-banner .message {
+      flex: 1;
+    }
+
+    .disconnected-banner .message strong {
+      display: block;
+      color: #92400E;
+      margin-bottom: 4px;
+    }
+
+    .disconnected-banner .message span {
+      font-size: var(--text-sm);
+      color: #A16207;
+    }
+
+    .check-status-btn {
+      background: #F59E0B;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: var(--text-sm);
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .check-status-btn:hover {
+      background: #D97706;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .progress-card {
+        padding: var(--space-6);
+      }
+
+      .progress-icon {
+        font-size: 48px;
+      }
+
+      .progress-card h1 {
+        font-size: var(--text-xl);
+      }
+
+      .stat-number {
+        font-size: 24px;
+      }
+
+      .view-results-btn,
+      .retry-btn {
+        width: 100%;
+        padding: 14px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/dashboard-header', { activePage: 'upload' }) %>
+
+  <main class="container">
+    <div class="sending-container">
+      <!-- Disconnection Banner -->
+      <div class="disconnected-banner" id="disconnectedBanner">
+        <span class="icon">&#9888;</span>
+        <div class="message">
+          <strong>Connection Lost</strong>
+          <span id="reconnectMessage">Reconnecting...</span>
+        </div>
+        <a href="/dashboard/upload/results" class="check-status-btn" id="checkStatusBtn">
+          Check Status
+        </a>
+      </div>
+
+      <div class="progress-card">
+        <!-- Sending State -->
+        <div id="sendingState">
+          <div class="progress-icon pulse-animation">&#128228;</div>
+          <h1>Sending SMS Messages</h1>
+          <p class="subtitle">Sending to <%= totalToSend %> customers from <%= filename %></p>
+
+          <div class="progress-count" id="progressCount">0 / <%= totalToSend %></div>
+          <div class="current-customer" id="currentCustomer">Connecting...</div>
+
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+
+          <div class="progress-stats">
+            <span><span id="sentCount" style="color: var(--success); font-weight: 600;">0</span> Sent</span>
+            <span><span id="failedCount" style="color: var(--danger); font-weight: 600;">0</span> Failed</span>
+          </div>
+        </div>
+
+        <!-- Complete State -->
+        <div id="completeState" class="hidden">
+          <div class="progress-icon">&#9989;</div>
+          <h1>Sending Complete!</h1>
+          <p class="subtitle">All SMS messages have been processed.</p>
+
+          <div class="summary-stats">
+            <div class="stat-box success">
+              <div class="stat-number" id="finalSentCount">0</div>
+              <div class="stat-label">Sent Successfully</div>
+            </div>
+            <div class="stat-box failed">
+              <div class="stat-number" id="finalFailedCount">0</div>
+              <div class="stat-label">Failed</div>
+            </div>
+          </div>
+
+          <div class="complete-actions">
+            <a href="/dashboard/upload/results" class="view-results-btn">View Full Results</a>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden">
+          <div class="progress-icon">&#10060;</div>
+          <h1>An Error Occurred</h1>
+          <p class="subtitle" id="errorMessage">Something went wrong while sending messages.</p>
+
+          <div class="complete-actions">
+            <a href="/dashboard/upload" class="retry-btn">Try Again</a>
+          </div>
+        </div>
+
+        <!-- Status Log -->
+        <div class="status-log" id="statusLog">
+          <div class="status-item sending">
+            <span class="icon">&#9203;</span>
+            <span>Initializing...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/dashboard-footer') %>
+
+  <script<%- typeof cspNonce !== 'undefined' ? ` nonce="${cspNonce}"` : '' %>>
+    var progressSessionId = '<%= progressSessionId %>';
+    var totalToSend = <%= totalToSend %>;
+
+    var sentCount = 0;
+    var failedCount = 0;
+    var eventSource = null;
+
+    // Reconnection state
+    var reconnectAttempts = 0;
+    var maxReconnectAttempts = 5;
+    var reconnectTimer = null;
+    var isComplete = false;
+
+    // DOM elements
+    var progressBar = document.getElementById('progressBar');
+    var progressCount = document.getElementById('progressCount');
+    var currentCustomer = document.getElementById('currentCustomer');
+    var sentCountEl = document.getElementById('sentCount');
+    var failedCountEl = document.getElementById('failedCount');
+    var statusLog = document.getElementById('statusLog');
+    var sendingState = document.getElementById('sendingState');
+    var completeState = document.getElementById('completeState');
+    var errorState = document.getElementById('errorState');
+    var disconnectedBanner = document.getElementById('disconnectedBanner');
+    var reconnectMessage = document.getElementById('reconnectMessage');
+
+    // Add status message to log
+    function addStatus(message, type) {
+      type = type || 'sending';
+      var icons = {
+        sending: '\u23F3',
+        success: '\u2705',
+        failed: '\u274C'
+      };
+
+      var item = document.createElement('div');
+      item.className = 'status-item ' + type;
+
+      var iconSpan = document.createElement('span');
+      iconSpan.className = 'icon';
+      iconSpan.textContent = icons[type];
+
+      var textSpan = document.createElement('span');
+      textSpan.textContent = message;
+
+      item.appendChild(iconSpan);
+      item.appendChild(textSpan);
+
+      // Add to top of log
+      statusLog.insertBefore(item, statusLog.firstChild);
+
+      // Keep log manageable
+      while (statusLog.children.length > 50) {
+        statusLog.removeChild(statusLog.lastChild);
+      }
+    }
+
+    // Update progress UI
+    function updateProgress(current, total) {
+      var percentage = (current / total) * 100;
+      progressBar.style.width = percentage + '%';
+      progressCount.textContent = current + ' / ' + total;
+    }
+
+    // Show completion state
+    function showComplete(successCount, failedCount) {
+      sendingState.classList.add('hidden');
+      completeState.classList.remove('hidden');
+      document.getElementById('finalSentCount').textContent = successCount;
+      document.getElementById('finalFailedCount').textContent = failedCount;
+    }
+
+    // Show error state
+    function showError(errorMessage) {
+      sendingState.classList.add('hidden');
+      errorState.classList.remove('hidden');
+      document.getElementById('errorMessage').textContent = errorMessage;
+    }
+
+    // Connect to SSE stream
+    function connectSSE() {
+      eventSource = new EventSource('/dashboard/upload/progress/' + progressSessionId);
+
+      eventSource.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        handleSSEMessage(data);
+      };
+
+      eventSource.onerror = function() {
+        console.error('SSE connection error');
+
+        // Don't try to reconnect if already complete
+        if (isComplete) return;
+
+        // Close the broken connection
+        eventSource.close();
+
+        // Show disconnection UI
+        showDisconnectedBanner(true);
+
+        // Attempt reconnection with exponential backoff
+        attemptReconnect();
+      };
+    }
+
+    // Show/hide disconnected banner
+    function showDisconnectedBanner(show) {
+      if (show) {
+        disconnectedBanner.classList.add('show');
+      } else {
+        disconnectedBanner.classList.remove('show');
+      }
+    }
+
+    // Attempt reconnection with exponential backoff
+    function attemptReconnect() {
+      if (isComplete) return;
+
+      reconnectAttempts++;
+
+      if (reconnectAttempts > maxReconnectAttempts) {
+        reconnectMessage.textContent = 'Unable to reconnect. Check status or try again.';
+        addStatus('Max reconnection attempts reached', 'failed');
+        return;
+      }
+
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+      var delay = Math.pow(2, reconnectAttempts - 1) * 1000;
+      var seconds = delay / 1000;
+
+      reconnectMessage.textContent = 'Reconnecting in ' + seconds + 's... (attempt ' + reconnectAttempts + '/' + maxReconnectAttempts + ')';
+      addStatus('Reconnecting in ' + seconds + ' seconds...', 'sending');
+
+      reconnectTimer = setTimeout(function() {
+        reconnectMessage.textContent = 'Reconnecting...';
+
+        // Try to reconnect
+        try {
+          eventSource = new EventSource('/dashboard/upload/progress/' + progressSessionId);
+
+          eventSource.onopen = function() {
+            // Connection restored!
+            reconnectAttempts = 0;
+            showDisconnectedBanner(false);
+            addStatus('Connection restored!', 'success');
+          };
+
+          // Re-attach all event handlers
+          eventSource.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            handleSSEMessage(data);
+          };
+
+          eventSource.onerror = function() {
+            if (!isComplete) {
+              eventSource.close();
+              attemptReconnect();
+            }
+          };
+        } catch (e) {
+          attemptReconnect();
+        }
+      }, delay);
+    }
+
+    // Handle SSE messages (extracted for reuse)
+    function handleSSEMessage(data) {
+      switch (data.type) {
+        case 'connected':
+          showDisconnectedBanner(false);
+          reconnectAttempts = 0;
+          addStatus('Connected! Starting to send...', 'sending');
+          startSending();
+          break;
+
+        case 'sending':
+          currentCustomer.textContent = 'Sending to: ' + data.customerName + ' (***' + data.phone + ')';
+          updateProgress(data.current, data.total);
+          break;
+
+        case 'sent':
+          sentCount++;
+          sentCountEl.textContent = sentCount;
+          addStatus('Sent to ' + data.customerName, 'success');
+          break;
+
+        case 'failed':
+          failedCount++;
+          failedCountEl.textContent = failedCount;
+          addStatus('Failed: ' + data.customerName + ' - ' + data.error, 'failed');
+          break;
+
+        case 'complete':
+          isComplete = true;
+          eventSource.close();
+          updateProgress(totalToSend, totalToSend);
+          addStatus('Complete! ' + data.successCount + ' sent, ' + data.failedCount + ' failed.', 'success');
+          setTimeout(function() {
+            showComplete(data.successCount, data.failedCount);
+          }, 1000);
+          break;
+
+        case 'error':
+          isComplete = true;
+          eventSource.close();
+          addStatus('Error: ' + data.error, 'failed');
+          showError(data.error);
+          break;
+      }
+    }
+
+    // Trigger actual SMS sending
+    function startSending() {
+      fetch('/dashboard/upload/start-sending', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ sessionId: progressSessionId })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.error) {
+          console.error('Start sending error:', data.error);
+        }
+      })
+      .catch(function(err) {
+        console.error('Start sending fetch error:', err);
+        addStatus('Failed to start sending: ' + err.message, 'failed');
+      });
+    }
+
+    // Start on page load
+    connectSSE();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
+      if (eventSource) {
+        eventSource.close();
+      }
+    });
+  </script>
+</body>
+</html>

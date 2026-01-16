@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const {
   showReviewLanding,
+  showReviewByShortCode,
   showThankYou
 } = require('../controllers/reviewController');
 
 // GET /review/:uuid - Direct redirect to review platform (Google-compliant)
+// Kept for backwards compatibility with existing SMS links
 router.get('/:uuid', showReviewLanding);
 
 // GET /review/:uuid/thank-you - Thank you page

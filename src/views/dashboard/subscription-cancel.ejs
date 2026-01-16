@@ -4,7 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --brand-dark: #500B42;
+      --brand-gold: #FFBA49;
+      --brand-accent: #A1438E;
+      --brand-positive: #20A39E;
+      --brand-negative: #EF5B5B;
+      --bg-light: #F9F7FA;
+      --text-primary: #500B42;
+      --text-secondary: #64748b;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,9 +27,9 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7fafc;
-      color: #2d3748;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -46,13 +61,13 @@
 
     h1 {
       font-size: 32px;
-      color: #2d3748;
+      color: var(--brand-dark);
       margin-bottom: 15px;
     }
 
     .subtitle {
       font-size: 18px;
-      color: #718096;
+      color: var(--text-secondary);
       margin-bottom: 30px;
       line-height: 1.6;
     }
@@ -98,23 +113,23 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 5px 15px rgba(255, 186, 73, 0.4);
     }
 
     .btn-secondary {
       background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
+      color: var(--brand-dark);
+      border: 2px solid var(--brand-gold);
     }
 
     .btn-secondary:hover {
-      background: #f7fafc;
+      background: var(--bg-light);
     }
 
     .support-note {
@@ -177,7 +192,7 @@
     <div class="support-note">
       <h3>Need help deciding?</h3>
       <p>
-        We understand choosing a subscription is a big decision. Here's what FilterFive can do for your business:
+        We understand choosing a subscription is a big decision. Here's what MoreStars can do for your business:
       </p>
       <ul style="text-align: left; margin-top: 15px; color: #4a5568; line-height: 2;">
         <li>✓ Filter negative reviews before they go public</li>
@@ -196,8 +211,8 @@
       </a>
     </div>
 
-    <p style="margin-top: 30px; color: #a0aec0; font-size: 13px;">
-      Questions? Contact us at <a href="mailto:info@filterfive.io" style="color: #667eea;">info@filterfive.io</a>
+    <p style="margin-top: 30px; color: var(--text-secondary); font-size: 13px;">
+      Questions? Contact us at <a href="mailto:support@morestars.io" style="color: var(--brand-gold);">support@morestars.io</a>
     </p>
   </div>
 </body>
