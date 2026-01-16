@@ -1,0 +1,20 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "5cfd8b85a0371d1a81c9d9cdcf277652"
+name = "MoreStars POS Integration"
+application_url = "https://app.morestars.io"
+embedded = false
+
+[webhooks]
+api_version = "2024-10"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create" ]
+  uri = "/api/webhooks/shopify"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_locations,read_orders"
+
+[auth]
+redirect_urls = [ "https://app.morestars.io/api/auth/shopify/callback" ]
