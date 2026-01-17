@@ -471,11 +471,322 @@ const sessionFactory = {
   },
 };
 
+/**
+ * Square Webhook Event Factory
+ */
+const squareEventFactory = {
+  /**
+   * Build base Square event
+   */
+  build(overrides = {}) {
+    return {
+      event_id: `evt_${faker.string.alphanumeric(24)}`,
+      merchant_id: `MERCH_${faker.string.alphanumeric(8).toUpperCase()}`,
+      type: overrides.type || 'payment.created',
+      created_at: new Date().toISOString(),
+      data: {
+        type: (overrides.type || 'payment.created').split('.')[0],
+        id: faker.string.alphanumeric(12),
+        object: overrides.data || {}
+      },
+      ...overrides
+    };
+  },
+
+  /**
+   * Build payment.created event
+   */
+  buildPaymentCreated(overrides = {}) {
+    const merchantId = overrides.merchantId || `MERCH_${faker.string.alphanumeric(8).toUpperCase()}`;
+    return this.build({
+      type: 'payment.created',
+      merchant_id: merchantId,
+      data: {
+        object: {
+          payment: {
+            id: `pay_${faker.string.alphanumeric(16)}`,
+            status: 'COMPLETED',
+            location_id: overrides.locationId || `loc_${faker.string.alphanumeric(12)}`,
+            customer_id: overrides.customerId || `cust_${faker.string.alphanumeric(12)}`,
+            total_money: {
+              amount: overrides.amount || 5000,
+              currency: 'USD'
+            },
+            created_at: new Date().toISOString(),
+            ...overrides.payment
+          }
+        }
+      },
+      ...overrides
+    });
+  },
+
+  /**
+   * Build order.created event
+   */
+  buildOrderCreated(overrides = {}) {
+    const merchantId = overrides.merchantId || `MERCH_${faker.string.alphanumeric(8).toUpperCase()}`;
+    return this.build({
+      type: 'order.created',
+      merchant_id: merchantId,
+      data: {
+        object: {
+          order: {
+            id: `ord_${faker.string.alphanumeric(16)}`,
+            state: 'COMPLETED',
+            location_id: overrides.locationId || `loc_${faker.string.alphanumeric(12)}`,
+            customer_id: overrides.customerId || `cust_${faker.string.alphanumeric(12)}`,
+            total_money: {
+              amount: overrides.amount || 5000,
+              currency: 'USD'
+            },
+            created_at: new Date().toISOString(),
+            ...overrides.order
+          }
+        }
+      },
+      ...overrides
+    });
+  },
+
+  /**
+   * Build oauth.authorization.revoked event
+   */
+  buildOAuthRevoked(merchantId, overrides = {}) {
+    return this.build({
+      type: 'oauth.authorization.revoked',
+      merchant_id: merchantId || `MERCH_${faker.string.alphanumeric(8).toUpperCase()}`,
+      data: {},
+      ...overrides
+    });
+  },
+
+  /**
+   * Build refund.created event
+   */
+  buildRefundCreated(overrides = {}) {
+    return this.build({
+      type: 'refund.created',
+      data: {
+        object: {
+          refund: {
+            id: `refund_${faker.string.alphanumeric(16)}`,
+            status: 'COMPLETED',
+            payment_id: overrides.paymentId || `pay_${faker.string.alphanumeric(16)}`,
+            amount_money: {
+              amount: overrides.amount || 5000,
+              currency: 'USD'
+            },
+            ...overrides.refund
+          }
+        }
+      },
+      ...overrides
+    });
+  }
+};
+
+/**
+ * Shopify Webhook Event Factory
+ */
+const shopifyEventFactory = {
+  /**
+   * Build base Shopify order
+   */
+  build(overrides = {}) {
+    return {
+      id: faker.number.int({ min: 1000000000, max: 9999999999 }),
+      admin_graphql_api_id: `gid://shopify/Order/${faker.number.int({ min: 1000000000, max: 9999999999 })}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      number: faker.number.int({ min: 1000, max: 9999 }),
+      total_price: (faker.number.int({ min: 1000, max: 50000 }) / 100).toFixed(2),
+      currency: 'USD',
+      financial_status: 'paid',
+      fulfillment_status: null,
+      ...overrides
+    };
+  },
+
+  /**
+   * Build orders/create event payload
+   */
+  buildOrderCreated(overrides = {}) {
+    const customer = overrides.customer || {
+      id: faker.number.int({ min: 1000000000, max: 9999999999 }),
+      email: faker.internet.email().toLowerCase(),
+      first_name: faker.person.firstName(),
+      last_name: faker.person.lastName(),
+      phone: overrides.customerPhone || `+1${faker.string.numeric(10)}`
+    };
+
+    return this.build({
+      customer,
+      email: customer.email,
+      phone: customer.phone,
+      location_id: overrides.locationId || faker.number.int({ min: 10000000, max: 99999999 }),
+      shipping_address: {
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        phone: overrides.shippingPhone || customer.phone,
+        address1: faker.location.streetAddress(),
+        city: faker.location.city(),
+        province: faker.location.state(),
+        country: 'United States',
+        zip: faker.location.zipCode()
+      },
+      billing_address: {
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        phone: overrides.billingPhone || customer.phone,
+        address1: faker.location.streetAddress(),
+        city: faker.location.city(),
+        province: faker.location.state(),
+        country: 'United States',
+        zip: faker.location.zipCode()
+      },
+      line_items: overrides.lineItems || [
+        {
+          id: faker.number.int({ min: 1000000000, max: 9999999999 }),
+          title: faker.commerce.productName(),
+          quantity: 1,
+          price: (faker.number.int({ min: 1000, max: 50000 }) / 100).toFixed(2)
+        }
+      ],
+      ...overrides
+    });
+  },
+
+  /**
+   * Build orders/create event without phone
+   */
+  buildOrderCreatedNoPhone(overrides = {}) {
+    return this.buildOrderCreated({
+      customer: {
+        id: faker.number.int({ min: 1000000000, max: 9999999999 }),
+        email: faker.internet.email().toLowerCase(),
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        phone: null
+      },
+      shipping_address: {
+        phone: null
+      },
+      billing_address: {
+        phone: null
+      },
+      ...overrides
+    });
+  },
+
+  /**
+   * Build app/uninstalled event payload
+   */
+  buildAppUninstalled(shopDomain, overrides = {}) {
+    return {
+      id: faker.number.int({ min: 1000000000, max: 9999999999 }),
+      name: 'Test Store',
+      email: faker.internet.email().toLowerCase(),
+      domain: shopDomain || 'test-store.myshopify.com',
+      created_at: new Date().toISOString(),
+      ...overrides
+    };
+  },
+
+  /**
+   * Get Shopify webhook headers
+   */
+  getHeaders(topic, shopDomain, overrides = {}) {
+    return {
+      'x-shopify-topic': topic,
+      'x-shopify-shop-domain': shopDomain || 'test-store.myshopify.com',
+      'x-shopify-api-version': '2024-01',
+      'x-shopify-webhook-id': faker.string.uuid(),
+      ...overrides
+    };
+  }
+};
+
+/**
+ * Extended Stripe Event Factory (additional methods)
+ */
+const extendedStripeEventFactory = {
+  ...stripeEventFactory,
+
+  /**
+   * Build full Stripe event structure
+   */
+  buildFullEvent(eventType, dataObject, overrides = {}) {
+    return {
+      id: overrides.eventId || `evt_${faker.string.alphanumeric(24)}`,
+      object: 'event',
+      api_version: '2023-10-16',
+      created: Math.floor(Date.now() / 1000),
+      type: eventType,
+      livemode: false,
+      pending_webhooks: 0,
+      data: {
+        object: dataObject
+      },
+      ...overrides
+    };
+  },
+
+  /**
+   * Build invoice.payment_succeeded with billing_reason
+   */
+  buildInvoicePaymentSucceeded(customerId, subscriptionId, options = {}) {
+    return this.buildFullEvent('invoice.payment_succeeded', {
+      id: `in_${faker.string.alphanumeric(24)}`,
+      customer: customerId,
+      subscription: subscriptionId,
+      status: 'paid',
+      amount_paid: options.amount || 7700,
+      billing_reason: options.billingReason || 'subscription_cycle',
+      ...options.invoice
+    });
+  },
+
+  /**
+   * Build checkout.session.completed
+   */
+  buildCheckoutSessionCompleted(customerId, subscriptionId, userId, plan = 'monthly') {
+    return this.buildFullEvent('checkout.session.completed', {
+      id: `cs_${faker.string.alphanumeric(24)}`,
+      customer: customerId,
+      subscription: subscriptionId,
+      mode: 'subscription',
+      status: 'complete',
+      payment_status: 'paid',
+      metadata: {
+        userId: userId.toString(),
+        plan: plan
+      }
+    });
+  },
+
+  /**
+   * Build customer.subscription.deleted
+   */
+  buildSubscriptionDeleted(subscriptionId, customerId) {
+    return this.buildFullEvent('customer.subscription.deleted', {
+      id: subscriptionId,
+      customer: customerId,
+      status: 'canceled',
+      canceled_at: Math.floor(Date.now() / 1000),
+      current_period_end: Math.floor(Date.now() / 1000)
+    });
+  }
+};
+
 module.exports = {
   userFactory,
   feedbackRequestFactory,
   reviewFactory,
   stripeEventFactory,
+  extendedStripeEventFactory,
+  squareEventFactory,
+  shopifyEventFactory,
   posIntegrationFactory,
   csvDataFactory,
   sessionFactory,
