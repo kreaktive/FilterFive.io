@@ -40,7 +40,8 @@ router.get('/email-preview', (req, res) => {
     { name: 'paymentFailed', label: 'Payment Failed' },
     { name: 'supportRequest', label: 'Support Request (Internal)' },
     { name: 'adminAlert', label: 'Admin Alert (Internal)' },
-    { name: 'contactForm', label: 'Contact Form (Internal)' }
+    { name: 'contactForm', label: 'Contact Form (Internal)' },
+    { name: 'businessEvent', label: 'Business Event Alert (Internal)' }
   ];
 
   const baseUrl = process.env.APP_URL || 'https://morestars.io';
@@ -155,6 +156,14 @@ router.get('/email-preview/:template', (req, res) => {
           topic: 'sales',
           message: 'Hi, I run an auto repair shop and I\'m interested in learning more about how MoreStars can help us get more Google reviews. We currently have about 50 reviews and want to grow. What would be the best plan for us?',
           submittedAt: new Date()
+        });
+        break;
+      case 'businessEvent':
+        html = emailTemplates.businessEventAlert('new_signup', {
+          businessName: 'Acme Coffee Shop',
+          email: 'owner@acmecoffee.com',
+          plan: 'Trial (14 days)',
+          source: 'Organic Search'
         });
         break;
       default:

@@ -4,9 +4,10 @@
  */
 
 // Logo URL - uses APP_URL for absolute path (required for email clients)
+// White version for dark email headers
 const getLogoUrl = () => {
   const baseUrl = process.env.APP_URL || 'https://morestars.io';
-  return `${baseUrl}/images/Logo%20MoreStars.io.png`;
+  return `${baseUrl}/images/Logo-MoreStars-white.png`;
 };
 
 // Logo HTML for email headers (white version for dark backgrounds)
