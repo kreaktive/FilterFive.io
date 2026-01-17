@@ -26,12 +26,14 @@ services:
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
       - APP_URL=${APP_URL:-http://localhost:3000}
       - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_URL=redis://redis:6379
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - db
-    command: npm run dev
+      - redis
+    command: npm start
     networks:
       - filterfive-network
 
@@ -47,6 +49,15 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - filterfive-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: morestars_redis
+    restart: always
+    ports:
+      - "6379:6379"
     networks:
       - filterfive-network
 
