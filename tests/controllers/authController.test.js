@@ -21,6 +21,7 @@ jest.mock('../../src/services/emailService', () => ({
   sendVerificationEmail: jest.fn().mockResolvedValue(true),
   sendWelcomeEmail: jest.fn().mockResolvedValue(true),
   sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+  sendBusinessEventAlert: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock('../../src/services/stripeService', () => ({
@@ -32,6 +33,14 @@ jest.mock('../../src/services/logger', () => ({
   info: jest.fn(),
   auth: jest.fn(),
   stripe: jest.fn(),
+}));
+
+jest.mock('../../src/middleware/csrf', () => ({
+  rotateToken: jest.fn(),
+}));
+
+jest.mock('../../src/middleware/auth', () => ({
+  invalidateUserSessionCache: jest.fn().mockResolvedValue(true),
 }));
 
 // Mock User model
@@ -76,6 +85,7 @@ describe('Auth Controller', () => {
         businessName: null,
         regenerate: jest.fn((cb) => cb && cb()),
         destroy: jest.fn((cb) => cb && cb()),
+        save: jest.fn((cb) => cb && cb()),
       },
     };
 
@@ -767,6 +777,344 @@ describe('Auth Controller', () => {
         businessName: '',
         email: '',
       }));
+    });
+  });
+
+  // ===========================================
+  // Additional Edge Case Tests for Full Coverage
+  // ===========================================
+  describe('POST /signup - Additional Edge Cases', () => {
+    const validSignupData = {
+      businessName: 'Test Business LLC',
+      email: 'newuser@example.com',
+      password: 'SecurePass123!',
+    };
+
+    beforeEach(() => {
+      User.findOne.mockResolvedValue(null);
+      User.create.mockResolvedValue({
+        id: 1,
+        ...validSignupData,
+        update: jest.fn().mockResolvedValue(true),
+      });
+    });
+
+    test('should render verify-pending with emailError when email fails', async () => {
+      mockReq.body = validSignupData;
+      const emailService = require('../../src/services/emailService');
+      emailService.sendVerificationEmail.mockRejectedValueOnce(new Error('SMTP connection failed'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.signup(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/verify-pending',
+        expect.objectContaining({
+          emailError: true,
+        })
+      );
+    });
+
+    test('should handle DB error during user creation', async () => {
+      mockReq.body = validSignupData;
+      User.create.mockRejectedValue(new Error('Database constraint violation'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.signup(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/signup',
+        expect.objectContaining({
+          error: expect.stringContaining('error'),
+        })
+      );
+    });
+
+    test('should show resend option for unverified duplicate email', async () => {
+      mockReq.body = validSignupData;
+      User.findOne.mockResolvedValue({
+        ...mockUser,
+        isVerified: false,
+      });
+
+      const authController = require('../../src/controllers/authController');
+      await authController.signup(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/signup',
+        expect.objectContaining({
+          showResendVerification: true,
+          unverifiedEmail: validSignupData.email.toLowerCase(),
+        })
+      );
+    });
+  });
+
+  describe('GET /verify/:token - Session Edge Cases', () => {
+    test('should show login message when session regeneration fails', async () => {
+      mockReq.params = { token: 'valid-token' };
+      mockReq.session.regenerate = jest.fn((cb) => cb(new Error('Session store unavailable')));
+
+      const validUser = {
+        id: 42,
+        email: 'verified@example.com',
+        businessName: 'Verified Business',
+        verificationToken: 'valid-token',
+        verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000),
+        isVerified: false,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(validUser);
+
+      const authController = require('../../src/controllers/authController');
+      await authController.verifyEmail(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/verify-success',
+        expect.objectContaining({
+          dashboardUrl: '/dashboard/login',
+          message: 'Please log in to continue.',
+        })
+      );
+    });
+
+    test('should handle session save error gracefully', async () => {
+      mockReq.params = { token: 'valid-token' };
+      mockReq.session.regenerate = jest.fn((cb) => cb(null));
+      mockReq.session.save = jest.fn((cb) => cb(new Error('Session save failed')));
+
+      const validUser = {
+        id: 42,
+        email: 'verified@example.com',
+        businessName: 'Verified Business',
+        verificationToken: 'valid-token',
+        verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000),
+        isVerified: false,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(validUser);
+
+      const authController = require('../../src/controllers/authController');
+      await authController.verifyEmail(mockReq, mockRes);
+
+      // Should still render success page despite save error
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/verify-success',
+        expect.objectContaining({
+          dashboardUrl: '/dashboard',
+        })
+      );
+    });
+
+    test('should handle welcome email failure without blocking', async () => {
+      mockReq.params = { token: 'valid-token' };
+
+      const validUser = {
+        id: 42,
+        email: 'verified@example.com',
+        businessName: 'Verified Business',
+        verificationToken: 'valid-token',
+        verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000),
+        isVerified: false,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(validUser);
+
+      const emailService = require('../../src/services/emailService');
+      emailService.sendWelcomeEmail.mockRejectedValueOnce(new Error('Email service down'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.verifyEmail(mockReq, mockRes);
+
+      // Verification should still succeed
+      expect(validUser.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isVerified: true,
+        })
+      );
+    });
+
+    test('should handle database error during verification', async () => {
+      mockReq.params = { token: 'any-token' };
+      User.findOne.mockRejectedValue(new Error('Database connection lost'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.verifyEmail(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/verify-error',
+        expect.objectContaining({
+          error: expect.stringContaining('error'),
+        })
+      );
+    });
+  });
+
+  describe('POST /resend-verification - Edge Cases', () => {
+    test('should return 400 when email not provided', async () => {
+      mockReq.body = { email: '' };
+
+      const authController = require('../../src/controllers/authController');
+      await authController.resendVerification(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Email is required',
+      });
+    });
+
+    test('should handle database error during resend', async () => {
+      mockReq.body = { email: 'test@example.com' };
+      User.findOne.mockRejectedValue(new Error('DB error'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.resendVerification(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to resend verification email',
+      });
+    });
+
+    test('should handle email send failure during resend', async () => {
+      mockReq.body = { email: 'unverified@example.com' };
+
+      const unverifiedUser = {
+        ...mockUser,
+        isVerified: false,
+        verificationToken: null,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(unverifiedUser);
+
+      const emailService = require('../../src/services/emailService');
+      emailService.sendVerificationEmail.mockRejectedValueOnce(new Error('SMTP failure'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.resendVerification(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to resend verification email',
+      });
+    });
+  });
+
+  describe('POST /forgot-password - Edge Cases', () => {
+    test('should handle email validation failure', async () => {
+      mockReq.body = { email: 'invalid-email' };
+
+      const authController = require('../../src/controllers/authController');
+      await authController.forgotPassword(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/forgot-password',
+        expect.objectContaining({
+          error: expect.any(String),
+        })
+      );
+    });
+
+    test('should handle email service failure', async () => {
+      mockReq.body = { email: 'user@example.com' };
+
+      const existingUser = {
+        ...mockUser,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(existingUser);
+
+      const emailService = require('../../src/services/emailService');
+      emailService.sendPasswordResetEmail.mockRejectedValueOnce(new Error('Email service down'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.forgotPassword(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/forgot-password',
+        expect.objectContaining({
+          error: expect.stringContaining('error'),
+        })
+      );
+    });
+
+    test('should use 30 minute token expiry (S5 security fix)', async () => {
+      mockReq.body = { email: 'user@example.com' };
+
+      const existingUser = {
+        ...mockUser,
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(existingUser);
+
+      const authController = require('../../src/controllers/authController');
+      await authController.forgotPassword(mockReq, mockRes);
+
+      const updateCall = existingUser.update.mock.calls[0][0];
+      const tokenExpiry = updateCall.resetPasswordTokenExpires;
+      const expiryDuration = tokenExpiry - Date.now();
+      const thirtyMinutes = 30 * 60 * 1000;
+
+      // S5 fix: Token should expire in 30 minutes or less
+      expect(expiryDuration).toBeLessThanOrEqual(thirtyMinutes + 1000); // Allow 1s tolerance
+      expect(expiryDuration).toBeGreaterThan(29 * 60 * 1000);
+    });
+  });
+
+  describe('POST /reset-password/:token - Edge Cases', () => {
+    test('should handle database error during reset', async () => {
+      mockReq.params = { token: 'valid-token' };
+      mockReq.body = {
+        password: 'NewPass123!',
+        confirmPassword: 'NewPass123!',
+      };
+      User.findOne.mockRejectedValue(new Error('DB connection lost'));
+
+      const authController = require('../../src/controllers/authController');
+      await authController.resetPassword(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/reset-error',
+        expect.objectContaining({
+          error: expect.stringContaining('error'),
+        })
+      );
+    });
+
+    test('should render success page after password reset', async () => {
+      mockReq.params = { token: 'valid-token' };
+      mockReq.body = {
+        password: 'NewPass123!',
+        confirmPassword: 'NewPass123!',
+      };
+
+      const userWithToken = {
+        ...mockUser,
+        resetPasswordToken: 'valid-token',
+        resetPasswordTokenExpires: new Date(Date.now() + 30 * 60 * 1000),
+        update: jest.fn().mockResolvedValue(true),
+      };
+      User.findOne.mockResolvedValue(userWithToken);
+
+      const authController = require('../../src/controllers/authController');
+      await authController.resetPassword(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith(
+        'auth/reset-success',
+        expect.objectContaining({
+          title: 'Password Reset Successful',
+          loginUrl: '/dashboard/login',
+        })
+      );
     });
   });
 });

@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Resend } = require('resend');
+const logger = require('./logger');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -213,20 +214,21 @@ const sendVerificationEmail = async (email, businessName, verificationToken) => 
     const result = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: 'Verify your FilterFive account',
+      subject: 'Verify your MoreStars account',
       html: templates.verificationEmail(businessName, verificationUrl)
     });
 
     if (result.error) {
+      logger.error('Verification email failed', { email, error: result.error.message });
       throw new Error(`Resend API Error: ${result.error.message}`);
     }
 
     const emailId = result?.data?.id || result?.id;
-    console.log(`✓ Verification email sent to ${email} - Email ID: ${emailId}`);
+    logger.info('Verification email sent', { email, emailId });
 
     return { success: true, emailId };
   } catch (error) {
-    console.error('✗ Verification email failed:', error.message);
+    logger.error('Verification email failed', { email, error: error.message });
     throw error;
   }
 };
@@ -242,7 +244,7 @@ const sendWelcomeEmail = async (email, businessName) => {
     const result = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: '🚀 Welcome to FilterFive - Your trial has started!',
+      subject: 'Welcome to MoreStars - Your trial has started!',
       html: templates.welcomeEmail(businessName, dashboardUrl)
     });
 
@@ -251,11 +253,11 @@ const sendWelcomeEmail = async (email, businessName) => {
     }
 
     const emailId = result?.data?.id || result?.id;
-    console.log(`✓ Welcome email sent to ${email} - Email ID: ${emailId}`);
+    logger.info('Welcome email sent', { email, emailId });
 
     return { success: true, emailId };
   } catch (error) {
-    console.error('✗ Welcome email failed:', error.message);
+    logger.error('Welcome email failed', { email, error: error.message });
     throw error;
   }
 };
@@ -275,7 +277,7 @@ const sendPasswordResetEmail = async (email, businessName, resetToken) => {
     const result = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: 'Reset your FilterFive password',
+      subject: 'Reset your MoreStars password',
       html: templates.passwordResetEmail(businessName, resetUrl)
     });
 
@@ -284,11 +286,11 @@ const sendPasswordResetEmail = async (email, businessName, resetToken) => {
     }
 
     const emailId = result?.data?.id || result?.id;
-    console.log(`✓ Password reset email sent to ${email} - Email ID: ${emailId}`);
+    logger.info('Password reset email sent', { email, emailId });
 
     return { success: true, emailId };
   } catch (error) {
-    console.error('✗ Password reset email failed:', error.message);
+    logger.error('Password reset email failed', { email, error: error.message });
     throw error;
   }
 };
@@ -309,7 +311,7 @@ const sendTrialEndingEmail = async (email, businessName, trialEndsAt) => {
     const result = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: '⏰ Your FilterFive trial ends in 3 days',
+      subject: 'Your MoreStars trial ends in 3 days',
       html: templates.trialEndingEmail(businessName, dashboardUrl, trialEndsDate)
     });
 
@@ -318,11 +320,11 @@ const sendTrialEndingEmail = async (email, businessName, trialEndsAt) => {
     }
 
     const emailId = result?.data?.id || result?.id;
-    console.log(`✓ Trial ending email sent to ${email} - Email ID: ${emailId}`);
+    logger.info('Trial ending email sent', { email, emailId });
 
     return { success: true, emailId };
   } catch (error) {
-    console.error('✗ Trial ending email failed:', error.message);
+    logger.error('Trial ending email failed', { email, error: error.message });
     throw error;
   }
 };
@@ -338,7 +340,7 @@ const sendTrialExpiredEmail = async (email, businessName) => {
     const result = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: 'Your FilterFive trial has ended',
+      subject: 'Your MoreStars trial has ended',
       html: templates.trialExpiredEmail(businessName, dashboardUrl)
     });
 
@@ -347,11 +349,11 @@ const sendTrialExpiredEmail = async (email, businessName) => {
     }
 
     const emailId = result?.data?.id || result?.id;
-    console.log(`✓ Trial expired email sent to ${email} - Email ID: ${emailId}`);
+    logger.info('Trial expired email sent', { email, emailId });
 
     return { success: true, emailId };
   } catch (error) {
-    console.error('✗ Trial expired email failed:', error.message);
+    logger.error('Trial expired email failed', { email, error: error.message });
     throw error;
   }
 };
@@ -387,6 +389,300 @@ const sendBusinessEventAlert = async (eventType, eventData = {}) => {
   }
 };
 
+/**
+ * Send Admin Alert (for system notifications)
+ * Does NOT throw on error - returns success: false instead
+ */
+const sendAdminAlert = async (title, message, stackTrace = null, metadata = {}) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@morestars.io';
+    const templates = require('./emailTemplates');
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: adminEmail,
+      subject: `[MoreStars Alert] ${title}`,
+      html: templates.adminAlertEmail(title, message, stackTrace, metadata)
+    });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Admin alert sent', { title, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Admin alert email failed', { title, error: error.message });
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send Support Request Email
+ */
+const sendSupportRequestEmail = async (email, businessName, userId, subjectType, message) => {
+  try {
+    const supportEmail = process.env.SUPPORT_EMAIL || 'support@morestars.io';
+    const templates = require('./emailTemplates');
+
+    const subjectLabels = {
+      feature_request: 'Feature Request',
+      bug_report: 'Bug Report',
+      billing: 'Billing Question',
+      integration: 'Integration Help',
+      general: 'General Question'
+    };
+
+    const subjectLabel = subjectLabels[subjectType] || 'General Question';
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: supportEmail,
+      replyTo: email,
+      subject: `[MoreStars Support] ${subjectLabel} from ${businessName}`,
+      html: templates.supportRequestEmail(email, businessName, userId, subjectType, message)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Support request email sent', { email, subjectType, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Support request email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send 7-Day Trial Warning Email
+ */
+const sendTrialWarning7DaysEmail = async (email, businessName, trialEndsAt) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+    const trialEndsDate = new Date(trialEndsAt).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: '7 days left in your MoreStars trial',
+      html: templates.trialWarning7DaysEmail(businessName, dashboardUrl, trialEndsDate)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Trial 7-day warning email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Trial 7-day warning email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send 1-Day Trial Warning Email (Urgent)
+ */
+const sendTrialWarning1DayEmail = async (email, businessName, trialEndsAt) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+    const trialEndsDate = new Date(trialEndsAt).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Last day of your MoreStars trial!',
+      html: templates.trialWarning1DayEmail(businessName, dashboardUrl, trialEndsDate)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Trial 1-day warning email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Trial 1-day warning email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send Abandoned Checkout Email
+ */
+const sendAbandonedCheckoutEmail = async (email, businessName) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard/subscription`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'You left something behind...',
+      html: templates.abandonedCheckoutEmail(businessName, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Abandoned checkout email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Abandoned checkout email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send 30-Minute Abandoned Checkout Email
+ */
+const sendAbandonedCheckout30MinEmail = async (email, businessName) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard/subscription`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Still thinking it over?',
+      html: templates.abandonedCheckout30MinEmail(businessName, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('30-min abandoned checkout email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('30-min abandoned checkout email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send Payment Failed Email
+ */
+const sendPaymentFailedEmail = async (email, businessName) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard/subscription`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Payment failed for your MoreStars subscription',
+      html: templates.paymentFailedEmail(businessName, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Payment failed email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Payment failed email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send Verification Reminder Email
+ */
+const sendVerificationReminderEmail = async (email, businessName, verificationToken) => {
+  try {
+    const templates = require('./emailTemplates');
+    const verificationUrl = `${process.env.APP_URL}/verify/${verificationToken}`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: "Don't forget to verify your MoreStars account",
+      html: templates.verificationReminderEmail(businessName, verificationUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Verification reminder email sent', { email, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Verification reminder email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
+ * Send Contact Form Notification
+ */
+const sendContactNotification = async (formData) => {
+  try {
+    const supportEmail = process.env.SUPPORT_EMAIL || 'support@morestars.io';
+    const templates = require('./emailTemplates');
+
+    const topicLabels = {
+      sales: 'Sales Inquiry',
+      support: 'Support Request',
+      billing: 'Billing Question',
+      partnership: 'Partnership Opportunity',
+      general: 'General Inquiry'
+    };
+
+    const topicLabel = topicLabels[formData.topic] || 'Contact Inquiry';
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: supportEmail,
+      replyTo: formData.email,
+      subject: `[MoreStars Contact] ${topicLabel} from ${formData.businessName}`,
+      html: templates.contactFormNotification(formData)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Contact notification sent', { email: formData.email, topic: formData.topic, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Contact notification email failed', { email: formData.email, error: error.message });
+    throw error;
+  }
+};
+
 module.exports = {
   sendNegativeFeedbackAlert,
   sendVerificationEmail,
@@ -394,5 +690,14 @@ module.exports = {
   sendPasswordResetEmail,
   sendTrialEndingEmail,
   sendTrialExpiredEmail,
-  sendBusinessEventAlert
+  sendBusinessEventAlert,
+  sendAdminAlert,
+  sendSupportRequestEmail,
+  sendTrialWarning7DaysEmail,
+  sendTrialWarning1DayEmail,
+  sendAbandonedCheckoutEmail,
+  sendAbandonedCheckout30MinEmail,
+  sendPaymentFailedEmail,
+  sendVerificationReminderEmail,
+  sendContactNotification
 };

@@ -65,6 +65,13 @@ jest.mock('../../src/models', () => ({
   },
 }));
 
+// Mock emailService - MUST be before stripeService import
+const mockSendBusinessEventAlert = jest.fn();
+jest.mock('../../src/services/emailService', () => ({
+  sendBusinessEventAlert: mockSendBusinessEventAlert,
+  sendPaymentFailedEmail: jest.fn().mockResolvedValue({ success: true }),
+}));
+
 // Now import the things we need for assertions
 const { User, StripeWebhookEvent } = require('../../src/models');
 const logger = require('../../src/services/logger');
@@ -118,6 +125,9 @@ describe('Stripe Service', () => {
     mockStripeSubscriptionsCancel.mockResolvedValue({ id: 'sub_test123', status: 'canceled' });
     mockStripeSubscriptionsUpdate.mockResolvedValue({ id: 'sub_test123', cancel_at_period_end: true });
     mockStripeBillingPortalSessionsCreate.mockResolvedValue({ url: 'https://billing.stripe.com/session/123' });
+
+    // Set up email service mock default
+    mockSendBusinessEventAlert.mockResolvedValue({ success: true });
 
     // Set up model mocks
     User.findOne.mockResolvedValue(createMockUser());
@@ -424,6 +434,60 @@ describe('Stripe Service', () => {
       });
     });
 
+    describe('customer.subscription.created Event', () => {
+      it('should route to handleSubscriptionCreated handler', async () => {
+        const mockUserUpdate = jest.fn().mockResolvedValue(true);
+        User.findOne.mockResolvedValue(createMockUser({ update: mockUserUpdate }));
+
+        const event = {
+          id: 'evt_sub_created123',
+          type: 'customer.subscription.created',
+          data: {
+            object: {
+              id: 'sub_new123',
+              customer: 'cus_test123',
+              status: 'active',
+              current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+            },
+          },
+        };
+
+        await stripeService.handleWebhookEvent(event);
+
+        expect(mockUserUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            stripeSubscriptionId: 'sub_new123',
+            subscriptionStatus: 'active',
+            smsUsageCount: 0,
+            smsUsageLimit: 1000,
+            marketingStatus: 'active',
+          })
+        );
+        expect(logger.info).toHaveBeenCalledWith('Subscription created', expect.any(Object));
+      });
+
+      it('should log warning when user not found', async () => {
+        User.findOne.mockResolvedValue(null);
+
+        const event = {
+          id: 'evt_sub_created_nouser',
+          type: 'customer.subscription.created',
+          data: {
+            object: {
+              id: 'sub_unknown',
+              customer: 'cus_unknown',
+              status: 'active',
+              current_period_end: Math.floor(Date.now() / 1000),
+            },
+          },
+        };
+
+        await stripeService.handleWebhookEvent(event);
+
+        expect(logger.warn).toHaveBeenCalledWith('User not found for subscription created', expect.any(Object));
+      });
+    });
+
     describe('checkout.session.completed Event', () => {
       it('should activate subscription and reset SMS count', async () => {
         const mockUserUpdate = jest.fn().mockResolvedValue(true);
@@ -560,6 +624,44 @@ describe('Stripe Service', () => {
           })
         );
       });
+
+      it('should log warning when user not found for subscription deleted', async () => {
+        User.findOne.mockResolvedValue(null);
+
+        const event = {
+          id: 'evt_deleted_nouser',
+          type: 'customer.subscription.deleted',
+          data: { object: { id: 'sub_unknown', customer: 'cus_unknown' } },
+        };
+
+        await stripeService.handleWebhookEvent(event);
+
+        expect(logger.warn).toHaveBeenCalledWith('User not found for subscription deleted', expect.any(Object));
+      });
+
+      it('should continue even if business alert fails', async () => {
+        const mockUserUpdate = jest.fn().mockResolvedValue(true);
+        User.findOne.mockResolvedValue(createMockUser({ update: mockUserUpdate }));
+        mockSendBusinessEventAlert.mockRejectedValue(new Error('Email service down'));
+
+        const event = {
+          id: 'evt_deleted_alert_fail',
+          type: 'customer.subscription.deleted',
+          data: { object: { id: 'sub_test123', customer: 'cus_test123' } },
+        };
+
+        // Should NOT throw - business alert is non-blocking
+        await expect(stripeService.handleWebhookEvent(event)).resolves.toEqual({ success: true });
+
+        // User should still be updated
+        expect(mockUserUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            subscriptionStatus: 'cancelled',
+          })
+        );
+        // Error should be logged
+        expect(logger.error).toHaveBeenCalledWith('Business alert failed', expect.any(Object));
+      });
     });
 
     describe('invoice.payment_succeeded Event (B6 Fix)', () => {
@@ -693,6 +795,74 @@ describe('Stripe Service', () => {
         );
         expect(logger.info).toHaveBeenCalledWith('Payment failed - SMS blocked', expect.any(Object));
       });
+
+      it('should log warning when user not found for payment failed', async () => {
+        User.findOne.mockResolvedValue(null);
+
+        const event = {
+          id: 'evt_failed_nouser',
+          type: 'invoice.payment_failed',
+          data: { object: { id: 'in_test123', customer: 'cus_unknown', attempt_count: 1 } },
+        };
+
+        await stripeService.handleWebhookEvent(event);
+
+        expect(logger.warn).toHaveBeenCalledWith('User not found for payment failed', expect.any(Object));
+      });
+
+      it('should continue even if payment failed email send fails', async () => {
+        const mockUserUpdate = jest.fn().mockResolvedValue(true);
+        User.findOne.mockResolvedValue(createMockUser({
+          paymentFailedEmailSentAt: null,
+          update: mockUserUpdate,
+        }));
+
+        // Make the email service throw
+        const emailService = require('../../src/services/emailService');
+        emailService.sendPaymentFailedEmail.mockRejectedValue(new Error('Email service down'));
+
+        const event = {
+          id: 'evt_failed_email_error',
+          type: 'invoice.payment_failed',
+          data: { object: { id: 'in_test123', customer: 'cus_test123', attempt_count: 1 } },
+        };
+
+        // Should NOT throw - email error is caught
+        await expect(stripeService.handleWebhookEvent(event)).resolves.toEqual({ success: true });
+
+        // User should still be updated with payment failed status
+        expect(mockUserUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            subscriptionStatus: 'past_due',
+            smsUsageLimit: 0,
+          })
+        );
+        // Error should be logged
+        expect(logger.error).toHaveBeenCalledWith('Failed to send payment failed email', expect.any(Object));
+      });
+    });
+
+    describe('invoice.payment_succeeded user not found', () => {
+      it('should log warning when user not found for payment succeeded', async () => {
+        User.findOne.mockResolvedValue(null);
+
+        const event = {
+          id: 'evt_success_nouser',
+          type: 'invoice.payment_succeeded',
+          data: {
+            object: {
+              id: 'in_test123',
+              customer: 'cus_unknown',
+              billing_reason: 'subscription_cycle',
+              amount_paid: 7700,
+            },
+          },
+        };
+
+        await stripeService.handleWebhookEvent(event);
+
+        expect(logger.warn).toHaveBeenCalledWith('User not found for payment succeeded', expect.any(Object));
+      });
     });
 
     describe('User Not Found Scenarios', () => {
@@ -749,6 +919,215 @@ describe('Stripe Service', () => {
         expect(result).toEqual({ success: true });
         expect(logger.debug).toHaveBeenCalledWith('Unhandled webhook event type', expect.any(Object));
       });
+    });
+  });
+
+  // ===========================================
+  // Payment Failed Email Throttling
+  // ===========================================
+  describe('Payment Failed Email Throttling', () => {
+    it('should not send payment failed email if sent within 3 hours', async () => {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findOne.mockResolvedValue(createMockUser({
+        paymentFailedEmailSentAt: twoHoursAgo,
+        update: mockUserUpdate,
+      }));
+
+      const event = {
+        id: 'evt_throttle_test',
+        type: 'invoice.payment_failed',
+        data: { object: { id: 'in_test123', customer: 'cus_test123', attempt_count: 2 } },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      // Should update status but NOT update paymentFailedEmailSentAt (email not sent)
+      expect(mockUserUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subscriptionStatus: 'past_due',
+          smsUsageLimit: 0,
+        })
+      );
+      // The paymentFailedEmailSentAt should NOT be updated since email wasn't sent
+      const updateCall = mockUserUpdate.mock.calls[0][0];
+      expect(updateCall.paymentFailedEmailSentAt).toBeUndefined();
+    });
+
+    it('should send payment failed email if more than 3 hours since last send', async () => {
+      const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findOne.mockResolvedValue(createMockUser({
+        paymentFailedEmailSentAt: fourHoursAgo,
+        update: mockUserUpdate,
+      }));
+
+      // Mock the email service
+      jest.mock('../../src/services/emailService', () => ({
+        sendPaymentFailedEmail: jest.fn().mockResolvedValue({ success: true }),
+      }));
+
+      const event = {
+        id: 'evt_4hr_test',
+        type: 'invoice.payment_failed',
+        data: { object: { id: 'in_test123', customer: 'cus_test123', attempt_count: 3 } },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      expect(mockUserUpdate).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================
+  // Business Event Alert Non-Blocking
+  // ===========================================
+  describe('Business Event Alert Non-Blocking', () => {
+    it('should continue checkout processing even if business alert fails', async () => {
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findByPk.mockResolvedValue(createMockUser({
+        subscriptionStatus: 'trial',
+        update: mockUserUpdate,
+      }));
+
+      // Use the module-level mock - set it to reject
+      mockSendBusinessEventAlert.mockRejectedValue(new Error('Email service down'));
+
+      const event = {
+        id: 'evt_checkout_alert_fail',
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            customer: 'cus_test123',
+            subscription: 'sub_new123',
+            metadata: { userId: '1', plan: 'monthly' },
+          },
+        },
+      };
+
+      // Should NOT throw - business alert is non-blocking
+      await expect(stripeService.handleWebhookEvent(event)).resolves.toEqual({ success: true });
+
+      // User should still be updated
+      expect(mockUserUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subscriptionStatus: 'active',
+        })
+      );
+    });
+
+    it('should mark trial_converted only if user was on trial', async () => {
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findByPk.mockResolvedValue(createMockUser({
+        subscriptionStatus: 'active', // NOT trial
+        update: mockUserUpdate,
+      }));
+
+      // Use module-level mock (already configured in beforeEach)
+      const event = {
+        id: 'evt_not_trial_conversion',
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            customer: 'cus_test123',
+            subscription: 'sub_new123',
+            metadata: { userId: '1', plan: 'monthly' },
+          },
+        },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      // Should be called with 'subscription_created' not 'trial_converted'
+      expect(mockSendBusinessEventAlert).toHaveBeenCalledWith(
+        'subscription_created',
+        expect.any(Object)
+      );
+    });
+  });
+
+  // ===========================================
+  // SMS Reset for Different Billing Reasons
+  // ===========================================
+  describe('SMS Reset for Billing Reasons', () => {
+    it('should NOT reset SMS count for subscription_update billing reason', async () => {
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findOne.mockResolvedValue(createMockUser({ smsUsageCount: 500, update: mockUserUpdate }));
+
+      const event = {
+        id: 'evt_sub_update',
+        type: 'invoice.payment_succeeded',
+        data: {
+          object: {
+            id: 'in_test123',
+            customer: 'cus_test123',
+            billing_reason: 'subscription_update',
+            amount_paid: 7700,
+          },
+        },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      // smsUsageCount should NOT be reset (undefined in update call)
+      const updateCall = mockUserUpdate.mock.calls[0][0];
+      expect(updateCall.smsUsageCount).toBeUndefined();
+    });
+
+    it('should NOT reset SMS count for subscription_threshold billing reason', async () => {
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findOne.mockResolvedValue(createMockUser({ smsUsageCount: 800, update: mockUserUpdate }));
+
+      const event = {
+        id: 'evt_sub_threshold',
+        type: 'invoice.payment_succeeded',
+        data: {
+          object: {
+            id: 'in_test123',
+            customer: 'cus_test123',
+            billing_reason: 'subscription_threshold',
+            amount_paid: 5000,
+          },
+        },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      // smsUsageCount should NOT be reset
+      const updateCall = mockUserUpdate.mock.calls[0][0];
+      expect(updateCall.smsUsageCount).toBeUndefined();
+    });
+
+    it('should always clear payment failure tracking on successful payment', async () => {
+      const mockUserUpdate = jest.fn().mockResolvedValue(true);
+      User.findOne.mockResolvedValue(createMockUser({
+        paymentFailedAt: new Date(),
+        paymentFailedEmailSentAt: new Date(),
+        update: mockUserUpdate,
+      }));
+
+      const event = {
+        id: 'evt_clear_failure',
+        type: 'invoice.payment_succeeded',
+        data: {
+          object: {
+            id: 'in_test123',
+            customer: 'cus_test123',
+            billing_reason: 'subscription_update', // Even for non-cycle billing
+            amount_paid: 1000,
+          },
+        },
+      };
+
+      await stripeService.handleWebhookEvent(event);
+
+      // Should always clear payment failure tracking
+      expect(mockUserUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          paymentFailedAt: null,
+          paymentFailedEmailSentAt: null,
+        })
+      );
     });
   });
 

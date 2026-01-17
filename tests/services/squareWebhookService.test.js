@@ -462,7 +462,59 @@ describe('Square Webhook Service', () => {
       const result = await squareWebhookService.processEvent(event);
 
       expect(logger.info).toHaveBeenCalledWith('Refund processed', { paymentId: 'pay_unknown' });
+      // No transaction to update, so just logged
       expect(result).toEqual({ processed: true, action: 'refund_logged' });
+    });
+
+    it('should NOT update transaction if SMS already sent', async () => {
+      const mockTransaction = {
+        id: 6,
+        smsStatus: 'sent', // Already sent, not pending
+        save: jest.fn().mockResolvedValue(true),
+      };
+      PosTransaction.findOne.mockResolvedValue(mockTransaction);
+
+      const event = {
+        event_id: 'evt_ref_sent',
+        type: 'refund.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            refund: { status: 'COMPLETED', payment_id: 'pay_sent' },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      // Should not update already sent SMS
+      expect(mockTransaction.save).not.toHaveBeenCalled();
+      expect(result).toEqual({ processed: true, action: 'transaction_marked_refunded' });
+    });
+
+    it('should NOT update transaction if SMS already failed', async () => {
+      const mockTransaction = {
+        id: 7,
+        smsStatus: 'failed', // Already failed
+        save: jest.fn().mockResolvedValue(true),
+      };
+      PosTransaction.findOne.mockResolvedValue(mockTransaction);
+
+      const event = {
+        event_id: 'evt_ref_failed',
+        type: 'refund.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            refund: { status: 'COMPLETED', payment_id: 'pay_failed' },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(mockTransaction.save).not.toHaveBeenCalled();
+      expect(result).toEqual({ processed: true, action: 'transaction_marked_refunded' });
     });
   });
 
@@ -512,6 +564,30 @@ describe('Square Webhook Service', () => {
       const result = await squareWebhookService.processEvent(event);
 
       expect(result).toEqual({ processed: true, action: 'oauth_revoked' });
+    });
+
+    it('should propagate integration save failure', async () => {
+      const mockIntegration = {
+        id: 1,
+        isActive: true,
+        accessTokenEncrypted: 'enc',
+        refreshTokenEncrypted: 'enc',
+        save: jest.fn().mockRejectedValue(new Error('Database error')),
+      };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+
+      const event = {
+        event_id: 'evt_oauth_save_fail',
+        type: 'oauth.authorization.revoked',
+        merchant_id: 'merch_1',
+      };
+
+      // Service does not handle save failures gracefully - error propagates
+      await expect(squareWebhookService.processEvent(event)).rejects.toThrow('Database error');
+
+      // But the integration object was modified before save failed
+      expect(mockIntegration.isActive).toBe(false);
+      expect(mockIntegration.accessTokenEncrypted).toBeNull();
     });
   });
 
@@ -717,6 +793,419 @@ describe('Square Webhook Service', () => {
       const result = await squareWebhookService.processEvent(event);
 
       expect(result).toEqual({ skipped: true, reason: 'already_processed' });
+    });
+
+    it('should skip order without customer_id', async () => {
+      // Need integration and location mocks for the check to reach customer_id validation
+      const mockIntegration = { id: 1, userId: 10, isTokenExpired: () => false };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store', isEnabled: true });
+      PosTransaction.findOne.mockResolvedValue(null); // Not already processed
+
+      const event = {
+        event_id: 'evt_ord_no_cust',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_no_customer',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              // No customer_id
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_customer_id' });
+    });
+
+    it('should handle order with completely missing customer_id field', async () => {
+      const mockIntegration = { id: 1, userId: 10, isTokenExpired: () => false };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store', isEnabled: true });
+      PosTransaction.findOne.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_missing_field',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_no_field',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              // customer_id field is completely absent
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_customer_id' });
+    });
+
+    it('should handle order with null customer_id', async () => {
+      const mockIntegration = { id: 1, userId: 10, isTokenExpired: () => false };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store', isEnabled: true });
+      PosTransaction.findOne.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_null_cust',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_null_cust',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: null,
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_customer_id' });
+    });
+
+    it('should handle order with empty string customer_id', async () => {
+      const mockIntegration = { id: 1, userId: 10, isTokenExpired: () => false };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store', isEnabled: true });
+      PosTransaction.findOne.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_empty_cust',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_empty_cust',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: '',
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_customer_id' });
+    });
+
+    it('should skip when no integration found for order', async () => {
+      PosIntegration.findOne.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_no_int',
+        type: 'order.created',
+        merchant_id: 'unknown_merch',
+        data: {
+          object: {
+            order: {
+              id: 'ord_1',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_integration' });
+    });
+
+    it('should skip when location is disabled for order', async () => {
+      const mockIntegration = { id: 1, userId: 10 };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_loc_disabled',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_1',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'location_disabled' });
+    });
+
+    it('should refresh token for order if expired', async () => {
+      const mockIntegration = {
+        id: 1,
+        userId: 10,
+        getAccessToken: jest.fn().mockReturnValue('token'),
+        isTokenExpired: jest.fn().mockReturnValue(true),
+      };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
+      PosTransaction.findOne.mockResolvedValue(null);
+      squareOAuthService.refreshToken.mockResolvedValue(true);
+      squareOAuthService.fetchCustomer.mockResolvedValue(null);
+
+      const event = {
+        event_id: 'evt_ord_refresh',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_1',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+            },
+          },
+        },
+      };
+
+      await squareWebhookService.processEvent(event);
+
+      expect(squareOAuthService.refreshToken).toHaveBeenCalledWith(mockIntegration);
+    });
+
+    it('should skip order when token refresh fails', async () => {
+      const mockIntegration = {
+        id: 1,
+        userId: 10,
+        getAccessToken: jest.fn().mockReturnValue('token'),
+        isTokenExpired: jest.fn().mockReturnValue(true),
+      };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
+      PosTransaction.findOne.mockResolvedValue(null);
+      squareOAuthService.refreshToken.mockRejectedValue(new Error('Token refresh failed'));
+
+      const event = {
+        event_id: 'evt_ord_refresh_fail',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_1',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'token_refresh_failed' });
+      expect(logger.error).toHaveBeenCalledWith('Failed to refresh Square token', { error: 'Token refresh failed' });
+    });
+
+    it('should skip order when customer has no phone', async () => {
+      const mockIntegration = {
+        id: 1,
+        userId: 10,
+        getAccessToken: jest.fn().mockReturnValue('token'),
+        isTokenExpired: jest.fn().mockReturnValue(false),
+      };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
+      PosTransaction.findOne.mockResolvedValue(null);
+      squareOAuthService.fetchCustomer.mockResolvedValue({
+        givenName: 'John',
+        familyName: 'Doe',
+        phoneNumber: null,
+      });
+
+      const event = {
+        event_id: 'evt_ord_no_phone',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_1',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+              total_money: { amount: 2500, currency: 'USD' },
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_phone_number' });
+      expect(posSmsService.logTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          customerName: 'John Doe',
+          smsStatus: 'skipped_no_phone',
+          skipReason: 'Customer has no phone number',
+        })
+      );
+    });
+
+    it('should process order transaction when all conditions met', async () => {
+      const mockIntegration = {
+        id: 1,
+        userId: 10,
+        getAccessToken: jest.fn().mockReturnValue('token'),
+        isTokenExpired: jest.fn().mockReturnValue(false),
+      };
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue({ locationName: 'Main Store' });
+      PosTransaction.findOne.mockResolvedValue(null);
+      squareOAuthService.fetchCustomer.mockResolvedValue({
+        givenName: 'Jane',
+        familyName: 'Smith',
+        phoneNumber: '+15551234567',
+      });
+      posSmsService.processTransaction.mockResolvedValue({ success: true });
+
+      const event = {
+        event_id: 'evt_ord_success',
+        type: 'order.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            order: {
+              id: 'ord_123',
+              state: 'COMPLETED',
+              location_id: 'loc_1',
+              customer_id: 'cust_1',
+              total_money: { amount: 7500, currency: 'USD' },
+            },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(posSmsService.processTransaction).toHaveBeenCalledWith({
+        integration: mockIntegration,
+        externalTransactionId: 'ord_123',
+        customerName: 'Jane Smith',
+        customerPhone: '+15551234567',
+        purchaseAmount: 75, // 7500 cents = $75
+        locationName: 'Main Store',
+      });
+      expect(result).toEqual({ success: true });
+    });
+  });
+
+  // ===========================================
+  // handleLocationEvent Additional Tests
+  // ===========================================
+  describe('handleLocationEvent - additional coverage', () => {
+    beforeEach(() => {
+      PosWebhookEvent.isProcessed.mockResolvedValue(false);
+    });
+
+    it('should skip location event without location data', async () => {
+      const event = {
+        event_id: 'evt_loc_no_data',
+        type: 'location.created',
+        merchant_id: 'merch_1',
+        data: { object: {} },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(result).toEqual({ skipped: true, reason: 'no_location_data' });
+    });
+
+    it('should create new location when it does not exist', async () => {
+      const mockIntegration = { id: 1 };
+      const mockCreatedLocation = {
+        id: 99,
+        locationName: 'New Location',
+        isEnabled: false,
+      };
+
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue(null); // Location doesn't exist
+      PosLocation.create = jest.fn().mockResolvedValue(mockCreatedLocation);
+
+      const event = {
+        event_id: 'evt_loc_create',
+        type: 'location.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            location: { id: 'loc_new', name: 'New Location' },
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(PosLocation.create).toHaveBeenCalledWith({
+        posIntegrationId: 1,
+        externalLocationId: 'loc_new',
+        locationName: 'New Location',
+        isEnabled: false,
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        'Added new Square location (disabled by default)',
+        { locationName: 'New Location' }
+      );
+      expect(result).toEqual({ processed: true, action: 'location_synced', locationId: 99 });
+    });
+
+    it('should use location ID as name when name is not provided', async () => {
+      const mockIntegration = { id: 1 };
+      const mockCreatedLocation = {
+        id: 100,
+        locationName: 'loc_no_name',
+        isEnabled: false,
+      };
+
+      PosIntegration.findOne.mockResolvedValue(mockIntegration);
+      PosLocation.findOne.mockResolvedValue(null);
+      PosLocation.create = jest.fn().mockResolvedValue(mockCreatedLocation);
+
+      const event = {
+        event_id: 'evt_loc_no_name',
+        type: 'location.created',
+        merchant_id: 'merch_1',
+        data: {
+          object: {
+            location: { id: 'loc_no_name' }, // No name field
+          },
+        },
+      };
+
+      const result = await squareWebhookService.processEvent(event);
+
+      expect(PosLocation.create).toHaveBeenCalledWith({
+        posIntegrationId: 1,
+        externalLocationId: 'loc_no_name',
+        locationName: 'loc_no_name', // Falls back to ID
+        isEnabled: false,
+      });
+      expect(result).toEqual({ processed: true, action: 'location_synced', locationId: 100 });
     });
   });
 });

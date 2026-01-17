@@ -47,6 +47,7 @@ jest.mock('../../src/services/emailTemplates', () => ({
   abandonedCheckout30MinEmail: jest.fn(() => '<html>Abandoned 30min</html>'),
   paymentFailedEmail: jest.fn(() => '<html>Payment Failed</html>'),
   contactFormNotification: jest.fn(() => '<html>Contact Form</html>'),
+  businessEventAlert: jest.fn(() => '<html>Business Event Alert</html>'),
 }));
 
 // Set environment variables BEFORE importing
@@ -54,6 +55,7 @@ process.env.RESEND_API_KEY = 'test_api_key';
 process.env.RESEND_FROM_EMAIL = 'noreply@morestars.io';
 process.env.APP_URL = 'https://morestars.io';
 process.env.ADMIN_EMAIL = 'admin@morestars.io';
+process.env.BUSINESS_ALERTS_EMAIL = 'alerts@morestars.io'; // Used by sendBusinessEventAlert
 
 const logger = require('../../src/services/logger');
 const emailService = require('../../src/services/emailService');
@@ -608,6 +610,356 @@ describe('Email Service', () => {
         'Verification email sent',
         expect.objectContaining({ emailId: 'msg_abc123' })
       );
+    });
+  });
+
+  // ===========================================
+  // sendBusinessEventAlert Tests
+  // ===========================================
+  describe('sendBusinessEventAlert', () => {
+    it('should send subscription_created event', async () => {
+      const result = await emailService.sendBusinessEventAlert('subscription_created', {
+        userId: 123,
+        email: 'user@test.com',
+        businessName: 'Test Business',
+        plan: 'monthly',
+      });
+
+      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+        to: 'alerts@morestars.io', // Uses BUSINESS_ALERTS_EMAIL env var
+        subject: expect.stringContaining('New Subscription'),
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('should send trial_converted event', async () => {
+      const result = await emailService.sendBusinessEventAlert('trial_converted', {
+        userId: 456,
+        email: 'converted@test.com',
+        businessName: 'Converted Biz',
+        plan: 'annual',
+      });
+
+      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+        subject: expect.stringContaining('Trial Converted'),
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('should use fallback label for unknown event type', async () => {
+      const result = await emailService.sendBusinessEventAlert('unknown_event_type', {
+        userId: 789,
+        email: 'unknown@test.com',
+        businessName: 'Unknown Biz',
+      });
+
+      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+        subject: expect.stringContaining('Business Event'),
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('should return success: false on API failure (non-blocking)', async () => {
+      mockSend.mockRejectedValue(new Error('Email service unavailable'));
+
+      const result = await emailService.sendBusinessEventAlert('subscription_created', {
+        userId: 1,
+        email: 'test@test.com',
+        businessName: 'Test',
+      });
+
+      // Should NOT throw, should return success: false
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Email service unavailable');
+    });
+
+    it('should log error but not throw on failure', async () => {
+      // Mock console.error since sendBusinessEventAlert uses it (not logger.error)
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockSend.mockRejectedValue(new Error('Connection timeout'));
+
+      await emailService.sendBusinessEventAlert('trial_converted', {
+        userId: 2,
+        email: 'timeout@test.com',
+        businessName: 'Timeout Biz',
+      });
+
+      // sendBusinessEventAlert uses console.error, not logger.error
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Business event alert failed:',
+        'Connection timeout'
+      );
+      consoleSpy.mockRestore();
+    });
+
+    it('should include event data in the email', async () => {
+      await emailService.sendBusinessEventAlert('subscription_created', {
+        userId: 100,
+        email: 'data@test.com',
+        businessName: 'Data Business',
+        plan: 'monthly',
+        amount: 77,
+      });
+
+      expect(mockSend).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================
+  // sendNegativeFeedbackAlert Tests (Deprecated)
+  // ===========================================
+  describe('sendNegativeFeedbackAlert (deprecated)', () => {
+    it('should still work for backward compatibility', async () => {
+      // sendNegativeFeedbackAlert is deprecated but should still function
+      if (typeof emailService.sendNegativeFeedbackAlert === 'function') {
+        const result = await emailService.sendNegativeFeedbackAlert(
+          'business@test.com',
+          'Test Business',
+          {
+            rating: 2,
+            feedback: 'Service was slow',
+            customerName: 'John Doe',
+          }
+        );
+
+        expect(result.success).toBe(true);
+      }
+    });
+
+    it('should throw when API key is not configured', async () => {
+      const originalKey = process.env.RESEND_API_KEY;
+      delete process.env.RESEND_API_KEY;
+
+      await expect(
+        emailService.sendNegativeFeedbackAlert('test@test.com', 'Customer', 2, 'Bad service', '+1555123456')
+      ).rejects.toThrow('Resend API key not configured');
+
+      process.env.RESEND_API_KEY = originalKey;
+    });
+
+    it('should throw on result.error response', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid email', statusCode: 400 } });
+
+      await expect(
+        emailService.sendNegativeFeedbackAlert('test@test.com', 'Customer', 2, 'Bad service', '+1555123456')
+      ).rejects.toThrow('Resend API Error: Invalid email (Status: 400)');
+    });
+
+    it('should throw when no email ID returned', async () => {
+      mockSend.mockResolvedValue({ data: {} });
+
+      await expect(
+        emailService.sendNegativeFeedbackAlert('test@test.com', 'Customer', 2, 'Bad service', '+1555123456')
+      ).rejects.toThrow('No email ID returned from Resend API');
+    });
+  });
+
+  // ===========================================
+  // HTTP Error Code Handling Tests
+  // ===========================================
+  describe('HTTP Error Code Handling', () => {
+    it('should handle 401 Unauthorized error', async () => {
+      const error = new Error('Unauthorized');
+      error.statusCode = 401;
+      mockSend.mockRejectedValue(error);
+
+      await expect(
+        emailService.sendWelcomeEmail('user@test.com', 'Test')
+      ).rejects.toThrow('Unauthorized');
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should handle 429 Rate Limit error', async () => {
+      const error = new Error('Too many requests');
+      error.statusCode = 429;
+      mockSend.mockRejectedValue(error);
+
+      await expect(
+        emailService.sendVerificationEmail('user@test.com', 'Test', 'token')
+      ).rejects.toThrow('Too many requests');
+    });
+
+    it('should handle 500 Server Error', async () => {
+      const error = new Error('Internal server error');
+      error.statusCode = 500;
+      mockSend.mockRejectedValue(error);
+
+      await expect(
+        emailService.sendPasswordResetEmail('user@test.com', 'Test', 'token')
+      ).rejects.toThrow();
+    });
+
+    it('should handle Resend API 401 in error response', async () => {
+      mockSend.mockResolvedValue({
+        error: { message: 'Invalid API key', statusCode: 401 },
+      });
+
+      await expect(
+        emailService.sendWelcomeEmail('user@test.com', 'Test')
+      ).rejects.toThrow('Resend API Error: Invalid API key');
+    });
+  });
+
+  // ===========================================
+  // Missing API Key Tests
+  // ===========================================
+  describe('Missing API Key Checks', () => {
+    it('sendVerificationEmail should throw when API key is not configured', async () => {
+      const originalKey = process.env.RESEND_API_KEY;
+      delete process.env.RESEND_API_KEY;
+
+      await expect(
+        emailService.sendVerificationEmail('test@test.com', 'Test Business', 'token123')
+      ).rejects.toThrow('Resend API key not configured');
+
+      process.env.RESEND_API_KEY = originalKey;
+    });
+
+    it('sendPasswordResetEmail should throw when API key is not configured', async () => {
+      const originalKey = process.env.RESEND_API_KEY;
+      delete process.env.RESEND_API_KEY;
+
+      await expect(
+        emailService.sendPasswordResetEmail('test@test.com', 'Test Business', 'reset_token')
+      ).rejects.toThrow('Resend API key not configured');
+
+      process.env.RESEND_API_KEY = originalKey;
+    });
+  });
+
+  // ===========================================
+  // Resend API Error Response Tests
+  // ===========================================
+  describe('Resend API Error Responses', () => {
+    it('sendPasswordResetEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid recipient' } });
+
+      await expect(
+        emailService.sendPasswordResetEmail('test@test.com', 'Test', 'token')
+      ).rejects.toThrow('Resend API Error: Invalid recipient');
+    });
+
+    it('sendTrialEndingEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Rate limit exceeded' } });
+
+      await expect(
+        emailService.sendTrialEndingEmail('test@test.com', 'Test', new Date())
+      ).rejects.toThrow('Resend API Error: Rate limit exceeded');
+    });
+
+    it('sendTrialExpiredEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid API key' } });
+
+      await expect(
+        emailService.sendTrialExpiredEmail('test@test.com', 'Test')
+      ).rejects.toThrow('Resend API Error: Invalid API key');
+    });
+
+    it('sendAdminAlert should return success:false on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Service unavailable' } });
+
+      const result = await emailService.sendAdminAlert('Test Alert', 'Test message');
+
+      // sendAdminAlert catches errors and returns success: false instead of throwing
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Service unavailable');
+    });
+
+    it('sendSupportRequestEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid format' } });
+
+      await expect(
+        emailService.sendSupportRequestEmail('test@test.com', 'Test', 1, 'general', 'message')
+      ).rejects.toThrow('Resend API Error: Invalid format');
+    });
+
+    it('sendTrialWarning7DaysEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Quota exceeded' } });
+
+      await expect(
+        emailService.sendTrialWarning7DaysEmail('test@test.com', 'Test', new Date())
+      ).rejects.toThrow('Resend API Error: Quota exceeded');
+    });
+
+    it('sendTrialWarning1DayEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Connection refused' } });
+
+      await expect(
+        emailService.sendTrialWarning1DayEmail('test@test.com', 'Test', new Date())
+      ).rejects.toThrow('Resend API Error: Connection refused');
+    });
+
+    it('sendAbandonedCheckoutEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Domain not verified' } });
+
+      await expect(
+        emailService.sendAbandonedCheckoutEmail('test@test.com', 'Test')
+      ).rejects.toThrow('Resend API Error: Domain not verified');
+    });
+
+    it('sendAbandonedCheckout30MinEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid sender' } });
+
+      await expect(
+        emailService.sendAbandonedCheckout30MinEmail('test@test.com', 'Test')
+      ).rejects.toThrow('Resend API Error: Invalid sender');
+    });
+
+    it('sendPaymentFailedEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Blocked domain' } });
+
+      await expect(
+        emailService.sendPaymentFailedEmail('test@test.com', 'Test')
+      ).rejects.toThrow('Resend API Error: Blocked domain');
+    });
+
+    it('sendVerificationReminderEmail should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Invalid token' } });
+
+      await expect(
+        emailService.sendVerificationReminderEmail('test@test.com', 'Test', 'token')
+      ).rejects.toThrow('Resend API Error: Invalid token');
+    });
+
+    it('sendContactNotification should throw on result.error', async () => {
+      mockSend.mockResolvedValue({ error: { message: 'Spam detected' } });
+
+      await expect(
+        emailService.sendContactNotification({ email: 'test@test.com', businessName: 'Test', topic: 'sales' })
+      ).rejects.toThrow('Resend API Error: Spam detected');
+    });
+  });
+
+  // ===========================================
+  // Edge Cases
+  // ===========================================
+  describe('Edge Cases', () => {
+    it('should handle empty business name', async () => {
+      const result = await emailService.sendWelcomeEmail('user@test.com', '');
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should handle special characters in email', async () => {
+      const result = await emailService.sendWelcomeEmail("user+test'special@test.com", 'Test');
+
+      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+        to: "user+test'special@test.com",
+      }));
+      expect(result.success).toBe(true);
+    });
+
+    it('should handle very long business names', async () => {
+      const longName = 'A'.repeat(500);
+      const result = await emailService.sendWelcomeEmail('user@test.com', longName);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should handle unicode in business name', async () => {
+      const result = await emailService.sendWelcomeEmail('user@test.com', 'Café Müller');
+
+      expect(result.success).toBe(true);
     });
   });
 });

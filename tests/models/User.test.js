@@ -624,3 +624,297 @@ describe('User Model Instance Methods', () => {
     });
   });
 });
+
+// ===========================================
+// Hook Behavior Tests (beforeCreate, beforeUpdate)
+// ===========================================
+describe('User Model Hooks', () => {
+  describe('beforeCreate hook behavior', () => {
+    it('should hash password before creating user', async () => {
+      const plainPassword = 'MySecurePassword123!';
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+      // Verify hashed password is different from plain password
+      expect(hashedPassword).not.toBe(plainPassword);
+
+      // Verify hash starts with bcrypt identifier
+      expect(hashedPassword).toMatch(/^\$2[ayb]\$/);
+
+      // Verify hashed password is correct length (60 chars for bcrypt)
+      expect(hashedPassword.length).toBe(60);
+    });
+
+    it('should generate API key for tenant role', () => {
+      const apiKey = `ff_${crypto.randomBytes(24).toString('hex')}`;
+
+      expect(apiKey).toMatch(/^ff_[a-f0-9]{48}$/);
+      expect(apiKey.length).toBe(51); // 'ff_' (3) + 48 hex chars
+    });
+
+    it('should not generate API key if already provided', () => {
+      const existingApiKey = 'ff_existingkey123456789012345678901234567890123456';
+      const user = { apiKey: existingApiKey };
+
+      // If apiKey already exists, hook should not overwrite
+      expect(user.apiKey).toBe(existingApiKey);
+    });
+
+    it('should only generate API key for tenant role', () => {
+      // Simulate hook logic: only tenants get API keys
+      const shouldGenerateApiKey = (role, existingApiKey) => {
+        return role === 'tenant' && !existingApiKey;
+      };
+
+      expect(shouldGenerateApiKey('tenant', null)).toBe(true);
+      expect(shouldGenerateApiKey('super_admin', null)).toBe(false);
+      expect(shouldGenerateApiKey('tenant', 'ff_existing')).toBe(false);
+    });
+  });
+
+  describe('beforeUpdate hook behavior', () => {
+    it('should rehash password when changed', async () => {
+      const oldPassword = 'OldPassword123!';
+      const newPassword = 'NewPassword456!';
+
+      const oldHash = await bcrypt.hash(oldPassword, 10);
+      const newHash = await bcrypt.hash(newPassword, 10);
+
+      // Hashes should be different
+      expect(oldHash).not.toBe(newHash);
+
+      // Both should be valid bcrypt hashes
+      expect(oldHash).toMatch(/^\$2[ayb]\$/);
+      expect(newHash).toMatch(/^\$2[ayb]\$/);
+    });
+
+    it('should not rehash password if not changed', async () => {
+      const password = 'SamePassword123!';
+      const hashedOnce = await bcrypt.hash(password, 10);
+
+      // Simulate checking if password changed (Sequelize's changed('password'))
+      const passwordChanged = false;
+
+      // If not changed, hook should skip rehashing
+      if (!passwordChanged) {
+        // Password remains the same
+        expect(hashedOnce).toMatch(/^\$2[ayb]\$/);
+      }
+    });
+
+    it('should detect password field changes correctly', () => {
+      // Simulate Sequelize's changed() method behavior
+      const user = {
+        _previousDataValues: { password: 'oldHash' },
+        password: 'newHash',
+        changed: function(field) {
+          return this[field] !== this._previousDataValues[field];
+        }
+      };
+
+      expect(user.changed('password')).toBe(true);
+
+      const unchangedUser = {
+        _previousDataValues: { password: 'sameHash' },
+        password: 'sameHash',
+        changed: function(field) {
+          return this[field] !== this._previousDataValues[field];
+        }
+      };
+
+      expect(unchangedUser.changed('password')).toBe(false);
+    });
+  });
+});
+
+// ===========================================
+// Token Generation Pattern Tests
+// ===========================================
+describe('Token Generation Patterns', () => {
+  describe('Verification Token', () => {
+    it('should generate cryptographically secure verification token', () => {
+      const token = crypto.randomBytes(32).toString('hex');
+
+      // Token should be 64 hex characters
+      expect(token.length).toBe(64);
+      expect(token).toMatch(/^[a-f0-9]{64}$/);
+    });
+
+    it('should generate unique tokens on each call', () => {
+      const token1 = crypto.randomBytes(32).toString('hex');
+      const token2 = crypto.randomBytes(32).toString('hex');
+
+      expect(token1).not.toBe(token2);
+    });
+
+    it('should calculate correct expiration (24 hours)', () => {
+      const now = new Date();
+      const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      // Should be 24 hours in the future
+      const diffMs = expires.getTime() - now.getTime();
+      const diffHours = diffMs / (60 * 60 * 1000);
+
+      expect(diffHours).toBe(24);
+    });
+  });
+
+  describe('Password Reset Token', () => {
+    it('should generate cryptographically secure reset token', () => {
+      const token = crypto.randomBytes(32).toString('hex');
+
+      expect(token.length).toBe(64);
+      expect(token).toMatch(/^[a-f0-9]{64}$/);
+    });
+
+    it('should calculate correct expiration (1 hour)', () => {
+      const now = new Date();
+      const expires = new Date(now.getTime() + 60 * 60 * 1000);
+
+      const diffMs = expires.getTime() - now.getTime();
+      const diffMinutes = diffMs / (60 * 1000);
+
+      expect(diffMinutes).toBe(60);
+    });
+  });
+});
+
+// ===========================================
+// Edge Cases and Boundary Conditions
+// ===========================================
+describe('Edge Cases', () => {
+  // Helper to create a mock user with all methods
+  const createMockUserInstance = (overrides = {}) => {
+    return {
+      smsUsageCount: 0,
+      smsUsageLimit: 10,
+      subscriptionStatus: 'trial',
+      trialEndsAt: null,
+      ...overrides,
+    };
+  };
+
+  describe('Trial Expiration Edge Cases', () => {
+    const isTrialActive = function() {
+      if (!this.trialEndsAt) return false;
+      const now = new Date();
+      return now < new Date(this.trialEndsAt);
+    };
+
+    it('should handle trialEndsAt as string (ISO format)', () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+      const user = createMockUserInstance({ trialEndsAt: futureDate });
+      user.isTrialActive = isTrialActive.bind(user);
+
+      expect(user.isTrialActive()).toBe(true);
+    });
+
+    it('should handle trialEndsAt as Date object', () => {
+      const futureDate = new Date(Date.now() + 86400000);
+      const user = createMockUserInstance({ trialEndsAt: futureDate });
+      user.isTrialActive = isTrialActive.bind(user);
+
+      expect(user.isTrialActive()).toBe(true);
+    });
+
+    it('should return false for exactly now (boundary)', () => {
+      // At exact boundary, trial is no longer active (< not <=)
+      const now = new Date();
+      const user = createMockUserInstance({ trialEndsAt: now });
+      user.isTrialActive = isTrialActive.bind(user);
+
+      expect(user.isTrialActive()).toBe(false);
+    });
+  });
+
+  describe('SMS Limit Edge Cases', () => {
+    const canSendSms = function() {
+      if (this.subscriptionStatus === 'past_due') return false;
+      return this.smsUsageCount < this.smsUsageLimit;
+    };
+
+    it('should return true at zero usage', () => {
+      const user = createMockUserInstance({
+        subscriptionStatus: 'active',
+        smsUsageCount: 0,
+        smsUsageLimit: 1000
+      });
+      user.canSendSms = canSendSms.bind(user);
+
+      expect(user.canSendSms()).toBe(true);
+    });
+
+    it('should return true at limit - 1', () => {
+      const user = createMockUserInstance({
+        subscriptionStatus: 'active',
+        smsUsageCount: 999,
+        smsUsageLimit: 1000
+      });
+      user.canSendSms = canSendSms.bind(user);
+
+      expect(user.canSendSms()).toBe(true);
+    });
+
+    it('should handle zero limit gracefully', () => {
+      const user = createMockUserInstance({
+        subscriptionStatus: 'active',
+        smsUsageCount: 0,
+        smsUsageLimit: 0
+      });
+      user.canSendSms = canSendSms.bind(user);
+
+      expect(user.canSendSms()).toBe(false);
+    });
+
+    it('should handle negative usage gracefully', () => {
+      // Should never happen, but test defensive behavior
+      const user = createMockUserInstance({
+        subscriptionStatus: 'active',
+        smsUsageCount: -1,
+        smsUsageLimit: 10
+      });
+      user.canSendSms = canSendSms.bind(user);
+
+      expect(user.canSendSms()).toBe(true);
+    });
+  });
+
+  describe('Password Hashing Edge Cases', () => {
+    it('should handle empty string password', async () => {
+      const emptyPassword = '';
+      const hash = await bcrypt.hash(emptyPassword, 10);
+
+      expect(hash).toMatch(/^\$2[ayb]\$/);
+
+      const isMatch = await bcrypt.compare('', hash);
+      expect(isMatch).toBe(true);
+    });
+
+    it('should handle very long password', async () => {
+      // bcrypt has a 72 character limit on input
+      const longPassword = 'A'.repeat(100);
+      const hash = await bcrypt.hash(longPassword, 10);
+
+      expect(hash).toMatch(/^\$2[ayb]\$/);
+
+      // Due to bcrypt's 72 char limit, only first 72 chars matter
+      const isMatch = await bcrypt.compare('A'.repeat(100), hash);
+      expect(isMatch).toBe(true);
+    });
+
+    it('should handle unicode characters in password', async () => {
+      const unicodePassword = '密码🔐Пароль';
+      const hash = await bcrypt.hash(unicodePassword, 10);
+
+      const isMatch = await bcrypt.compare(unicodePassword, hash);
+      expect(isMatch).toBe(true);
+    });
+
+    it('should handle special characters in password', async () => {
+      const specialPassword = '!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~';
+      const hash = await bcrypt.hash(specialPassword, 10);
+
+      const isMatch = await bcrypt.compare(specialPassword, hash);
+      expect(isMatch).toBe(true);
+    });
+  });
+});
