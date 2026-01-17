@@ -18,10 +18,7 @@ const initiateSquareOAuth = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    const { url, state } = squareOAuthService.getAuthorizationUrl(userId);
-
-    // Store state in session for verification (optional additional security)
-    req.session.squareOAuthState = state;
+    const { url, state } = squareOAuthService.getAuthorizationUrl(req, userId);
 
     res.redirect(url);
   } catch (error) {
@@ -52,7 +49,7 @@ const handleSquareCallback = async (req, res) => {
     }
 
     // Exchange code for tokens
-    const { userId, tokens } = await squareOAuthService.handleCallback(code, state);
+    const { userId, tokens } = await squareOAuthService.handleCallback(req, code, state);
 
     // Create or update integration
     await squareOAuthService.createOrUpdateIntegration(userId, tokens);
@@ -84,10 +81,7 @@ const initiateShopifyOAuth = async (req, res) => {
       return res.redirect('/dashboard/settings?tab=pos');
     }
 
-    const { url, state, shopDomain } = shopifyOAuthService.getAuthorizationUrl(userId, shop);
-
-    // Store state in session
-    req.session.shopifyOAuthState = state;
+    const { url, state, shopDomain } = shopifyOAuthService.getAuthorizationUrl(req, userId, shop);
 
     res.redirect(url);
   } catch (error) {
@@ -118,7 +112,7 @@ const handleShopifyCallback = async (req, res) => {
     }
 
     // Exchange code for tokens
-    const { userId, shopDomain, tokens } = await shopifyOAuthService.handleCallback(code, shop, state);
+    const { userId, shopDomain, tokens } = await shopifyOAuthService.handleCallback(req, code, shop, state);
 
     // Create or update integration
     await shopifyOAuthService.createOrUpdateIntegration(userId, shopDomain, tokens);

@@ -76,18 +76,20 @@ describe('Square OAuth Service', () => {
   // ===========================================
   describe('getAuthorizationUrl', () => {
     it('should generate authorization URL with userId in state', () => {
-      const result = squareOAuthService.getAuthorizationUrl(123);
+      const mockReq = { session: {} };
+      const result = squareOAuthService.getAuthorizationUrl(mockReq, 123);
 
       expect(result.url).toContain('oauth2/authorize');
       expect(result.url).toContain('client_id=test_square_app_id');
       expect(result.url).toContain('state=123%3A'); // userId:state encoded
       expect(result.url).toContain('redirect_uri=');
       expect(result.state).toBeDefined();
-      expect(result.state.length).toBe(64); // 32 bytes hex = 64 chars
+      expect(result.state).toMatch(/^\d+:[0-9a-f]{64}$/); // userId:token format
     });
 
     it('should include required OAuth scopes', () => {
-      const result = squareOAuthService.getAuthorizationUrl(1);
+      const mockReq = { session: {} };
+      const result = squareOAuthService.getAuthorizationUrl(mockReq, 1);
 
       expect(result.url).toContain('PAYMENTS_READ');
       expect(result.url).toContain('CUSTOMERS_READ');
@@ -95,14 +97,16 @@ describe('Square OAuth Service', () => {
     });
 
     it('should include redirect URI', () => {
-      const result = squareOAuthService.getAuthorizationUrl(1);
+      const mockReq = { session: {} };
+      const result = squareOAuthService.getAuthorizationUrl(mockReq, 1);
 
       expect(result.url).toContain(encodeURIComponent('https://morestars.io/api/auth/square/callback'));
     });
 
     it('should generate unique state for each call', () => {
-      const result1 = squareOAuthService.getAuthorizationUrl(1);
-      const result2 = squareOAuthService.getAuthorizationUrl(1);
+      const mockReq = { session: {} };
+      const result1 = squareOAuthService.getAuthorizationUrl(mockReq, 1);
+      const result2 = squareOAuthService.getAuthorizationUrl(mockReq, 1);
 
       expect(result1.state).not.toBe(result2.state);
     });
@@ -113,6 +117,9 @@ describe('Square OAuth Service', () => {
   // ===========================================
   describe('handleCallback', () => {
     it('should exchange code for tokens', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 123);
+
       mockObtainToken.mockResolvedValue({
         result: {
           accessToken: 'access_token_123',
@@ -122,7 +129,7 @@ describe('Square OAuth Service', () => {
         },
       });
 
-      const result = await squareOAuthService.handleCallback('auth_code', '123:state_value');
+      const result = await squareOAuthService.handleCallback(mockReq, 'auth_code', state);
 
       expect(mockObtainToken).toHaveBeenCalledWith({
         clientId: 'test_square_app_id',
@@ -138,48 +145,69 @@ describe('Square OAuth Service', () => {
     });
 
     it('should handle response without result wrapper', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 456);
+
       mockObtainToken.mockResolvedValue({
         accessToken: 'direct_token',
         refreshToken: 'direct_refresh',
         merchantId: 'direct_merchant',
       });
 
-      const result = await squareOAuthService.handleCallback('code', '456:state');
+      const result = await squareOAuthService.handleCallback(mockReq, 'code', state);
 
       expect(result.tokens.accessToken).toBe('direct_token');
     });
 
-    it('should throw on missing userId in state', async () => {
-      // State without userId (starts with colon)
-      await expect(squareOAuthService.handleCallback('code', ':stateonly'))
-        .rejects.toThrow('Invalid state parameter');
+    it('should throw on invalid state (no session)', async () => {
+      const mockReq = { session: {} };
+
+      await expect(squareOAuthService.handleCallback(mockReq, 'code', '123:invalidtoken'))
+        .rejects.toThrow('Invalid or expired OAuth state');
     });
 
-    it('should throw on empty state', async () => {
-      await expect(squareOAuthService.handleCallback('code', ':state'))
-        .rejects.toThrow('Invalid state parameter');
+    it('should throw on tampered state', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 123);
+
+      // Tamper with the token part (not just userId)
+      const parts = state.split(':');
+      const tamperedToken = parts[1].substring(0, 60) + 'fake';
+      const tamperedState = `${parts[0]}:${tamperedToken}`;
+
+      await expect(squareOAuthService.handleCallback(mockReq, 'code', tamperedState))
+        .rejects.toThrow('Invalid or expired OAuth state');
     });
 
     it('should throw when no access token returned', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 1);
+
       mockObtainToken.mockResolvedValue({ result: {} });
 
-      await expect(squareOAuthService.handleCallback('code', '1:state'))
+      await expect(squareOAuthService.handleCallback(mockReq, 'code', state))
         .rejects.toThrow('Failed to obtain access token from Square');
     });
 
     it('should handle Square API errors', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 1);
+
       mockObtainToken.mockRejectedValue(new Error('API rate limit'));
 
-      await expect(squareOAuthService.handleCallback('code', '1:state'))
+      await expect(squareOAuthService.handleCallback(mockReq, 'code', state))
         .rejects.toThrow('Square API error: API rate limit');
     });
 
     it('should log token exchange attempt', async () => {
+      const mockReq = { session: {} };
+      const { state } = squareOAuthService.getAuthorizationUrl(mockReq, 1);
+
       mockObtainToken.mockResolvedValue({
         result: { accessToken: 'token', merchantId: 'merch' },
       });
 
-      await squareOAuthService.handleCallback('code', '1:state');
+      await squareOAuthService.handleCallback(mockReq, 'code', state);
 
       expect(logger.info).toHaveBeenCalledWith(
         'Square OAuth: Exchanging code for token',
@@ -354,24 +382,26 @@ describe('Square OAuth Service', () => {
         ],
       });
 
-      const locations = await squareOAuthService.fetchLocations('token');
+      const result = await squareOAuthService.fetchLocations('token');
 
-      expect(locations).toHaveLength(2);
-      expect(locations[0]).toEqual({
+      expect(result.success).toBe(true);
+      expect(result.locations).toHaveLength(2);
+      expect(result.locations[0]).toEqual({
         id: 'loc1',
         name: 'Main Store',
         address: '123 Main St, City, State',
         status: 'ACTIVE',
       });
-      expect(locations[1].address).toBeNull();
+      expect(result.locations[1].address).toBeNull();
     });
 
-    it('should return empty array when no locations', async () => {
+    it('should return empty locations array when no locations', async () => {
       mockLocationsList.mockResolvedValue({});
 
-      const locations = await squareOAuthService.fetchLocations('token');
+      const result = await squareOAuthService.fetchLocations('token');
 
-      expect(locations).toEqual([]);
+      expect(result.success).toBe(true);
+      expect(result.locations).toEqual([]);
     });
 
     it('should handle partial address', async () => {
@@ -386,9 +416,19 @@ describe('Square OAuth Service', () => {
         ],
       });
 
-      const locations = await squareOAuthService.fetchLocations('token');
+      const result = await squareOAuthService.fetchLocations('token');
 
-      expect(locations[0].address).toBe(', City,');
+      expect(result.success).toBe(true);
+      expect(result.locations[0].address).toBe(', City,');
+    });
+
+    it('should return error result on API error', async () => {
+      mockLocationsList.mockRejectedValue(new Error('API error'));
+
+      const result = await squareOAuthService.fetchLocations('token');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('API error');
     });
   });
 
@@ -407,10 +447,11 @@ describe('Square OAuth Service', () => {
         },
       });
 
-      const customer = await squareOAuthService.fetchCustomer('token', 'cust123');
+      const result = await squareOAuthService.fetchCustomer('token', 'cust123');
 
       expect(mockCustomersGet).toHaveBeenCalledWith({ customerId: 'cust123' });
-      expect(customer).toEqual({
+      expect(result.success).toBe(true);
+      expect(result.customer).toEqual({
         id: 'cust123',
         givenName: 'John',
         familyName: 'Doe',
@@ -419,30 +460,34 @@ describe('Square OAuth Service', () => {
       });
     });
 
-    it('should return null for missing customerId', async () => {
-      const customer = await squareOAuthService.fetchCustomer('token', null);
+    it('should return failure for missing customerId', async () => {
+      const result = await squareOAuthService.fetchCustomer('token', null);
 
-      expect(customer).toBeNull();
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('no_customer_id');
       expect(mockCustomersGet).not.toHaveBeenCalled();
     });
 
-    it('should return null when customer not found', async () => {
+    it('should return failure when customer not found', async () => {
       mockCustomersGet.mockResolvedValue({});
 
-      const customer = await squareOAuthService.fetchCustomer('token', 'cust123');
+      const result = await squareOAuthService.fetchCustomer('token', 'cust123');
 
-      expect(customer).toBeNull();
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('customer_not_found');
     });
 
-    it('should return null on API error', async () => {
+    it('should return failure on API error', async () => {
       mockCustomersGet.mockRejectedValue(new Error('Customer not found'));
 
-      const customer = await squareOAuthService.fetchCustomer('token', 'cust123');
+      const result = await squareOAuthService.fetchCustomer('token', 'cust123');
 
-      expect(customer).toBeNull();
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('api_error');
+      expect(result.error).toBe('Customer not found');
       expect(logger.error).toHaveBeenCalledWith(
         'Error fetching Square customer',
-        { error: 'Customer not found' }
+        expect.objectContaining({ error: 'Customer not found' })
       );
     });
   });
@@ -588,4 +633,5 @@ describe('Square OAuth Service', () => {
       expect(client).toBeDefined();
     });
   });
+
 });

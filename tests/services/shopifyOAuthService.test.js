@@ -100,7 +100,8 @@ describe('ShopifyOAuthService', () => {
   // ============================================
   describe('getAuthorizationUrl', () => {
     it('should generate valid authorization URL', () => {
-      const result = shopifyOAuthService.getAuthorizationUrl(1, 'test-store');
+      const mockReq = { session: {} };
+      const result = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'test-store');
 
       expect(result.url).toContain('https://test-store.myshopify.com/admin/oauth/authorize');
       expect(result.url).toContain('client_id=test-api-key');
@@ -110,22 +111,25 @@ describe('ShopifyOAuthService', () => {
     });
 
     it('should include state parameter with userId and shop', () => {
-      const result = shopifyOAuthService.getAuthorizationUrl(5, 'my-store');
+      const mockReq = { session: {} };
+      const result = shopifyOAuthService.getAuthorizationUrl(mockReq, 5, 'my-store');
 
       expect(result.state).toBeDefined();
-      expect(result.state).toHaveLength(64); // 32 bytes = 64 hex chars
+      expect(result.state).toMatch(/^5:my-store\.myshopify\.com:[0-9a-f]{64}$/);
       expect(result.url).toContain('state=5%3Amy-store.myshopify.com%3A');
     });
 
     it('should generate unique state each time', () => {
-      const result1 = shopifyOAuthService.getAuthorizationUrl(1, 'store1');
-      const result2 = shopifyOAuthService.getAuthorizationUrl(1, 'store1');
+      const mockReq = { session: {} };
+      const result1 = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'store1');
+      const result2 = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'store1');
 
       expect(result1.state).not.toBe(result2.state);
     });
 
     it('should use correct redirect URI', () => {
-      const result = shopifyOAuthService.getAuthorizationUrl(1, 'test-store');
+      const mockReq = { session: {} };
+      const result = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'test-store');
 
       expect(result.url).toContain(encodeURIComponent('/api/auth/shopify/callback'));
     });
@@ -199,6 +203,9 @@ describe('ShopifyOAuthService', () => {
   // ============================================
   describe('handleCallback', () => {
     it('should exchange code for access token', async () => {
+      const mockReq = { session: {} };
+      const { state } = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'test-store.myshopify.com');
+
       axios.post.mockResolvedValue({
         data: {
           access_token: 'shpat_test_token_123',
@@ -207,9 +214,10 @@ describe('ShopifyOAuthService', () => {
       });
 
       const result = await shopifyOAuthService.handleCallback(
+        mockReq,
         'auth-code',
         'test-store.myshopify.com',
-        '1:test-store.myshopify.com:random-state'
+        state
       );
 
       expect(axios.post).toHaveBeenCalledWith(
@@ -225,31 +233,47 @@ describe('ShopifyOAuthService', () => {
       expect(result.tokens.accessToken).toBe('shpat_test_token_123');
     });
 
-    it('should throw error for invalid state format', async () => {
+    it('should throw error for invalid state (no session)', async () => {
+      const mockReq = { session: {} };
+
       await expect(
-        shopifyOAuthService.handleCallback('code', 'shop', 'invalid-state')
-      ).rejects.toThrow('Invalid state parameter');
+        shopifyOAuthService.handleCallback(mockReq, 'code', 'shop.myshopify.com', '1:shop:invalidtoken')
+      ).rejects.toThrow('Invalid or expired OAuth state');
     });
 
-    it('should throw error when state is missing userId', async () => {
+    it('should throw error for tampered state', async () => {
+      const mockReq = { session: {} };
+      const { state } = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'shop.myshopify.com');
+
+      // Tamper with the token part (not just userId)
+      const parts = state.split(':');
+      const tamperedToken = parts[2].substring(0, 60) + 'fake';
+      const tamperedState = `${parts[0]}:${parts[1]}:${tamperedToken}`;
+
       await expect(
-        shopifyOAuthService.handleCallback('code', 'shop', ':shop:state')
-      ).rejects.toThrow('Invalid state parameter');
+        shopifyOAuthService.handleCallback(mockReq, 'code', 'shop.myshopify.com', tamperedState)
+      ).rejects.toThrow('Invalid or expired OAuth state');
     });
 
     it('should throw error when access_token not returned', async () => {
+      const mockReq = { session: {} };
+      const { state } = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'shop.myshopify.com');
+
       axios.post.mockResolvedValue({ data: { error: 'invalid_grant' } });
 
       await expect(
-        shopifyOAuthService.handleCallback('code', 'shop', '1:shop:state')
+        shopifyOAuthService.handleCallback(mockReq, 'code', 'shop.myshopify.com', state)
       ).rejects.toThrow('Failed to obtain access token');
     });
 
     it('should handle axios errors', async () => {
+      const mockReq = { session: {} };
+      const { state } = shopifyOAuthService.getAuthorizationUrl(mockReq, 1, 'shop.myshopify.com');
+
       axios.post.mockRejectedValue(new Error('Network error'));
 
       await expect(
-        shopifyOAuthService.handleCallback('code', 'shop', '1:shop:state')
+        shopifyOAuthService.handleCallback(mockReq, 'code', 'shop.myshopify.com', state)
       ).rejects.toThrow('Network error');
     });
   });
@@ -288,14 +312,15 @@ describe('ShopifyOAuthService', () => {
 
       const result = await shopifyOAuthService.fetchLocations('token', 'test-store.myshopify.com');
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
+      expect(result.success).toBe(true);
+      expect(result.locations).toHaveLength(2);
+      expect(result.locations[0]).toEqual({
         id: '123',
         name: 'Main Store',
         address: '123 Main St, NYC, NY',
         isActive: true,
       });
-      expect(result[1].id).toBe('456');
+      expect(result.locations[1].id).toBe('456');
     });
 
     it('should extract numeric ID from GraphQL global ID', async () => {
@@ -320,7 +345,8 @@ describe('ShopifyOAuthService', () => {
 
       const result = await shopifyOAuthService.fetchLocations('token', 'shop.myshopify.com');
 
-      expect(result[0].id).toBe('789012');
+      expect(result.success).toBe(true);
+      expect(result.locations[0].id).toBe('789012');
     });
 
     it('should handle missing address gracefully', async () => {
@@ -345,24 +371,27 @@ describe('ShopifyOAuthService', () => {
 
       const result = await shopifyOAuthService.fetchLocations('token', 'shop.myshopify.com');
 
-      expect(result[0].address).toBeNull();
+      expect(result.success).toBe(true);
+      expect(result.locations[0].address).toBeNull();
     });
 
-    it('should return empty array on API error', async () => {
+    it('should return error result on API error', async () => {
       axios.post.mockRejectedValue(new Error('GraphQL error'));
 
       const result = await shopifyOAuthService.fetchLocations('token', 'shop.myshopify.com');
 
-      expect(result).toEqual([]);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('GraphQL error');
       expect(logger.error).toHaveBeenCalledWith('Error fetching Shopify locations', expect.any(Object));
     });
 
-    it('should return empty array when locations data is missing', async () => {
+    it('should return empty locations array when locations data is missing', async () => {
       axios.post.mockResolvedValue({ data: { data: null } });
 
       const result = await shopifyOAuthService.fetchLocations('token', 'shop.myshopify.com');
 
-      expect(result).toEqual([]);
+      expect(result.success).toBe(true);
+      expect(result.locations).toEqual([]);
     });
 
     it('should use correct GraphQL endpoint', async () => {
@@ -714,4 +743,5 @@ describe('ShopifyOAuthService', () => {
       expect(PosLocation.upsert).toHaveBeenCalled();
     });
   });
+
 });

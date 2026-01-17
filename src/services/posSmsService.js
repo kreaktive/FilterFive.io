@@ -100,6 +100,26 @@ class PosSmsService {
     // Fetch user for settings
     const user = await User.findByPk(userId);
     if (!user) {
+      logger.error('POS transaction skipped - user not found', {
+        userId,
+        integrationId: integration.id,
+        externalTransactionId,
+        customerPhone: normalizedPhone
+      });
+
+      // Log transaction for visibility
+      await this.logTransaction({
+        userId,
+        posIntegrationId: integration.id,
+        externalTransactionId,
+        customerName,
+        customerPhone: normalizedPhone,
+        purchaseAmount,
+        locationName,
+        smsStatus: 'skipped_error',
+        skipReason: 'User account not found in database'
+      });
+
       return { skipped: true, reason: 'user_not_found' };
     }
 

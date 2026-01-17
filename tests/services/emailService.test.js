@@ -674,8 +674,6 @@ describe('Email Service', () => {
     });
 
     it('should log error but not throw on failure', async () => {
-      // Mock console.error since sendBusinessEventAlert uses it (not logger.error)
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockSend.mockRejectedValue(new Error('Connection timeout'));
 
       await emailService.sendBusinessEventAlert('trial_converted', {
@@ -684,12 +682,14 @@ describe('Email Service', () => {
         businessName: 'Timeout Biz',
       });
 
-      // sendBusinessEventAlert uses console.error, not logger.error
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Business event alert failed:',
-        'Connection timeout'
+      // sendBusinessEventAlert now uses logger.error for proper Sentry tracking
+      expect(logger.error).toHaveBeenCalledWith(
+        'Business event alert failed',
+        expect.objectContaining({
+          eventType: 'trial_converted',
+          error: 'Connection timeout'
+        })
       );
-      consoleSpy.mockRestore();
     });
 
     it('should include event data in the email', async () => {
@@ -824,6 +824,17 @@ describe('Email Service', () => {
       ).rejects.toThrow('Resend API key not configured');
 
       process.env.RESEND_API_KEY = originalKey;
+    });
+  });
+
+  // ===========================================
+  // Email Service Configuration Tests
+  // ===========================================
+  describe('Email service configuration', () => {
+    it('should have RESEND_API_KEY configured in test environment', () => {
+      // This test documents that the email service requires RESEND_API_KEY
+      // Individual functions may have their own validation logic
+      expect(process.env.RESEND_API_KEY).toBeDefined();
     });
   });
 

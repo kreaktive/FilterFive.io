@@ -291,7 +291,7 @@ describe('Square Webhook Service', () => {
       PosIntegration.findOne.mockResolvedValue(mockIntegration);
       PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
       squareOAuthService.refreshToken.mockResolvedValue(true);
-      squareOAuthService.fetchCustomer.mockResolvedValue(null);
+      squareOAuthService.fetchCustomer.mockResolvedValue({ success: false, reason: 'no_customer_id' });
 
       const event = createPaymentEvent();
       await squareWebhookService.processEvent(event);
@@ -303,6 +303,7 @@ describe('Square Webhook Service', () => {
       const mockIntegration = {
         id: 1,
         userId: 10,
+        merchantId: 'merch_123',
         getAccessToken: jest.fn().mockReturnValue('token'),
         isTokenExpired: jest.fn().mockReturnValue(true),
       };
@@ -314,7 +315,13 @@ describe('Square Webhook Service', () => {
       const result = await squareWebhookService.processEvent(event);
 
       expect(result).toEqual({ skipped: true, reason: 'token_refresh_failed' });
-      expect(logger.error).toHaveBeenCalledWith('Failed to refresh Square token', { error: 'Refresh failed' });
+      expect(logger.error).toHaveBeenCalledWith('Failed to refresh Square token', {
+        integrationId: 1,
+        userId: 10,
+        merchantId: 'merch_123',
+        error: 'Refresh failed',
+        stack: expect.any(String)
+      });
     });
 
     it('should skip and log when customer has no phone', async () => {
@@ -327,9 +334,12 @@ describe('Square Webhook Service', () => {
       PosIntegration.findOne.mockResolvedValue(mockIntegration);
       PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
       squareOAuthService.fetchCustomer.mockResolvedValue({
-        givenName: 'John',
-        familyName: 'Doe',
-        phoneNumber: null,
+        success: true,
+        customer: {
+          givenName: 'John',
+          familyName: 'Doe',
+          phoneNumber: null,
+        }
       });
 
       const event = createPaymentEvent();
@@ -355,9 +365,12 @@ describe('Square Webhook Service', () => {
       PosIntegration.findOne.mockResolvedValue(mockIntegration);
       PosLocation.findOne.mockResolvedValue({ locationName: 'Main Store' });
       squareOAuthService.fetchCustomer.mockResolvedValue({
-        givenName: 'Jane',
-        familyName: 'Smith',
-        phoneNumber: '+15551234567',
+        success: true,
+        customer: {
+          givenName: 'Jane',
+          familyName: 'Smith',
+          phoneNumber: '+15551234567',
+        }
       });
       posSmsService.processTransaction.mockResolvedValue({ success: true });
 
@@ -965,7 +978,7 @@ describe('Square Webhook Service', () => {
       PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
       PosTransaction.findOne.mockResolvedValue(null);
       squareOAuthService.refreshToken.mockResolvedValue(true);
-      squareOAuthService.fetchCustomer.mockResolvedValue(null);
+      squareOAuthService.fetchCustomer.mockResolvedValue({ success: false, reason: 'no_customer_id' });
 
       const event = {
         event_id: 'evt_ord_refresh',
@@ -1033,9 +1046,12 @@ describe('Square Webhook Service', () => {
       PosLocation.findOne.mockResolvedValue({ locationName: 'Store' });
       PosTransaction.findOne.mockResolvedValue(null);
       squareOAuthService.fetchCustomer.mockResolvedValue({
-        givenName: 'John',
-        familyName: 'Doe',
-        phoneNumber: null,
+        success: true,
+        customer: {
+          givenName: 'John',
+          familyName: 'Doe',
+          phoneNumber: null,
+        }
       });
 
       const event = {
@@ -1078,9 +1094,12 @@ describe('Square Webhook Service', () => {
       PosLocation.findOne.mockResolvedValue({ locationName: 'Main Store' });
       PosTransaction.findOne.mockResolvedValue(null);
       squareOAuthService.fetchCustomer.mockResolvedValue({
-        givenName: 'Jane',
-        familyName: 'Smith',
-        phoneNumber: '+15551234567',
+        success: true,
+        customer: {
+          givenName: 'Jane',
+          familyName: 'Smith',
+          phoneNumber: '+15551234567',
+        }
       });
       posSmsService.processTransaction.mockResolvedValue({ success: true });
 

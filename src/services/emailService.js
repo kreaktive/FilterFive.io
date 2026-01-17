@@ -381,10 +381,21 @@ const sendBusinessEventAlert = async (eventType, eventData = {}) => {
       html: templates.businessEventAlert(eventType, eventData)
     });
     if (result.error) throw new Error(result.error.message);
-    console.log("Business event alert sent:", eventType, eventData.businessName || eventData.email);
+    // CRITICAL FIX: Use logger instead of console.log for proper monitoring
+    logger.info("Business event alert sent", {
+      eventType,
+      businessName: eventData.businessName,
+      email: eventData.email,
+      emailId: result?.data?.id
+    });
     return { success: true, emailId: result?.data?.id };
   } catch (error) {
-    console.error("Business event alert failed:", error.message);
+    // CRITICAL FIX: Use logger.error instead of console.error for Sentry tracking
+    logger.error("Business event alert failed", {
+      eventType,
+      eventData,
+      error: error.message
+    });
     return { success: false, error: error.message };
   }
 };

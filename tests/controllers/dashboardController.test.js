@@ -752,6 +752,75 @@ describe('Dashboard Controller', () => {
   });
 
   // ===========================================
+  // QR Code Page Tests
+  // ===========================================
+  describe('GET /dashboard/qr (showQrCode)', () => {
+    it('should render QR code page with QR image', async () => {
+      mockReq.session.userId = 1;
+      mockReq.session.businessName = 'Test Business';
+      const user = createMockUser({ reviewUrl: 'https://g.page/r/test123/review' });
+      User.findByPk.mockResolvedValue(user);
+      mockReq.user = user;
+
+      // Mock QRCode module
+      jest.mock('qrcode', () => ({
+        toDataURL: jest.fn().mockResolvedValue('data:image/png;base64,test-qr-code'),
+      }));
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showQrCode(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith('dashboard/qr', expect.objectContaining({
+        title: 'My QR Code - MoreStars',
+        businessName: 'Test Business',
+        user: expect.any(Object),
+        qrCodeImage: expect.any(String),
+        qrUrl: expect.stringContaining('/r/1'),
+      }));
+    });
+
+    it('should redirect to login if user not found', async () => {
+      mockReq.session.userId = 1;
+      User.findByPk.mockResolvedValue(null);
+      mockReq.user = null;
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showQrCode(mockReq, mockRes);
+
+      expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/login');
+    });
+
+    it('should handle database errors gracefully', async () => {
+      mockReq.session.userId = 1;
+      mockReq.user = null;
+
+      // Database error when fetching user
+      User.findByPk.mockRejectedValue(new Error('Database error'));
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showQrCode(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.send).toHaveBeenCalledWith('Something went wrong');
+    });
+
+    it('should use req.user if available', async () => {
+      mockReq.session.userId = 1;
+      mockReq.session.businessName = 'Test Business';
+      const user = createMockUser({ id: 42 });
+      mockReq.user = user;
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showQrCode(mockReq, mockRes);
+
+      // Should use req.user and render QR code
+      expect(mockRes.render).toHaveBeenCalledWith('dashboard/qr', expect.objectContaining({
+        qrUrl: expect.stringContaining('/r/42'),
+      }));
+    });
+  });
+
+  // ===========================================
   // API Key Regeneration Tests
   // ===========================================
   describe('POST /dashboard/api-key/regenerate', () => {
@@ -785,6 +854,42 @@ describe('Dashboard Controller', () => {
       expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
         error: 'Not authenticated'
+      }));
+    });
+
+    it('should handle regenerateApiKey failure gracefully', async () => {
+      mockReq.session.userId = 1;
+
+      const user = createMockUser();
+      user.regenerateApiKey = jest.fn().mockRejectedValue(new Error('Key generation failed'));
+      User.findByPk.mockResolvedValue(user);
+      mockReq.user = user;
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.regenerateApiKey(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: false,
+        error: expect.stringContaining('Failed to regenerate')
+      }));
+    });
+
+    it('should include success message with regenerated key', async () => {
+      mockReq.session.userId = 1;
+
+      const user = createMockUser();
+      user.regenerateApiKey = jest.fn().mockResolvedValue('ff_new_api_key_xyz');
+      User.findByPk.mockResolvedValue(user);
+      mockReq.user = user;
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.regenerateApiKey(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: true,
+        apiKey: 'ff_new_api_key_xyz',
+        message: expect.stringContaining('regenerated successfully')
       }));
     });
   });
@@ -850,8 +955,87 @@ describe('Dashboard Controller', () => {
       expect(mockRes.status).toHaveBeenCalledWith(401);
     });
 
-    // Note: Email service error handling is tested at the service level
-    // The controller catches errors and returns appropriate responses
+    it('should still succeed even if email fails (non-blocking)', async () => {
+      mockReq.session.userId = 1;
+      mockReq.body = {
+        subject: 'Help needed',
+        message: 'I need assistance with my account'
+      };
+
+      const { sendSupportRequestEmail } = require('../../src/services/emailService');
+      sendSupportRequestEmail.mockRejectedValue(new Error('Email service down'));
+
+      User.findByPk.mockResolvedValue(createMockUser());
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.submitSupportRequest(mockReq, mockRes);
+
+      // Should still return success even if email fails
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: true
+      }));
+    });
+
+    it('should handle database errors gracefully', async () => {
+      mockReq.session.userId = 1;
+      mockReq.body = {
+        subject: 'Help needed',
+        message: 'I need assistance'
+      };
+
+      User.findByPk.mockRejectedValue(new Error('Database error'));
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.submitSupportRequest(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        error: expect.stringContaining('Failed to submit')
+      }));
+    });
+  });
+
+  // ===========================================
+  // Show Settings Tests
+  // ===========================================
+  describe('GET /dashboard/settings (showSettings)', () => {
+    it('should render settings page with user data', async () => {
+      mockReq.session.userId = 1;
+      mockReq.session.businessName = 'Test Business';
+
+      const user = createMockUser();
+      User.findByPk.mockResolvedValue(user);
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showSettings(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith('dashboard/settings', expect.objectContaining({
+        title: 'Settings - MoreStars',
+        businessName: 'Test Business',
+        user: expect.any(Object)
+      }));
+    });
+
+    it('should redirect to login if user not found', async () => {
+      mockReq.session.userId = 999;
+      User.findByPk.mockResolvedValue(null);
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showSettings(mockReq, mockRes);
+
+      expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/login');
+    });
+
+    it('should handle database error gracefully', async () => {
+      mockReq.session.userId = 1;
+      User.findByPk.mockRejectedValue(new Error('Database error'));
+
+      const dashboardController = require('../../src/controllers/dashboardController');
+      await dashboardController.showSettings(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.send).toHaveBeenCalledWith('Something went wrong');
+    });
   });
 
   // ===========================================

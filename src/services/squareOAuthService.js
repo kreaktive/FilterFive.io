@@ -9,6 +9,7 @@ const PosIntegration = require('../models/PosIntegration');
 const PosLocation = require('../models/PosLocation');
 const logger = require('./logger');
 const { maskSecret } = require('../utils/formatters');
+const oauthStateService = require('./oauthStateService');
 
 class SquareOAuthService {
   constructor() {
@@ -34,18 +35,19 @@ class SquareOAuthService {
 
   /**
    * Generate OAuth authorization URL
+   * @param {object} req - Express request (has session)
    * @param {number} userId - MoreStars user ID
    * @returns {object} { url, state }
    */
-  getAuthorizationUrl(userId) {
-    // Generate secure state parameter (prevents CSRF)
-    const state = crypto.randomBytes(32).toString('hex');
+  getAuthorizationUrl(req, userId) {
+    // Generate secure state parameter using centralized OAuth state service
+    const state = oauthStateService.generateState(req, 'square', userId);
 
     const params = new URLSearchParams({
       client_id: this.clientId,
       scope: 'PAYMENTS_READ CUSTOMERS_READ MERCHANT_PROFILE_READ',
       session: 'false', // Don't use Square's session
-      state: `${userId}:${state}`,
+      state,
       redirect_uri: `${process.env.APP_URL}/api/auth/square/callback`
     });
 
@@ -56,16 +58,21 @@ class SquareOAuthService {
 
   /**
    * Exchange authorization code for access token
+   * @param {object} req - Express request (has session)
    * @param {string} code - Authorization code from callback
    * @param {string} state - State parameter from callback
    * @returns {object} { userId, tokens }
    */
-  async handleCallback(code, state) {
-    // Parse state to get userId
-    const [userId, originalState] = state.split(':');
-    if (!userId) {
-      throw new Error('Invalid state parameter');
+  async handleCallback(req, code, state) {
+    // Validate OAuth state token against session
+    const validation = oauthStateService.validateAndConsume(req, 'square', state);
+
+    if (!validation.valid) {
+      logger.error('Square OAuth state validation failed', { error: validation.error });
+      throw new Error('Invalid or expired OAuth state');
     }
+
+    const userId = validation.userId;
 
     // Exchange code for tokens
     const client = new SquareClient({ environment: this.environment });
@@ -180,35 +187,45 @@ class SquareOAuthService {
   /**
    * Fetch all locations for a merchant
    * @param {string} accessToken - Decrypted access token
-   * @returns {Array} List of locations
+   * @returns {object} { success: boolean, locations?: Array, error?: string }
    */
   async fetchLocations(accessToken) {
     const client = this.getClient(accessToken);
 
-    const response = await client.locations.list();
+    try {
+      const response = await client.locations.list();
 
-    if (!response.locations) {
-      return [];
+      if (!response.locations) {
+        return { success: true, locations: [] };
+      }
+
+      const locations = response.locations.map(loc => ({
+        id: loc.id,
+        name: loc.name,
+        address: loc.address ?
+          `${loc.address.addressLine1 || ''}, ${loc.address.locality || ''}, ${loc.address.administrativeDistrictLevel1 || ''}`.trim()
+          : null,
+        status: loc.status
+      }));
+
+      return { success: true, locations };
+    } catch (error) {
+      logger.error('Error fetching Square locations', { error: error.message });
+      // CRITICAL FIX: Return error state instead of empty array to prevent data deletion
+      return { success: false, error: error.message };
     }
-
-    return response.locations.map(loc => ({
-      id: loc.id,
-      name: loc.name,
-      address: loc.address ?
-        `${loc.address.addressLine1 || ''}, ${loc.address.locality || ''}, ${loc.address.administrativeDistrictLevel1 || ''}`.trim()
-        : null,
-      status: loc.status
-    }));
   }
 
   /**
    * Fetch customer details by ID
    * @param {string} accessToken - Decrypted access token
    * @param {string} customerId - Square customer ID
-   * @returns {object|null} Customer details
+   * @returns {object} { success: boolean, customer?: object, reason?: string, error?: string }
    */
   async fetchCustomer(accessToken, customerId) {
-    if (!customerId) return null;
+    if (!customerId) {
+      return { success: false, reason: 'no_customer_id' };
+    }
 
     const client = this.getClient(accessToken);
 
@@ -216,20 +233,25 @@ class SquareOAuthService {
       const response = await client.customers.get({ customerId });
 
       if (!response.customer) {
-        return null;
+        return { success: false, reason: 'customer_not_found' };
       }
 
       const customer = response.customer;
       return {
-        id: customer.id,
-        givenName: customer.givenName,
-        familyName: customer.familyName,
-        phoneNumber: customer.phoneNumber,
-        emailAddress: customer.emailAddress
+        success: true,
+        customer: {
+          id: customer.id,
+          givenName: customer.givenName,
+          familyName: customer.familyName,
+          phoneNumber: customer.phoneNumber,
+          emailAddress: customer.emailAddress
+        }
       };
     } catch (error) {
-      logger.error('Error fetching Square customer', { error: error.message });
-      return null;
+      // CRITICAL FIX: Distinguish API errors from "customer not found"
+      // This prevents logging "no phone number" when the API actually failed
+      logger.error('Error fetching Square customer', { customerId, error: error.message });
+      return { success: false, reason: 'api_error', error: error.message };
     }
   }
 
@@ -243,7 +265,26 @@ class SquareOAuthService {
       throw new Error('No access token available');
     }
 
-    const locations = await this.fetchLocations(accessToken);
+    const result = await this.fetchLocations(accessToken);
+
+    // CRITICAL FIX: If API call failed, do NOT delete any locations
+    if (!result.success) {
+      logger.warn('Skipping location sync due to API error - preserving existing locations', {
+        integrationId: integration.id,
+        provider: 'square',
+        error: result.error
+      });
+      // Return existing locations from database instead
+      const existingLocations = await PosLocation.findAll({
+        where: { posIntegrationId: integration.id }
+      });
+      return existingLocations.map(l => ({
+        id: l.externalLocationId,
+        name: l.locationName
+      }));
+    }
+
+    const locations = result.locations;
 
     for (const loc of locations) {
       await PosLocation.upsert({
@@ -256,16 +297,18 @@ class SquareOAuthService {
       });
     }
 
-    // Remove locations that no longer exist in Square
+    // Remove locations that no longer exist in Square (only if we successfully fetched locations)
     const externalIds = locations.map(l => l.id);
-    await PosLocation.destroy({
-      where: {
-        posIntegrationId: integration.id,
-        externalLocationId: {
-          [require('sequelize').Op.notIn]: externalIds
+    if (externalIds.length > 0) {
+      await PosLocation.destroy({
+        where: {
+          posIntegrationId: integration.id,
+          externalLocationId: {
+            [require('sequelize').Op.notIn]: externalIds
+          }
         }
-      }
-    });
+      });
+    }
 
     return locations;
   }

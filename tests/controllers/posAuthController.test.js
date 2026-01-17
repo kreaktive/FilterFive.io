@@ -73,8 +73,7 @@ describe('POS Auth Controller', () => {
 
       await initiateSquareOAuth(mockReq, mockRes);
 
-      expect(squareOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(1);
-      expect(mockReq.session.squareOAuthState).toBe('abc123');
+      expect(squareOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(mockReq, 1);
       expect(mockRes.redirect).toHaveBeenCalledWith(
         'https://connect.squareup.com/oauth2/authorize?client_id=123'
       );
@@ -128,7 +127,7 @@ describe('POS Auth Controller', () => {
 
       await handleSquareCallback(mockReq, mockRes);
 
-      expect(squareOAuthService.handleCallback).toHaveBeenCalledWith('auth_code_123', '1:statevalue');
+      expect(squareOAuthService.handleCallback).toHaveBeenCalledWith(mockReq, 'auth_code_123', '1:statevalue');
       expect(squareOAuthService.createOrUpdateIntegration).toHaveBeenCalledWith(1, {
         accessToken: 'token123',
         refreshToken: 'refresh123',
@@ -210,8 +209,7 @@ describe('POS Auth Controller', () => {
 
       await initiateShopifyOAuth(mockReq, mockRes);
 
-      expect(shopifyOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(1, 'teststore.myshopify.com');
-      expect(mockReq.session.shopifyOAuthState).toBe('xyz789');
+      expect(shopifyOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(mockReq, 1, 'teststore.myshopify.com');
       expect(mockRes.redirect).toHaveBeenCalledWith(
         'https://teststore.myshopify.com/admin/oauth/authorize?client_id=123'
       );
@@ -291,6 +289,7 @@ describe('POS Auth Controller', () => {
 
       expect(shopifyOAuthService.validateCallback).toHaveBeenCalledWith(mockReq.query);
       expect(shopifyOAuthService.handleCallback).toHaveBeenCalledWith(
+        mockReq,
         'shopify_code_123',
         'teststore.myshopify.com',
         '1:teststore.myshopify.com:statevalue'
@@ -400,30 +399,6 @@ describe('POS Auth Controller', () => {
       await initiateShopifyOAuth(mockReq, mockRes);
 
       expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/login');
-    });
-
-    it('should store OAuth state in session for Square', async () => {
-      squareOAuthService.getAuthorizationUrl.mockReturnValue({
-        url: 'https://example.com',
-        state: 'secure_state_token',
-      });
-
-      await initiateSquareOAuth(mockReq, mockRes);
-
-      expect(mockReq.session.squareOAuthState).toBe('secure_state_token');
-    });
-
-    it('should store OAuth state in session for Shopify', async () => {
-      mockReq.query = { shop: 'test.myshopify.com' };
-      shopifyOAuthService.getAuthorizationUrl.mockReturnValue({
-        url: 'https://example.com',
-        state: 'shopify_state_token',
-        shopDomain: 'test.myshopify.com',
-      });
-
-      await initiateShopifyOAuth(mockReq, mockRes);
-
-      expect(mockReq.session.shopifyOAuthState).toBe('shopify_state_token');
     });
   });
 });

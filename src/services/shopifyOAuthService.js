@@ -8,6 +8,7 @@ const axios = require('axios');
 const PosIntegration = require('../models/PosIntegration');
 const PosLocation = require('../models/PosLocation');
 const logger = require('./logger');
+const oauthStateService = require('./oauthStateService');
 
 class ShopifyOAuthService {
   constructor() {
@@ -19,22 +20,23 @@ class ShopifyOAuthService {
 
   /**
    * Generate OAuth authorization URL
+   * @param {object} req - Express request (has session)
    * @param {number} userId - MoreStars user ID
    * @param {string} shop - Shop domain (e.g., store.myshopify.com)
    * @returns {object} { url, state }
    */
-  getAuthorizationUrl(userId, shop) {
+  getAuthorizationUrl(req, userId, shop) {
     // Normalize shop domain
     const shopDomain = this.normalizeShopDomain(shop);
 
-    // Generate secure state parameter (prevents CSRF)
-    const state = crypto.randomBytes(32).toString('hex');
+    // Generate secure state parameter using centralized OAuth state service
+    const state = oauthStateService.generateState(req, 'shopify', userId, { shopDomain });
 
     const params = new URLSearchParams({
       client_id: this.apiKey,
       scope: this.scopes,
       redirect_uri: `${process.env.APP_URL}/api/auth/shopify/callback`,
-      state: `${userId}:${shopDomain}:${state}`
+      state
     });
 
     const url = `https://${shopDomain}/admin/oauth/authorize?${params.toString()}`;
@@ -93,19 +95,23 @@ class ShopifyOAuthService {
 
   /**
    * Exchange authorization code for access token
+   * @param {object} req - Express request (has session)
    * @param {string} code - Authorization code from callback
    * @param {string} shop - Shop domain
    * @param {string} state - State parameter from callback
    * @returns {object} { userId, shopDomain, tokens }
    */
-  async handleCallback(code, shop, state) {
-    // Parse state to get userId and shop
-    const [userId, shopFromState, originalState] = state.split(':');
-    if (!userId || !shopFromState) {
-      throw new Error('Invalid state parameter');
+  async handleCallback(req, code, shop, state) {
+    // Validate OAuth state token against session
+    const validation = oauthStateService.validateAndConsume(req, 'shopify', state);
+
+    if (!validation.valid) {
+      logger.error('Shopify OAuth state validation failed', { error: validation.error });
+      throw new Error('Invalid or expired OAuth state');
     }
 
-    const shopDomain = this.normalizeShopDomain(shop);
+    const userId = validation.userId;
+    const shopDomain = validation.metadata.shopDomain;
 
     // Exchange code for access token
     const response = await axios.post(
@@ -140,7 +146,7 @@ class ShopifyOAuthService {
    * Fetch all locations for a shop (using GraphQL)
    * @param {string} accessToken - Decrypted access token
    * @param {string} shopDomain - Shop domain
-   * @returns {Array} List of locations
+   * @returns {object} { success: boolean, locations?: Array, error?: string }
    */
   async fetchLocations(accessToken, shopDomain) {
     const query = `
@@ -175,10 +181,10 @@ class ShopifyOAuthService {
       );
 
       if (!response.data.data || !response.data.data.locations) {
-        return [];
+        return { success: true, locations: [] };
       }
 
-      return response.data.data.locations.edges.map(edge => {
+      const locations = response.data.data.locations.edges.map(edge => {
         const loc = edge.node;
         // Extract numeric ID from GraphQL global ID (gid://shopify/Location/123)
         const idMatch = loc.id.match(/\/(\d+)$/);
@@ -191,9 +197,12 @@ class ShopifyOAuthService {
           isActive: loc.isActive
         };
       });
+
+      return { success: true, locations };
     } catch (error) {
-      logger.error('Error fetching Shopify locations', { error: error.message });
-      return [];
+      logger.error('Error fetching Shopify locations', { shopDomain, error: error.message });
+      // CRITICAL FIX: Return error state instead of empty array to prevent data deletion
+      return { success: false, error: error.message };
     }
   }
 
@@ -207,7 +216,26 @@ class ShopifyOAuthService {
       throw new Error('No access token available');
     }
 
-    const locations = await this.fetchLocations(accessToken, integration.shopDomain);
+    const result = await this.fetchLocations(accessToken, integration.shopDomain);
+
+    // CRITICAL FIX: If API call failed, do NOT delete any locations
+    if (!result.success) {
+      logger.warn('Skipping location sync due to API error - preserving existing locations', {
+        integrationId: integration.id,
+        shopDomain: integration.shopDomain,
+        error: result.error
+      });
+      // Return existing locations from database instead
+      const existingLocations = await PosLocation.findAll({
+        where: { posIntegrationId: integration.id }
+      });
+      return existingLocations.map(l => ({
+        id: l.externalLocationId,
+        name: l.locationName
+      }));
+    }
+
+    const locations = result.locations;
 
     for (const loc of locations) {
       await PosLocation.upsert({
@@ -220,7 +248,7 @@ class ShopifyOAuthService {
       });
     }
 
-    // Remove locations that no longer exist
+    // Remove locations that no longer exist (only if we successfully fetched locations)
     const externalIds = locations.map(l => l.id);
     if (externalIds.length > 0) {
       await PosLocation.destroy({

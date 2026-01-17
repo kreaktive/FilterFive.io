@@ -195,22 +195,52 @@ class SquareWebhookService {
       try {
         await squareOAuthService.refreshToken(integration);
       } catch (error) {
-        logger.error('Failed to refresh Square token', { error: error.message });
+        logger.error('Failed to refresh Square token', {
+          integrationId: integration.id,
+          userId: integration.userId,
+          merchantId: integration.merchantId,
+          error: error.message,
+          stack: error.stack
+        });
         return { skipped: true, reason: 'token_refresh_failed' };
       }
     }
 
-    const customer = await squareOAuthService.fetchCustomer(
+    const customerResult = await squareOAuthService.fetchCustomer(
       integration.getAccessToken(),
       customerId
     );
 
-    if (!customer || !customer.phoneNumber) {
+    // CRITICAL FIX: Distinguish between "no customer/no phone" and "API error"
+    if (!customerResult.success) {
+      const skipReason = customerResult.reason === 'api_error'
+        ? `Square API error: ${customerResult.error}`
+        : customerResult.reason === 'customer_not_found'
+          ? 'Customer not found in Square'
+          : 'No customer ID provided';
+
       await posSmsService.logTransaction({
         userId: integration.userId,
         posIntegrationId: integration.id,
         externalTransactionId: paymentId,
-        customerName: customer ? `${customer.givenName || ''} ${customer.familyName || ''}`.trim() : null,
+        customerName: null,
+        customerPhone: null,
+        purchaseAmount: payment.total_money ? payment.total_money.amount / 100 : null,
+        locationName: location.locationName,
+        smsStatus: customerResult.reason === 'api_error' ? 'skipped_api_error' : 'skipped_no_phone',
+        skipReason
+      });
+      return { skipped: true, reason: customerResult.reason };
+    }
+
+    const customer = customerResult.customer;
+
+    if (!customer.phoneNumber) {
+      await posSmsService.logTransaction({
+        userId: integration.userId,
+        posIntegrationId: integration.id,
+        externalTransactionId: paymentId,
+        customerName: `${customer.givenName || ''} ${customer.familyName || ''}`.trim() || null,
         customerPhone: null,
         purchaseAmount: payment.total_money ? payment.total_money.amount / 100 : null,
         locationName: location.locationName,
@@ -318,17 +348,41 @@ class SquareWebhookService {
       }
     }
 
-    const customer = await squareOAuthService.fetchCustomer(
+    const customerResult = await squareOAuthService.fetchCustomer(
       integration.getAccessToken(),
       customerId
     );
 
-    if (!customer || !customer.phoneNumber) {
+    // CRITICAL FIX: Distinguish between "no customer/no phone" and "API error"
+    if (!customerResult.success) {
+      const skipReason = customerResult.reason === 'api_error'
+        ? `Square API error: ${customerResult.error}`
+        : customerResult.reason === 'customer_not_found'
+          ? 'Customer not found in Square'
+          : 'No customer ID provided';
+
       await posSmsService.logTransaction({
         userId: integration.userId,
         posIntegrationId: integration.id,
         externalTransactionId: orderId,
-        customerName: customer ? `${customer.givenName || ''} ${customer.familyName || ''}`.trim() : null,
+        customerName: null,
+        customerPhone: null,
+        purchaseAmount: order.total_money ? order.total_money.amount / 100 : null,
+        locationName: location.locationName,
+        smsStatus: customerResult.reason === 'api_error' ? 'skipped_api_error' : 'skipped_no_phone',
+        skipReason
+      });
+      return { skipped: true, reason: customerResult.reason };
+    }
+
+    const customer = customerResult.customer;
+
+    if (!customer.phoneNumber) {
+      await posSmsService.logTransaction({
+        userId: integration.userId,
+        posIntegrationId: integration.id,
+        externalTransactionId: orderId,
+        customerName: `${customer.givenName || ''} ${customer.familyName || ''}`.trim() || null,
         customerPhone: null,
         purchaseAmount: order.total_money ? order.total_money.amount / 100 : null,
         locationName: location.locationName,

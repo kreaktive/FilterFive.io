@@ -755,6 +755,7 @@ describe('Upload Controller', () => {
 
       expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/login');
     });
+
   });
 
   // ===========================================
@@ -786,6 +787,41 @@ describe('Upload Controller', () => {
       expect(mockRes.render).toHaveBeenCalledWith('upload-results', expect.objectContaining({
         title: 'Upload Results',
       }));
+    });
+
+    test('should include full results data in render', async () => {
+      mockReq.user = mockUser;
+      const fullResults = {
+        filename: 'customers.csv',
+        totalRows: 10,
+        successCount: 8,
+        failedCount: 2,
+        duplicateCount: 0,
+        invalidCount: 0,
+        processingTimeSeconds: 5,
+        successfulSends: [],
+        failedSends: [],
+        duplicates: [],
+        invalidRows: []
+      };
+      mockReq.session.uploadResults = fullResults;
+
+      await uploadController.showResults(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith('upload-results', expect.objectContaining({
+        results: fullResults,
+      }));
+    });
+
+    test('should redirect to upload when error occurs', async () => {
+      // The controller catches errors and redirects to upload page
+      mockReq.user = null;
+      mockReq.session.uploadResults = null;
+
+      await uploadController.showResults(mockReq, mockRes);
+
+      // When there's no results and no user, redirects to upload
+      expect(mockRes.redirect).toHaveBeenCalled();
     });
   });
 
@@ -825,6 +861,92 @@ describe('Upload Controller', () => {
         title: 'Review Upload',
         preview: expect.objectContaining({ filename: 'test.csv' }),
       }));
+    });
+
+    test('should redirect to upload when no preview data exists', async () => {
+      // The controller first checks for preview data
+      mockReq.user = mockUser;
+      mockReq.session.csvPreview = null;
+
+      await uploadController.showPreview(mockReq, mockRes);
+
+      expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/upload');
+    });
+
+    test('should include all preview data categories', async () => {
+      mockReq.user = mockUser;
+      const fullPreview = {
+        filename: 'customers.csv',
+        validRows: [{ name: 'John', phone: '+11234567890', rowNumber: 1 }],
+        invalidRows: [{ name: '', phone: 'invalid', rowNumber: 2, error: 'Invalid phone' }],
+        duplicateRows: [{ name: 'Jane', phone: '+10987654321', rowNumber: 3, error: 'Duplicate' }],
+        errors: [],
+        totalRows: 3,
+        uploadedAt: new Date()
+      };
+      mockReq.session.csvPreview = fullPreview;
+
+      await uploadController.showPreview(mockReq, mockRes);
+
+      expect(mockRes.render).toHaveBeenCalledWith('upload-preview', expect.objectContaining({
+        preview: fullPreview,
+      }));
+    });
+  });
+
+  // ===========================================
+  // Additional progressStream tests (Phase 2.3)
+  // ===========================================
+  describe('progressStream additional tests', () => {
+    test('should set X-Accel-Buffering header to disable nginx buffering', () => {
+      mockReq.params = { sessionId: 'test-session-999' };
+      mockReq.on = jest.fn();
+
+      uploadController.progressStream(mockReq, mockRes);
+
+      expect(mockRes.setHeader).toHaveBeenCalledWith('X-Accel-Buffering', 'no');
+    });
+
+    test('should send connected event on connection', () => {
+      mockReq.params = { sessionId: 'test-session-connected' };
+      mockReq.on = jest.fn();
+
+      uploadController.progressStream(mockReq, mockRes);
+
+      expect(mockRes.write).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"connected"')
+      );
+    });
+  });
+
+  // ===========================================
+  // sendToSelected additional tests
+  // ===========================================
+  describe('sendToSelected additional tests', () => {
+    test('should redirect to login if user not found', async () => {
+      mockReq.user = null;
+      User.findByPk.mockResolvedValue(null);
+      mockReq.session.csvPreview = {
+        filename: 'test.csv',
+        validRows: [{ name: 'John', phone: '+11234567890', rowNumber: 1 }],
+        invalidRows: [],
+        duplicateRows: [],
+        errors: [],
+        totalRows: 1,
+      };
+
+      await uploadController.sendToSelected(mockReq, mockRes);
+
+      expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/login');
+    });
+
+    test('should redirect to upload when no preview data', async () => {
+      mockReq.user = mockUser;
+      mockReq.session.csvPreview = null;
+
+      await uploadController.sendToSelected(mockReq, mockRes);
+
+      expect(mockRes.redirect).toHaveBeenCalledWith('/dashboard/upload');
     });
   });
 });
