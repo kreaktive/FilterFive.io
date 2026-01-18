@@ -203,7 +203,7 @@ function registerIndustryRoutes(app) {
   app.get('/industries/:slug', (req, res) => {
     const industry = industries[req.params.slug];
 
-    if (!industry) {
+    if (!industry || typeof industry !== 'object' || !industry.color) {
       return res.status(404).render('404', { title: 'Page Not Found - MoreStars', noindex: true });
     }
 
