@@ -2390,26 +2390,4 @@ const industries = {
   },
 };
 
-// Helper function to get industry by slug
-function getIndustry(slug) {
-  return industries[slug] || null;
-}
-
-// Helper function to get all industry slugs
-function getAllSlugs() {
-  return Object.keys(industries);
-}
-
-// Helper function to get industries for navigation/listing
-function getIndustriesForNav() {
-  return Object.values(industries).map(ind => ({
-    slug: ind.slug,
-    title: ind.title,
-    emoji: ind.emoji,
-  }));
-}
-
 module.exports = industries;
-module.exports.getIndustry = getIndustry;
-module.exports.getAllSlugs = getAllSlugs;
-module.exports.getIndustriesForNav = getIndustriesForNav;
