@@ -44,3 +44,6 @@ postgres_data/
 # Stripe data exports (may contain test keys)
 stripe_*.csv
 prices-stripe-*.csv
+
+# Auto Claude data directory
+.auto-claude/
