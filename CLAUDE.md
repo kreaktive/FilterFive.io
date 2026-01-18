@@ -109,6 +109,26 @@ docker compose down
 docker compose logs app | tail -50
 ```
 
+### Docker Gotcha: restart vs down && up
+
+**CRITICAL:** `docker compose restart` does NOT reload environment variables.
+
+```bash
+# ❌ WRONG - Reuses container with cached .env values
+docker compose restart app
+
+# ✅ CORRECT - Fully removes container and creates fresh one
+docker compose down && docker compose up -d app
+```
+
+**Why?**
+- `restart` stops and starts the same container instance
+- Environment variables are baked into the container when created
+- Changing `.env` has no effect until you remove and recreate the container
+- This is a common Docker gotcha that wastes debugging time
+
+**Rule:** Anytime you change `.env` values, always use `down` then `up` (or the aggressive rebuild command above).
+
 ## Project Architecture
 
 ### Request Flow
