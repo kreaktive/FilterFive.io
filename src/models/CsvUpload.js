@@ -45,12 +45,18 @@ const CsvUpload = sequelize.define('CsvUpload', {
       type: DataTypes.STRING,
       defaultValue: 'processing',
       validate: {
-        isIn: [['processing', 'completed', 'failed', 'partial']]
+        isIn: [['processing', 'not_started', 'in_progress', 'completed', 'failed', 'partial']]
       }
     },
     errors: {
       type: DataTypes.JSONB,
       defaultValue: []
+    },
+    parsedData: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null,
+      field: 'parsed_data'
     },
     processingTimeMs: {
       type: DataTypes.INTEGER

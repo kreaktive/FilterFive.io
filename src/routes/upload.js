@@ -36,8 +36,17 @@ router.post('/upload/start-sending', smsSendLimiter, uploadController.startSendi
 // GET /dashboard/upload/results - Show final results page
 router.get('/upload/results', uploadController.showResults);
 
+// POST /dashboard/upload/add-contact - Add manual contact to upload
+router.post('/upload/add-contact', uploadController.addManualContact);
+
 // GET /dashboard/uploads - View upload history
 router.get('/uploads', uploadController.showUploadHistory);
+
+// GET /dashboard/uploads/:id - View specific upload details
+router.get('/uploads/:id', uploadController.showPreview);
+
+// POST /dashboard/uploads/:id/status - Toggle upload completion status
+router.post('/uploads/:id/status', uploadController.toggleUploadStatus);
 
 // POST /dashboard/send-single - Resend SMS to single customer
 // Rate limited to prevent SMS abuse

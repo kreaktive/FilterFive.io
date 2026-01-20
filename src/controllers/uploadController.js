@@ -132,7 +132,7 @@ const processUpload = async (req, res) => {
         .on('data', (row) => {
           rows.push({
             name: row.name?.trim() || row.customer_name?.trim() || '',
-            phone: row.phone?.trim() || row.customer_phone?.trim() || '',
+            phone: row.phone?.trim() || row.customer_phone?.trim() || row.number?.trim() || row.mobile?.trim() || row.cell?.trim() || '',
             email: row.email?.trim() || row.customer_email?.trim() || ''
           });
         })
@@ -250,8 +250,8 @@ const processUpload = async (req, res) => {
 
     logger.info('CSV parsing complete', { totalRows: rows.length, validRows: validRows.length, invalidRows: invalidRows.length, duplicateRows: duplicateRows.length });
 
-    // Store parsed data in session for preview
-    req.session.csvPreview = {
+    // Build parsed data object
+    const parsedData = {
       filename: filename,
       validRows: validRows,
       invalidRows: invalidRows.map((row, i) => ({
@@ -267,13 +267,18 @@ const processUpload = async (req, res) => {
       uploadedAt: new Date()
     };
 
-    // Save session before redirecting to ensure data persists
-    logger.debug('Saving session data', { sessionId: req.sessionID });
-    logger.debug('Session data to save', {
-      filename: req.session.csvPreview.filename,
-      validRows: req.session.csvPreview.validRows.length,
-      totalRows: req.session.csvPreview.totalRows
+    // Store parsed data in database for persistence
+    await uploadRecord.update({
+      parsedData: parsedData,
+      validRows: validRows.length,
+      duplicateCount: duplicateRows.length,
+      failedCount: invalidRows.length
     });
+
+    logger.info('Parsed data saved to database', { uploadId: uploadRecord.id });
+
+    // Store just the upload ID in session (lightweight)
+    req.session.csvUploadId = uploadRecord.id;
 
     req.session.save((err) => {
       if (err) {
@@ -311,36 +316,71 @@ const processUpload = async (req, res) => {
 };
 
 // GET /dashboard/upload/preview - Show CSV preview with checkboxes
+// Also handles /dashboard/uploads/:id for viewing past uploads
 const showPreview = async (req, res) => {
   try {
     const userId = req.session.userId;
     const { User } = require('../models');
-    const user = req.user || await User.findByPk(userId);
+
+    // Load full user data including SMS settings (not from req.user which has limited attributes)
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.redirect('/dashboard/login');
     }
 
-    // Get preview data from session
-    const previewData = req.session.csvPreview;
-    logger.debug('Preview page', { sessionId: req.sessionID, hasPreviewData: !!previewData });
-    if (previewData) {
-      logger.debug('Preview data found', {
-        filename: previewData.filename,
-        validRows: previewData.validRows?.length,
-        totalRows: previewData.totalRows
+
+    // Get upload ID from URL param (for history links) or session (for fresh uploads)
+    const uploadId = req.params.id || req.session.csvUploadId;
+
+    let previewData = null;
+    let uploadRecord = null;
+
+    if (uploadId) {
+      // Load from database
+      uploadRecord = await CsvUpload.findOne({
+        where: { id: uploadId, userId: user.id }
       });
+
+      if (uploadRecord && uploadRecord.parsedData) {
+        previewData = uploadRecord.parsedData;
+        logger.debug('Preview data loaded from database', {
+          uploadId: uploadRecord.id,
+          filename: previewData.filename,
+          validRows: previewData.validRows?.length,
+          totalRows: previewData.totalRows
+        });
+      }
     }
 
     if (!previewData) {
-      logger.warn('No preview data in session - redirecting to upload');
+      // Check if this is a historical upload without parsedData
+      if (uploadRecord && !uploadRecord.parsedData) {
+        logger.info('Viewing historical upload without parsedData', { uploadId: uploadRecord.id });
+        return res.render('upload-preview', {
+          title: 'Upload Details',
+          user: user,
+          preview: null,
+          uploadRecord: uploadRecord,
+          isHistorical: true,
+          alreadySent: uploadRecord.status === 'completed'
+        });
+      }
+
+      logger.warn('No preview data found - redirecting to upload');
       return res.redirect('/dashboard/upload');
     }
+
+    // Check if this upload has been worked on (status is not_started, in_progress, or completed)
+    const alreadySent = uploadRecord && ['not_started', 'in_progress', 'completed'].includes(uploadRecord.status);
 
     res.render('upload-preview', {
       title: 'Review Upload',
       user: user,
-      preview: previewData
+      preview: previewData,
+      uploadId: uploadRecord?.id,
+      uploadStatus: uploadRecord?.status,
+      alreadySent: alreadySent
     });
   } catch (error) {
     logger.error('Preview error', { error: error.message });
@@ -362,13 +402,27 @@ const sendToSelected = async (req, res) => {
       return res.redirect('/dashboard/login');
     }
 
-    // Get preview data from session
-    const previewData = req.session.csvPreview;
+    // Get upload ID from form body (for existing uploads) or session (for fresh uploads)
+    const uploadId = req.body.uploadId || req.session.csvUploadId;
 
-    logger.debug('Send page', { sessionId: req.sessionID, hasPreviewData: !!previewData });
+    logger.debug('Send page', { sessionId: req.sessionID, uploadId, fromBody: !!req.body.uploadId });
+
+    let previewData = null;
+    let uploadRecord = null;
+
+    if (uploadId) {
+      // Load from database - allow any status so users can send in batches
+      uploadRecord = await CsvUpload.findOne({
+        where: { id: uploadId, userId: user.id }
+      });
+
+      if (uploadRecord && uploadRecord.parsedData) {
+        previewData = uploadRecord.parsedData;
+      }
+    }
 
     if (!previewData) {
-      logger.warn('Session data lost - redirecting to upload page');
+      logger.warn('No preview data found - redirecting to upload page');
       return res.redirect('/dashboard/upload');
     }
 
@@ -416,6 +470,7 @@ const sendToSelected = async (req, res) => {
       progressSessionId,
       rowsToSend,
       previewData,
+      uploadId: uploadRecord.id,
       startTime: Date.now()
     };
 
@@ -483,7 +538,10 @@ const startSending = async (req, res) => {
 
   try {
     const userId = req.session.userId;
-    const user = req.user || await User.findByPk(userId);
+
+    // IMPORTANT: Load full user data from DB, not req.user which only has basic attributes
+    // req.user doesn't include smsMessageTone/customSmsMessage, causing wrong template to be sent
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.json({ error: 'Not authenticated' });
@@ -495,10 +553,15 @@ const startSending = async (req, res) => {
       return res.json({ error: 'Session expired' });
     }
 
-    const { rowsToSend, previewData, startTime } = sendingData;
+    const { rowsToSend, previewData, uploadId, startTime } = sendingData;
     const smsDelay = 150; // 150ms between SMS sends
 
-    logger.info('Starting SMS send', { customerCount: rowsToSend.length });
+    logger.info('Starting SMS send', {
+      customerCount: rowsToSend.length,
+      uploadId,
+      smsMessageTone: user.smsMessageTone || 'friendly (default)',
+      hasCustomMessage: !!user.customSmsMessage
+    });
 
     // B5 FIX: Start trial on first CSV SMS send (if not already started)
     // IMPORTANT: Must be done BEFORE bulk reservation to avoid deadlock
@@ -532,15 +595,13 @@ const startSending = async (req, res) => {
     // (CsvUpload and FeedbackRequest have FK to users, which is locked)
     const { transaction } = bulkReservation;
 
-    // Create upload record - use same transaction to avoid FK lock wait
-    logger.info('Creating CsvUpload record', { userId: user.id, filename: previewData.filename });
-    uploadRecord = await CsvUpload.create({
-      userId: user.id,
-      filename: previewData.filename,
-      totalRows: previewData.totalRows,
-      status: 'processing'
-    }, { transaction });
-    logger.info('CsvUpload record created', { uploadId: uploadRecord.id });
+    // Get existing upload record (created during processUpload)
+    logger.info('Loading existing CsvUpload record', { uploadId });
+    uploadRecord = await CsvUpload.findByPk(uploadId, { transaction });
+    if (!uploadRecord) {
+      throw new Error('Upload record not found');
+    }
+    logger.info('CsvUpload record loaded', { uploadId: uploadRecord.id });
 
     // Generate unique short codes for all requests
     logger.info('Generating short codes', { count: rowsToSend.length });
@@ -673,7 +734,7 @@ const startSending = async (req, res) => {
       failedCount: failedCount + previewData.invalidRows.length + previewData.duplicateRows.length,
       duplicateCount: previewData.duplicateRows.length,
       errors: [...previewData.errors, ...errors],
-      status: successCount > 0 ? 'completed' : 'failed',
+      status: successCount > 0 ? 'in_progress' : 'failed',
       processingTimeMs: processingTime,
       completedAt: new Date()
     });
@@ -693,8 +754,8 @@ const startSending = async (req, res) => {
       invalidRows: previewData.invalidRows
     };
 
-    // Clear preview data
-    delete req.session.csvPreview;
+    // Clear session data
+    delete req.session.csvUploadId;
     delete req.session.sendingData;
 
     // Send completion event
@@ -807,7 +868,10 @@ const sendSingleSMS = async (req, res) => {
   try {
     const userId = req.session.userId;
     const { User } = require('../models');
-    const user = req.user || await User.findByPk(userId);
+
+    // IMPORTANT: Load full user data from DB, not req.user which only has basic attributes
+    // req.user doesn't include smsMessageTone/customSmsMessage, causing wrong template to be sent
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.redirect('/dashboard/login');
@@ -863,6 +927,162 @@ const sendSingleSMS = async (req, res) => {
   }
 };
 
+// POST /dashboard/upload/add-contact - Add manual contact to an upload
+const addManualContact = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { User } = require('../models');
+    const user = req.user || await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { uploadId, name, phone, email } = req.body;
+
+    if (!uploadId) {
+      return res.status(400).json({ error: 'Upload ID is required' });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    // Find the upload record
+    const uploadRecord = await CsvUpload.findOne({
+      where: { id: uploadId, userId: user.id }
+    });
+
+    if (!uploadRecord) {
+      return res.status(404).json({ error: 'Upload not found' });
+    }
+
+    if (uploadRecord.status === 'completed') {
+      return res.status(400).json({ error: 'Cannot add contacts to a completed upload' });
+    }
+
+    // Validate the phone number
+    const validation = validateRow({ name, phone, email });
+    if (!validation.isValid) {
+      return res.status(400).json({ error: validation.errors.join(', ') });
+    }
+
+    // Get the formatted phone
+    const formattedPhone = validation.phoneFormatted?.formatted || phone;
+
+    // Check for duplicates in existing contacts
+    const { batchCheckDuplicatePhones } = require('../utils/csvValidator');
+    const duplicateMap = await batchCheckDuplicatePhones(user.id, [formattedPhone]);
+    const duplicateCheck = duplicateMap.get(formattedPhone) || { isDuplicate: false };
+
+    if (duplicateCheck.isDuplicate) {
+      const contactDate = duplicateCheck.lastContactedAt
+        ? new Date(duplicateCheck.lastContactedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'within last 30 days';
+      return res.status(400).json({ error: `Duplicate: Already contacted on ${contactDate}` });
+    }
+
+    // Get current parsed data - deep clone to ensure Sequelize detects changes
+    let parsedData = uploadRecord.parsedData
+      ? JSON.parse(JSON.stringify(uploadRecord.parsedData))
+      : {
+          validRows: [],
+          invalidRows: [],
+          duplicateRows: [],
+          errors: [],
+          totalRows: 0
+        };
+
+    // Calculate next row number
+    const allRowNumbers = [
+      ...parsedData.validRows.map(r => r.rowNumber),
+      ...parsedData.invalidRows.map(r => r.rowNumber),
+      ...parsedData.duplicateRows.map(r => r.rowNumber)
+    ];
+    const nextRowNumber = allRowNumbers.length > 0 ? Math.max(...allRowNumbers) + 1 : 1;
+
+    // Create the new row
+    const newRow = {
+      name: name?.trim() || '',
+      phone: formattedPhone,
+      phoneOriginal: phone,
+      email: email?.trim() || '',
+      rowNumber: nextRowNumber,
+      phoneFormatted: validation.phoneFormatted,
+      warnings: validation.warnings || [],
+      manuallyAdded: true
+    };
+
+    // Add to valid rows
+    parsedData.validRows.push(newRow);
+    parsedData.totalRows = parsedData.validRows.length + parsedData.invalidRows.length + parsedData.duplicateRows.length;
+
+    // Update the database - use set() + save() to ensure JSONB change is detected
+    uploadRecord.set('parsedData', parsedData);
+    uploadRecord.set('validRows', parsedData.validRows.length);
+    uploadRecord.set('totalRows', parsedData.totalRows);
+    await uploadRecord.save();
+
+    logger.info('Manual contact added', {
+      uploadId: uploadRecord.id,
+      rowNumber: nextRowNumber,
+      phone: formattedPhone
+    });
+
+    res.json({
+      success: true,
+      rowNumber: nextRowNumber,
+      name: newRow.name,
+      phone: formattedPhone,
+      email: newRow.email
+    });
+
+  } catch (error) {
+    logger.error('Add manual contact error', { error: error.message });
+    res.status(500).json({ error: 'Failed to add contact' });
+  }
+};
+
+// POST /dashboard/uploads/:id/status - Toggle upload completion status
+const toggleUploadStatus = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const uploadId = req.params.id;
+    const { status } = req.body;
+
+    // Validate status
+    const validStatuses = ['not_started', 'in_progress', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    // Find the upload
+    const uploadRecord = await CsvUpload.findOne({
+      where: { id: uploadId, userId: userId }
+    });
+
+    if (!uploadRecord) {
+      return res.status(404).json({ error: 'Upload not found' });
+    }
+
+    // Don't allow changing status of uploads that haven't been sent yet
+    if (uploadRecord.status === 'processing' || uploadRecord.status === 'failed') {
+      return res.status(400).json({ error: `Cannot change status of ${uploadRecord.status} uploads` });
+    }
+
+    // Update status
+    await uploadRecord.update({ status });
+
+    logger.info('Upload status toggled', { uploadId, oldStatus: uploadRecord.status, newStatus: status });
+
+    res.json({ success: true, status });
+
+  } catch (error) {
+    logger.error('Toggle upload status error', { error: error.message });
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+};
+
 module.exports = {
   upload,
   showUploadPage,
@@ -873,5 +1093,7 @@ module.exports = {
   startSending,
   showResults,
   showUploadHistory,
-  sendSingleSMS
+  sendSingleSMS,
+  addManualContact,
+  toggleUploadStatus
 };

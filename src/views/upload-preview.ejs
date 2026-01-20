@@ -445,6 +445,133 @@
       font-weight: 600;
     }
 
+    /* Add Contact Form Styles */
+    .add-contact-section {
+      background: var(--bg-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-4);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .add-contact-header {
+      padding: var(--space-3) var(--space-4);
+      cursor: pointer;
+      background: var(--bg-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: var(--text-primary);
+      transition: background var(--transition-base);
+    }
+
+    .add-contact-header:hover {
+      background: #E5E7EB;
+    }
+
+    .add-contact-form {
+      padding: var(--space-4);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .add-contact-form .form-row {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .add-contact-form .form-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .add-contact-form .form-group.form-actions {
+      flex: 0 0 auto;
+      min-width: auto;
+    }
+
+    .add-contact-form label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-1);
+    }
+
+    .add-contact-form input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    .add-contact-form input:focus {
+      outline: none;
+      border-color: var(--brand-gold);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    .add-contact-btn {
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      white-space: nowrap;
+    }
+
+    .add-contact-btn:hover {
+      background: var(--brand-gold-dark);
+      transform: translateY(-1px);
+    }
+
+    .add-contact-btn:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .add-contact-error {
+      margin-top: var(--space-3);
+      padding: 10px 14px;
+      background: #FEE2E2;
+      border-radius: var(--radius-md);
+      color: #991B1B;
+      font-size: var(--text-sm);
+    }
+
+    .add-contact-success {
+      margin-top: var(--space-3);
+      padding: 10px 14px;
+      background: #D1FAE5;
+      border-radius: var(--radius-md);
+      color: #065F46;
+      font-size: var(--text-sm);
+    }
+
+    .manually-added {
+      background: #FEF3C7 !important;
+    }
+
+    .manual-badge {
+      display: inline-block;
+      background: var(--brand-gold);
+      color: var(--brand-dark);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
     @media (max-width: 768px) {
       .checkbox-cell input[type="checkbox"] {
         width: 24px;
@@ -513,9 +640,75 @@
   <%- include('partials/dashboard-header', { activePage: 'upload' }) %>
 
   <main class="container">
+    <% if (typeof isHistorical !== 'undefined' && isHistorical) { %>
+      <!-- Historical upload without detailed data -->
+      <div class="page-title">
+        <h2>Upload Summary</h2>
+        <p>Uploaded on <%= new Date(uploadRecord.createdAt).toLocaleDateString() %></p>
+      </div>
+
+      <div class="summary-cards">
+        <div class="summary-card total">
+          <div class="summary-label">Total Rows</div>
+          <div class="summary-number"><%= uploadRecord.totalRows %></div>
+        </div>
+        <div class="summary-card valid">
+          <div class="summary-label">Sent Successfully</div>
+          <div class="summary-number"><%= uploadRecord.successCount || 0 %></div>
+        </div>
+        <div class="summary-card invalid">
+          <div class="summary-label">Failed</div>
+          <div class="summary-number"><%= uploadRecord.failedCount || 0 %></div>
+        </div>
+        <div class="summary-card duplicate">
+          <div class="summary-label">Duplicates</div>
+          <div class="summary-number"><%= uploadRecord.duplicateCount || 0 %></div>
+        </div>
+      </div>
+
+      <div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-5); text-align: center;">
+        <p style="color: #92400E; margin: 0;">
+          <strong>Note:</strong> Detailed contact information is not available for uploads created before January 20, 2026.
+          <br>New uploads will show full contact details.
+        </p>
+      </div>
+
+      <div class="submit-section">
+        <a href="/dashboard/uploads" class="cancel-btn">Back to Upload History</a>
+        <a href="/dashboard/upload" class="submit-btn" style="text-decoration: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Upload New File
+        </a>
+      </div>
+    <% } else { %>
     <div class="page-title">
       <h2><%= title %></h2>
-      <p>Review and select customers to send SMS review requests</p>
+      <% if (typeof alreadySent !== 'undefined' && alreadySent) { %>
+        <p>Uploaded on <%= new Date(preview.uploadedAt).toLocaleDateString() %></p>
+        <!-- Status Toggle -->
+        <div class="status-toggle-container" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: var(--text-sm); color: var(--text-secondary);">Status:</span>
+          <div class="status-toggle" style="display: inline-flex; background: var(--bg-light); border-radius: var(--radius-md); padding: 4px; gap: 4px;">
+            <button type="button" class="status-btn <%= uploadStatus === 'not_started' ? 'active' : '' %>" data-status="not_started" style="padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; background: <%= uploadStatus === 'not_started' ? '#E5E7EB' : 'transparent' %>; color: <%= uploadStatus === 'not_started' ? '#374151' : 'var(--text-secondary)' %>;">
+              Not Started
+            </button>
+            <button type="button" class="status-btn <%= uploadStatus === 'in_progress' ? 'active' : '' %>" data-status="in_progress" style="padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; background: <%= uploadStatus === 'in_progress' ? '#FEF3C7' : 'transparent' %>; color: <%= uploadStatus === 'in_progress' ? '#92400E' : 'var(--text-secondary)' %>;">
+              In Progress
+            </button>
+            <button type="button" class="status-btn <%= uploadStatus === 'completed' ? 'active' : '' %>" data-status="completed" style="padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; background: <%= uploadStatus === 'completed' ? '#D1FAE5' : 'transparent' %>; color: <%= uploadStatus === 'completed' ? '#065F46' : 'var(--text-secondary)' %>;">
+              Completed
+            </button>
+          </div>
+          <span id="statusSaving" style="display: none; font-size: var(--text-xs); color: var(--text-muted);">Saving...</span>
+          <span id="statusSaved" style="display: none; font-size: var(--text-xs); color: var(--success);">&#10003; Saved</span>
+        </div>
+      <% } else { %>
+        <p>Review and select customers to send SMS review requests</p>
+      <% } %>
     </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
@@ -548,7 +741,7 @@
     <%
       // Generate preview message with sample name
       const sampleName = preview.validRows.length > 0 && preview.validRows[0].name ? preview.validRows[0].name.split(' ')[0] : 'John';
-      const tone = user.smsTone || 'friendly';
+      const tone = user.smsMessageTone || 'friendly';
       const businessName = user.businessName || 'Your Business';
       const reviewLink = user.googleReviewLink || 'https://g.page/...';
 
@@ -598,105 +791,136 @@
     </div>
 
     <% if (preview.validRows.length > 0) { %>
-    <form id="sendForm" action="/dashboard/upload/send" method="POST">
-      <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-      <!-- Selection Controls -->
-      <div class="selection-controls">
-        <div>
-          <span class="selected-count">Selected: <strong id="selectedCount">0</strong> of <%= preview.validRows.length %></span>
-        </div>
-        <div class="selection-buttons">
-          <button type="button" data-action="select-all">Select All</button>
-          <button type="button" data-action="deselect-all">Deselect All</button>
-        </div>
-      </div>
+        <!-- Editable form for pending uploads -->
+        <form id="sendForm" action="/dashboard/upload/send" method="POST">
+          <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+          <input type="hidden" name="uploadId" value="<%= typeof uploadId !== 'undefined' ? uploadId : '' %>">
+          <!-- Selection Controls -->
+          <div class="selection-controls">
+            <div>
+              <span class="selected-count">Selected: <strong id="selectedCount">0</strong> of <%= preview.validRows.length %></span>
+            </div>
+            <div class="selection-buttons">
+              <button type="button" data-action="select-all">Select All</button>
+              <button type="button" data-action="deselect-all">Deselect All</button>
+            </div>
+          </div>
 
-      <!-- Phone Confidence Legend -->
-      <div class="confidence-legend">
-        <div class="legend-item">
-          <span class="legend-icon confidence-high">&#10003;</span>
-          <span>Valid mobile number</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-icon confidence-medium">&#9888;</span>
-          <span>May be landline/VoIP (delivery uncertain)</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-icon confidence-low">!</span>
-          <span>Invalid format (will be skipped)</span>
-        </div>
-      </div>
+          <!-- Phone Confidence Legend -->
+          <div class="confidence-legend">
+            <div class="legend-item">
+              <span class="legend-icon confidence-high">&#10003;</span>
+              <span>Valid mobile number</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon confidence-medium">&#9888;</span>
+              <span>May be landline/VoIP (delivery uncertain)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon confidence-low">!</span>
+              <span>Invalid format (will be skipped)</span>
+            </div>
+          </div>
 
-      <!-- Valid Customers Table -->
-      <div class="preview-table">
-        <table>
-          <thead>
-            <tr>
-              <th class="checkbox-cell">
-                <input type="checkbox" id="selectAllCheckbox">
-              </th>
-              <th>Row #</th>
-              <th>Name</th>
-              <th>Phone Number</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% preview.validRows.forEach(row => { %>
-            <tr>
-              <td class="checkbox-cell">
-                <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox">
-              </td>
-              <td><%= row.rowNumber %></td>
-              <td><%= row.name || '-' %></td>
-              <td>
-                <% if (row.phoneFormatted) { %>
-                  <div>
-                    <% if (row.phoneFormatted.confidence === 'high') { %>
-                      <span class="confidence-high" title="High confidence">&#10003;</span>
-                    <% } else if (row.phoneFormatted.confidence === 'medium') { %>
-                      <span class="confidence-medium" title="Medium confidence - please verify">&#9888;</span>
-                    <% } else if (row.phoneFormatted.confidence === 'low') { %>
-                      <span class="confidence-low" title="Low confidence - please verify">!</span>
+          <!-- Add Contact Form -->
+          <div class="add-contact-section">
+            <div class="add-contact-header" id="addContactToggle">
+              <span>➕ Add Contact Manually</span>
+              <span id="addContactArrow">&#9660;</span>
+            </div>
+            <div class="add-contact-form" id="addContactForm" style="display: none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="manualName">Name</label>
+                  <input type="text" id="manualName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                  <label for="manualPhone">Phone <span style="color: var(--danger);">*</span></label>
+                  <input type="tel" id="manualPhone" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                  <label for="manualEmail">Email</label>
+                  <input type="email" id="manualEmail" placeholder="john@example.com">
+                </div>
+                <div class="form-group form-actions">
+                  <button type="button" id="addContactBtn" class="add-contact-btn">Add</button>
+                </div>
+              </div>
+              <div id="addContactError" class="add-contact-error" style="display: none;"></div>
+              <div id="addContactSuccess" class="add-contact-success" style="display: none;"></div>
+            </div>
+          </div>
+
+          <!-- Valid Customers Table -->
+          <div class="preview-table">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-cell">
+                    <input type="checkbox" id="selectAllCheckbox">
+                  </th>
+                  <th>Row #</th>
+                  <th>Name</th>
+                  <th>Phone Number</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% preview.validRows.forEach(row => { %>
+                <tr>
+                  <td class="checkbox-cell">
+                    <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox">
+                  </td>
+                  <td><%= row.rowNumber %></td>
+                  <td><%= row.name || '-' %></td>
+                  <td>
+                    <% if (row.phoneFormatted) { %>
+                      <div>
+                        <% if (row.phoneFormatted.confidence === 'high') { %>
+                          <span class="confidence-high" title="High confidence">&#10003;</span>
+                        <% } else if (row.phoneFormatted.confidence === 'medium') { %>
+                          <span class="confidence-medium" title="Medium confidence - please verify">&#9888;</span>
+                        <% } else if (row.phoneFormatted.confidence === 'low') { %>
+                          <span class="confidence-low" title="Low confidence - please verify">!</span>
+                        <% } %>
+                        <span class="phone-formatted"><%= row.phone %></span>
+                        <% if (row.phoneFormatted.detected) { %>
+                          <span class="detected-badge"><%= row.phoneFormatted.detected %></span>
+                        <% } %>
+                      </div>
+                      <% if (row.phoneOriginal !== row.phone) { %>
+                        <div class="phone-original">Original: <%= row.phoneOriginal %></div>
+                      <% } %>
+                      <% if (row.warnings && row.warnings.length > 0) { %>
+                        <div>
+                          <% row.warnings.forEach(warning => { %>
+                            <span class="warning-badge"><%= warning %></span>
+                          <% }); %>
+                        </div>
+                      <% } %>
+                    <% } else { %>
+                      <%= row.phone %>
                     <% } %>
-                    <span class="phone-formatted"><%= row.phone %></span>
-                    <% if (row.phoneFormatted.detected) { %>
-                      <span class="detected-badge"><%= row.phoneFormatted.detected %></span>
-                    <% } %>
-                  </div>
-                  <% if (row.phoneOriginal !== row.phone) { %>
-                    <div class="phone-original">Original: <%= row.phoneOriginal %></div>
-                  <% } %>
-                  <% if (row.warnings && row.warnings.length > 0) { %>
-                    <div>
-                      <% row.warnings.forEach(warning => { %>
-                        <span class="warning-badge"><%= warning %></span>
-                      <% }); %>
-                    </div>
-                  <% } %>
-                <% } else { %>
-                  <%= row.phone %>
-                <% } %>
-              </td>
-              <td><%= row.email || '-' %></td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
-      </div>
+                  </td>
+                  <td><%= row.email || '-' %></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
 
-      <!-- Submit Section -->
-      <div class="submit-section">
-        <a href="/dashboard/upload" class="cancel-btn">Cancel</a>
-        <button type="submit" class="submit-btn" id="submitBtn" disabled>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 2L11 13"></path>
-            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-          </svg>
-          Send SMS to Selected
-        </button>
-      </div>
-    </form>
+          <!-- Submit Section -->
+          <div class="submit-section">
+            <a href="/dashboard/upload" class="cancel-btn">Cancel</a>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+              </svg>
+              Send SMS to Selected
+            </button>
+          </div>
+        </form>
     <% } else { %>
       <div class="empty-state">
         <p>No valid customers to send SMS.</p>
@@ -737,6 +961,7 @@
       </div>
     </div>
     <% } %>
+    <% } %> <!-- End of isHistorical else block -->
   </main>
 
   <%- include('partials/dashboard-footer') %>
@@ -751,10 +976,13 @@
 
       // Update count function
       function updateCount() {
+        var selectedCountEl = document.getElementById('selectedCount');
+        if (!selectedCountEl) return; // Not on editable view
+
         var checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         var count = checkedBoxes.length;
 
-        document.getElementById('selectedCount').textContent = count;
+        selectedCountEl.textContent = count;
         var submitBtn = document.getElementById('submitBtn');
         if (submitBtn) {
           submitBtn.disabled = count === 0;
@@ -855,8 +1083,215 @@
         });
       }
 
+      // Add Contact Form Toggle
+      var addContactToggle = document.getElementById('addContactToggle');
+      var addContactFormEl = document.getElementById('addContactForm');
+      var addContactArrow = document.getElementById('addContactArrow');
+
+      if (addContactToggle && addContactFormEl) {
+        addContactToggle.addEventListener('click', function() {
+          if (addContactFormEl.style.display === 'none') {
+            addContactFormEl.style.display = 'block';
+            addContactArrow.textContent = '\u25B2'; // Up arrow
+          } else {
+            addContactFormEl.style.display = 'none';
+            addContactArrow.textContent = '\u25BC'; // Down arrow
+          }
+        });
+      }
+
+      // Add Contact Button Handler
+      var addContactBtn = document.getElementById('addContactBtn');
+      var uploadId = '<%= typeof uploadId !== "undefined" ? uploadId : "" %>';
+      var csrfToken = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
+
+      if (addContactBtn) {
+        addContactBtn.addEventListener('click', function() {
+          var nameInput = document.getElementById('manualName');
+          var phoneInput = document.getElementById('manualPhone');
+          var emailInput = document.getElementById('manualEmail');
+          var errorDiv = document.getElementById('addContactError');
+          var successDiv = document.getElementById('addContactSuccess');
+
+          // Clear previous messages
+          errorDiv.style.display = 'none';
+          successDiv.style.display = 'none';
+
+          var name = nameInput.value.trim();
+          var phone = phoneInput.value.trim();
+          var email = emailInput.value.trim();
+
+          // Validate phone is required
+          if (!phone) {
+            errorDiv.textContent = 'Phone number is required';
+            errorDiv.style.display = 'block';
+            phoneInput.focus();
+            return;
+          }
+
+          // Disable button while submitting
+          addContactBtn.disabled = true;
+          addContactBtn.textContent = 'Adding...';
+
+          // Send AJAX request
+          fetch('/dashboard/upload/add-contact', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({
+              uploadId: uploadId,
+              name: name,
+              phone: phone,
+              email: email
+            })
+          })
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            addContactBtn.disabled = false;
+            addContactBtn.textContent = 'Add';
+
+            if (data.error) {
+              errorDiv.textContent = data.error;
+              errorDiv.style.display = 'block';
+              return;
+            }
+
+            // Success - add row to table
+            var tbody = document.querySelector('.preview-table tbody');
+            var newRow = document.createElement('tr');
+            newRow.className = 'manually-added';
+            newRow.innerHTML =
+              '<td class="checkbox-cell">' +
+                '<input type="checkbox" name="selectedRows" value="' + data.rowNumber + '" class="row-checkbox" checked>' +
+              '</td>' +
+              '<td>' + data.rowNumber + '<span class="manual-badge">NEW</span></td>' +
+              '<td>' + (data.name || '-') + '</td>' +
+              '<td>' +
+                '<span class="confidence-high">&#10003;</span> ' +
+                '<span class="phone-formatted">' + data.phone + '</span>' +
+              '</td>' +
+              '<td>' + (data.email || '-') + '</td>';
+
+            tbody.appendChild(newRow);
+
+            // Add event listener to new checkbox
+            var newCheckbox = newRow.querySelector('.row-checkbox');
+            newCheckbox.addEventListener('change', updateCount);
+
+            // Update rowCheckboxes reference and count
+            rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            updateCount();
+
+            // Update the "Selected X of Y" display
+            var selectedCountDisplay = document.querySelector('.selected-count');
+            if (selectedCountDisplay) {
+              selectedCountDisplay.innerHTML = 'Selected: <strong id="selectedCount">' +
+                document.querySelectorAll('.row-checkbox:checked').length + '</strong> of ' + rowCheckboxes.length;
+            }
+
+            // Show success message
+            successDiv.textContent = 'Contact added successfully!';
+            successDiv.style.display = 'block';
+
+            // Clear form
+            nameInput.value = '';
+            phoneInput.value = '';
+            emailInput.value = '';
+
+            // Hide success after 3 seconds
+            setTimeout(function() {
+              successDiv.style.display = 'none';
+            }, 3000);
+          })
+          .catch(function(error) {
+            addContactBtn.disabled = false;
+            addContactBtn.textContent = 'Add';
+            errorDiv.textContent = 'Failed to add contact. Please try again.';
+            errorDiv.style.display = 'block';
+          });
+        });
+      }
+
       // Initialize count
       updateCount();
+
+      // Status Toggle Handler
+      var statusBtns = document.querySelectorAll('.status-btn');
+      var statusSaving = document.getElementById('statusSaving');
+      var statusSaved = document.getElementById('statusSaved');
+
+      statusBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var newStatus = btn.dataset.status;
+          var currentUploadId = '<%= typeof uploadId !== "undefined" ? uploadId : "" %>';
+
+          if (!currentUploadId) return;
+
+          // Show saving indicator
+          if (statusSaving) statusSaving.style.display = 'inline';
+          if (statusSaved) statusSaved.style.display = 'none';
+
+          // Update UI immediately (optimistic)
+          statusBtns.forEach(function(b) {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-secondary)';
+            b.classList.remove('active');
+          });
+
+          // Style the clicked button based on status
+          btn.classList.add('active');
+          if (newStatus === 'not_started') {
+            btn.style.background = '#E5E7EB';
+            btn.style.color = '#374151';
+          } else if (newStatus === 'in_progress') {
+            btn.style.background = '#FEF3C7';
+            btn.style.color = '#92400E';
+          } else if (newStatus === 'completed') {
+            btn.style.background = '#D1FAE5';
+            btn.style.color = '#065F46';
+          }
+
+          // Send AJAX request
+          fetch('/dashboard/uploads/' + currentUploadId + '/status', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ status: newStatus })
+          })
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            if (statusSaving) statusSaving.style.display = 'none';
+
+            if (data.error) {
+              alert('Failed to update status: ' + data.error);
+              // Revert UI on error
+              location.reload();
+              return;
+            }
+
+            // Show saved indicator
+            if (statusSaved) {
+              statusSaved.style.display = 'inline';
+              setTimeout(function() {
+                statusSaved.style.display = 'none';
+              }, 2000);
+            }
+          })
+          .catch(function(error) {
+            if (statusSaving) statusSaving.style.display = 'none';
+            alert('Failed to update status. Please try again.');
+            location.reload();
+          });
+        });
+      });
     });
   </script>
 </body>
