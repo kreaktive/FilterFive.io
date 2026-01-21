@@ -319,6 +319,50 @@ function registerHealthRoutes(app, sequelize) {
       });
     }
   });
+
+  /**
+   * Preflight check - comprehensive health check for all money-making services
+   * Tests: Database, Stripe, Twilio, Resend, Redis, Environment
+   *
+   * Returns:
+   * - 200: All systems healthy
+   * - 503: One or more critical systems down
+   * - 207: Mixed status (some degraded but functional)
+   */
+  app.get('/health/preflight', async (req, res) => {
+    try {
+      const preflightService = require('../services/preflightService');
+      const report = await preflightService.runAllChecks();
+
+      // Determine HTTP status based on overall health
+      let httpStatus = 200;
+      if (report.status === 'critical') {
+        httpStatus = 503;
+      } else if (report.status === 'degraded') {
+        httpStatus = 207; // Multi-Status
+      }
+
+      // Log if not healthy
+      if (report.status !== 'healthy') {
+        logger.warn('Preflight check detected issues', {
+          status: report.status,
+          checks: Object.fromEntries(
+            Object.entries(report.checks)
+              .filter(([_, v]) => v.status !== 'ok')
+          )
+        });
+      }
+
+      res.status(httpStatus).json(report);
+    } catch (error) {
+      logger.error('Preflight check failed', { error: error.message });
+      res.status(500).json({
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        error: error.message
+      });
+    }
+  });
 }
 
 /**
