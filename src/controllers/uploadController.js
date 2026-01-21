@@ -374,6 +374,18 @@ const showPreview = async (req, res) => {
     // Check if this upload has been worked on (status is not_started, in_progress, or completed)
     const alreadySent = uploadRecord && ['not_started', 'in_progress', 'completed'].includes(uploadRecord.status);
 
+    // Prevent browser caching to ensure fresh SMS settings are shown
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    logger.debug('Preview page render', {
+      uploadId: uploadRecord?.id,
+      smsMessageTone: user.smsMessageTone,
+      hasCustomMessage: !!user.customSmsMessage,
+      userId: user.id
+    });
+
     res.render('upload-preview', {
       title: 'Review Upload',
       user: user,
@@ -727,16 +739,36 @@ const startSending = async (req, res) => {
     const successCount = successfulSends.length;
     const failedCount = errors.length;
 
-    // Update upload record
+    // Mark sent contacts in parsedData so they show as sent on the preview page
+    const updatedParsedData = JSON.parse(JSON.stringify(previewData));
+    const sentRowNumbers = new Set(successfulSends.map(s => {
+      // Find row number by phone match
+      const matchingRow = rowsToSend.find(r => r.phone === s.phone);
+      return matchingRow?.rowNumber;
+    }).filter(Boolean));
+
+    updatedParsedData.validRows = updatedParsedData.validRows.map(row => {
+      if (sentRowNumbers.has(row.rowNumber)) {
+        return {
+          ...row,
+          sentAt: new Date().toISOString(),
+          twilioSid: successfulSends.find(s => s.phone === row.phone)?.twilioSid
+        };
+      }
+      return row;
+    });
+
+    // Update upload record with sent contact tracking
     await uploadRecord.update({
       validRows: rowsToSend.length,
-      successCount: successCount,
+      successCount: (uploadRecord.successCount || 0) + successCount,
       failedCount: failedCount + previewData.invalidRows.length + previewData.duplicateRows.length,
       duplicateCount: previewData.duplicateRows.length,
       errors: [...previewData.errors, ...errors],
       status: successCount > 0 ? 'in_progress' : 'failed',
       processingTimeMs: processingTime,
-      completedAt: new Date()
+      completedAt: new Date(),
+      parsedData: updatedParsedData
     });
 
     // Store results in session for results page

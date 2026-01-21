@@ -10,12 +10,9 @@ const getLogoUrl = () => {
   return `${baseUrl}/images/Logo-MoreStars-white.png`;
 };
 
-// Logo HTML for email headers (white version for dark backgrounds)
-const logoHtml = () => `
-  <div class="header-logo">
-    <img src="${getLogoUrl()}" alt="MoreStars" height="32">
-  </div>
-`;
+// Logo HTML for email headers - DISABLED due to spam filter issues
+// External images trigger aggressive spam filters on some hosts (Hostinger, etc.)
+const logoHtml = () => ``;
 
 const baseStyles = `
   body {

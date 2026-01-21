@@ -4,8 +4,9 @@
  */
 
 // Maximum SMS segment lengths
-const SMS_MAX_LENGTH = 160; // Single SMS
-const SMS_CONCAT_MAX = 1600; // Max concatenated SMS (10 segments)
+const SMS_MAX_LENGTH = 160; // Single SMS segment
+const SMS_TWO_SEGMENT_MAX = 306; // Max for 2 segments (153 chars each due to UDH header)
+const SMS_CONCAT_MAX = 306; // Enforce 2-segment limit to control costs
 
 // Available template tags
 const VALID_TAGS = ['{{CustomerName}}', '{{BusinessName}}', '{{ReviewLink}}'];
@@ -39,11 +40,14 @@ const validateSmsTemplate = (template) => {
   }
 
   // Check maximum length (with sample values substituted)
+  // Enforce 2-segment max to control SMS costs
   const estimatedLength = estimateMessageLength(trimmed);
-  if (estimatedLength > SMS_CONCAT_MAX) {
-    errors.push(`Template is too long. Estimated length: ${estimatedLength} characters (max: ${SMS_CONCAT_MAX})`);
-  } else if (estimatedLength > SMS_MAX_LENGTH * 3) {
-    warnings.push(`Template may result in ${Math.ceil(estimatedLength / 153)} SMS segments (cost consideration)`);
+  const segments = calculateSegments(estimatedLength);
+
+  if (segments > 2) {
+    errors.push(`Message too long: ${estimatedLength} characters = ${segments} SMS segments. Maximum allowed: 2 segments (306 characters). Please shorten your message.`);
+  } else if (segments === 2) {
+    warnings.push(`Message will send as 2 SMS segments (${estimatedLength} chars). Consider shortening to under 160 characters for 1 segment.`);
   }
 
   // Check for required tags
@@ -181,6 +185,7 @@ module.exports = {
   getAvailableTags,
   calculateSegments,
   SMS_MAX_LENGTH,
+  SMS_TWO_SEGMENT_MAX,
   SMS_CONCAT_MAX,
   VALID_TAGS,
   REQUIRED_TAGS

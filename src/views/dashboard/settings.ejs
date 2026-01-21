@@ -967,6 +967,7 @@
                   id="customSmsMessage"
                   name="customSmsMessage"
                   rows="4"
+                  maxlength="306"
                   style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; font-family: inherit; resize: vertical;"
                   placeholder="Hi {{CustomerName}}! Thanks for visiting {{BusinessName}}. We'd love your feedback: {{ReviewLink}}"
                 ><%= user.customSmsMessage || '' %></textarea>
@@ -984,7 +985,7 @@
                   <em style="color: #a0aec0;">Enter a message above to see preview</em>
                 </p>
                 <div style="margin-top: 10px; font-size: 12px; color: #718096;">
-                  <span id="charCount">0</span> / 160 characters (SMS segment)
+                  <span id="charCount">0</span> / 306 characters &middot; <span id="segmentCount">1</span> SMS segment(s) <span style="color: #dc2626;">(max 2)</span>
                 </div>
               </div>
             </div>
@@ -1676,8 +1677,14 @@
       var customMessageTextarea = document.getElementById('customSmsMessage');
       var previewElement = document.getElementById('customMessagePreview');
       var charCountElement = document.getElementById('charCount');
+      var segmentCountElement = document.getElementById('segmentCount');
       var businessName = '<%= user.businessName %>';
       var reviewLink = '<%= user.reviewUrl || "https://g.page/your-business/review" %>';
+
+      function calculateSegments(length) {
+        if (length <= 160) return 1;
+        return Math.ceil(length / 153); // Concatenated SMS uses 153 chars per segment
+      }
 
       function updateCustomMessagePreview() {
         if (!customMessageTextarea || !previewElement) return;
@@ -1686,6 +1693,7 @@
         if (!message.trim()) {
           previewElement.innerHTML = '<em style="color: #a0aec0;">Enter a message above to see preview</em>';
           if (charCountElement) charCountElement.textContent = '0';
+          if (segmentCountElement) segmentCountElement.textContent = '1';
           return;
         }
 
@@ -1697,11 +1705,16 @@
 
         previewElement.textContent = preview;
 
-        // Update character count
+        // Update character count and segment count
         if (charCountElement) {
           var charCount = preview.length;
+          var segments = calculateSegments(charCount);
           charCountElement.textContent = charCount;
-          charCountElement.style.color = charCount > 160 ? '#dc2626' : '#718096';
+          charCountElement.style.color = segments > 2 ? '#dc2626' : (segments === 2 ? '#f59e0b' : '#718096');
+          if (segmentCountElement) {
+            segmentCountElement.textContent = segments;
+            segmentCountElement.style.color = segments > 2 ? '#dc2626' : (segments === 2 ? '#f59e0b' : '#718096');
+          }
         }
       }
 

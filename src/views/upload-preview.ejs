@@ -572,6 +572,31 @@
       margin-left: 6px;
     }
 
+    .sent-badge {
+      display: inline-block;
+      background: #D1FAE5;
+      color: #065F46;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    .sent-row {
+      background: #F0FDF4 !important;
+    }
+
+    .sent-row:hover {
+      background: #DCFCE7 !important;
+    }
+
+    .sent-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
     /* Sortable Table Headers */
     .sortable {
       cursor: pointer;
@@ -748,11 +773,26 @@
     <% } %>
 
     <!-- Summary Cards -->
+    <%
+      const sentCount = preview.validRows.filter(r => r.sentAt).length;
+      const remainingCount = preview.validRows.length - sentCount;
+    %>
     <div class="summary-cards">
+      <% if (sentCount > 0) { %>
+      <div class="summary-card valid">
+        <div class="summary-label">Already Sent</div>
+        <div class="summary-number"><%= sentCount %></div>
+      </div>
+      <div class="summary-card total">
+        <div class="summary-label">Remaining</div>
+        <div class="summary-number"><%= remainingCount %></div>
+      </div>
+      <% } else { %>
       <div class="summary-card valid">
         <div class="summary-label">Valid Customers</div>
         <div class="summary-number"><%= preview.validRows.length %></div>
       </div>
+      <% } %>
       <div class="summary-card invalid">
         <div class="summary-label">Invalid Rows</div>
         <div class="summary-number"><%= preview.invalidRows.length %></div>
@@ -897,11 +937,18 @@
               </thead>
               <tbody>
                 <% preview.validRows.forEach(row => { %>
-                <tr>
+                <tr class="<%= row.sentAt ? 'sent-row' : '' %><%= row.manuallyAdded ? ' manually-added' : '' %>">
                   <td class="checkbox-cell">
                     <input type="checkbox" name="selectedRows" value="<%= row.rowNumber %>" class="row-checkbox">
                   </td>
-                  <td><%= row.rowNumber %></td>
+                  <td>
+                    <%= row.rowNumber %>
+                    <% if (row.sentAt) { %>
+                      <span class="sent-badge">✓ Sent</span>
+                    <% } else if (row.manuallyAdded) { %>
+                      <span class="manual-badge">NEW</span>
+                    <% } %>
+                  </td>
                   <td><%= row.name || '-' %></td>
                   <td>
                     <% if (row.phoneFormatted) { %>
@@ -927,6 +974,9 @@
                             <span class="warning-badge"><%= warning %></span>
                           <% }); %>
                         </div>
+                      <% } %>
+                      <% if (row.sentAt) { %>
+                        <div class="sent-info">Sent <%= new Date(row.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></div>
                       <% } %>
                     <% } else { %>
                       <%= row.phone %>
