@@ -12,6 +12,7 @@ const { initDailySnapshotsCron } = require('../cron/daily-snapshots');
 const { initTrialNotificationsCron } = require('../cron/trial-notifications');
 const { initAbandonedCheckoutCron } = require('../cron/abandoned-checkout');
 const { initTokenCleanupCron } = require('../cron/token-cleanup');
+const { initUptimeMonitorCron } = require('../cron/uptime-monitor');
 
 // Queue initializers
 const { initProcessor: initPosSmsQueue } = require('../queues/posSmsQueue');
@@ -52,6 +53,7 @@ function initCronJobs() {
     initTrialNotificationsCron();
     initAbandonedCheckoutCron();
     initTokenCleanupCron();
+    initUptimeMonitorCron();
     logger.info('All cron jobs scheduled');
   } else {
     logger.warn('Cron jobs disabled (set ENABLE_CRON=true to enable in development)');

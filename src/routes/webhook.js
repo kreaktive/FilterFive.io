@@ -16,6 +16,26 @@ const logger = require('../services/logger');
 router.post('/stripe', express.raw({ type: 'application/json' }), handleWebhook);
 
 /**
+ * Test uptime alert - sends a test SMS to verify monitoring works
+ * GET /webhooks/test-alert?key=API_SECRET
+ */
+router.get('/test-alert', async (req, res) => {
+  // Require API secret for security
+  if (req.query.key !== process.env.API_SECRET) {
+    return res.status(401).json({ error: 'Invalid key' });
+  }
+
+  try {
+    const { sendTestAlert } = require('../cron/uptime-monitor');
+    await sendTestAlert();
+    res.json({ success: true, message: 'Test alert sent' });
+  } catch (error) {
+    logger.error('Test alert failed', { error: error.message });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * UptimeRobot Webhook
  * Receives downtime alerts and sends SMS via Twilio
  *
