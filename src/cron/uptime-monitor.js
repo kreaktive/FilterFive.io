@@ -4,10 +4,10 @@
  * Self-monitoring for MoreStars critical services.
  * Runs every 5 minutes and sends SMS alerts via Twilio when services fail.
  *
- * Schedule: */5 * * * * (every 5 minutes)
+ * Schedule: Every 5 minutes (cron: star-slash-5 * * * *)
  *
  * Features:
- * - Only alerts on state CHANGE (down → up or up → down)
+ * - Only alerts on state CHANGE (down to up or up to down)
  * - Tracks which specific services failed
  * - Sends recovery notification when services come back
  *
