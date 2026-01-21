@@ -118,13 +118,9 @@ async function executeUptimeCheck() {
     }
   }
 
-  // State change: Was failing, now healthy
+  // State change: Was failing, now healthy (just log, no SMS)
   else if (lastStatus !== 'healthy' && currentStatus === 'healthy') {
-    const message = `🟢 MoreStars RECOVERED\n\nAll services healthy`;
-
-    await sendAlert(message);
-
-    logger.info('Uptime check recovered - alert sent', {
+    logger.info('Uptime check recovered', {
       previousStatus: lastStatus,
       previousFailures: lastFailedServices
     });
