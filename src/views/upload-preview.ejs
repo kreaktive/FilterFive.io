@@ -572,6 +572,36 @@
       margin-left: 6px;
     }
 
+    /* Sortable Table Headers */
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      padding-right: 20px !important;
+    }
+
+    .sortable:hover {
+      background: #E5E7EB;
+    }
+
+    .sortable::after {
+      content: '⇅';
+      position: absolute;
+      right: 8px;
+      opacity: 0.4;
+      font-size: 12px;
+    }
+
+    .sortable.asc::after {
+      content: '↑';
+      opacity: 1;
+    }
+
+    .sortable.desc::after {
+      content: '↓';
+      opacity: 1;
+    }
+
     @media (max-width: 768px) {
       .checkbox-cell input[type="checkbox"] {
         width: 24px;
@@ -859,10 +889,10 @@
                   <th class="checkbox-cell">
                     <input type="checkbox" id="selectAllCheckbox">
                   </th>
-                  <th>Row #</th>
-                  <th>Name</th>
+                  <th class="sortable" data-sort="row">Row #</th>
+                  <th class="sortable" data-sort="name">Name</th>
                   <th>Phone Number</th>
-                  <th>Email</th>
+                  <th class="sortable" data-sort="email">Email</th>
                 </tr>
               </thead>
               <tbody>
@@ -994,6 +1024,67 @@
           selectAllCheckbox.indeterminate = count > 0 && count < rowCheckboxes.length;
         }
       }
+
+      // Table sorting functionality
+      var sortableHeaders = document.querySelectorAll('.sortable');
+      var currentSort = { column: null, direction: 'asc' };
+
+      sortableHeaders.forEach(function(header) {
+        header.addEventListener('click', function() {
+          var sortKey = header.dataset.sort;
+          var tbody = document.querySelector('.preview-table tbody');
+          if (!tbody) return;
+
+          var rows = Array.from(tbody.querySelectorAll('tr'));
+
+          // Determine sort direction
+          if (currentSort.column === sortKey) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+          } else {
+            currentSort.column = sortKey;
+            currentSort.direction = 'asc';
+          }
+
+          // Update header styles
+          sortableHeaders.forEach(function(h) {
+            h.classList.remove('asc', 'desc');
+          });
+          header.classList.add(currentSort.direction);
+
+          // Sort rows
+          rows.sort(function(a, b) {
+            var aValue, bValue;
+
+            if (sortKey === 'row') {
+              aValue = parseInt(a.cells[1].textContent.trim()) || 0;
+              bValue = parseInt(b.cells[1].textContent.trim()) || 0;
+            } else if (sortKey === 'name') {
+              aValue = a.cells[2].textContent.trim().toLowerCase();
+              bValue = b.cells[2].textContent.trim().toLowerCase();
+            } else if (sortKey === 'email') {
+              aValue = a.cells[4].textContent.trim().toLowerCase();
+              bValue = b.cells[4].textContent.trim().toLowerCase();
+            }
+
+            // Handle empty/dash values - push to end
+            if (aValue === '-' || aValue === '') aValue = currentSort.direction === 'asc' ? '\uffff' : '';
+            if (bValue === '-' || bValue === '') bValue = currentSort.direction === 'asc' ? '\uffff' : '';
+
+            if (sortKey === 'row') {
+              return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+            } else {
+              if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+              if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
+              return 0;
+            }
+          });
+
+          // Re-append sorted rows
+          rows.forEach(function(row) {
+            tbody.appendChild(row);
+          });
+        });
+      });
 
       // Add click handler to each row checkbox
       rowCheckboxes.forEach(function(checkbox) {
