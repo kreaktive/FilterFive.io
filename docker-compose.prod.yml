@@ -61,6 +61,9 @@ services:
       # Error Monitoring (Sentry)
       - SENTRY_DSN=${SENTRY_DSN}
 
+      # Admin Alerts
+      - ADMIN_ALERT_PHONE=${ADMIN_ALERT_PHONE}
+
       # POS Token Encryption
       - POS_TOKEN_ENCRYPTION_KEY=${POS_TOKEN_ENCRYPTION_KEY}
     depends_on:

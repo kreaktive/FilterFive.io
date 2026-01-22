@@ -804,6 +804,63 @@ function adjustColor(hex, percent) {
 }
 
 /**
+ * Subscription Confirmation Email (sent to customer after successful purchase)
+ */
+const subscriptionConfirmationEmail = (businessName, plan, dashboardUrl) => {
+  const planDisplay = plan === 'annual' ? 'Annual ($770/year)' : 'Monthly ($77/month)';
+  const billingCycle = plan === 'annual' ? 'yearly' : 'monthly';
+
+  const content = `
+    <div class="header" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+      ${logoHtml()}
+      <h1>You're All Set!</h1>
+    </div>
+    <div class="content">
+      <p>Hi <strong>${businessName}</strong>,</p>
+
+      <p>Thank you for subscribing to MoreStars! Your subscription is now <strong>active</strong> and you're ready to start collecting more 5-star reviews.</p>
+
+      <div class="info-box" style="background: #ecfdf5; border-left-color: #10B981;">
+        <strong>📋 Subscription Details:</strong>
+        <ul style="margin: 12px 0; padding-left: 20px;">
+          <li><strong>Plan:</strong> ${planDisplay}</li>
+          <li><strong>SMS Limit:</strong> 1,000 messages per month</li>
+          <li><strong>Billing:</strong> Charged ${billingCycle}</li>
+          <li><strong>Status:</strong> Active</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${dashboardUrl}" class="cta-button" style="background: #10B981;">
+          📊 Go to Dashboard
+        </a>
+      </div>
+
+      <div class="divider"></div>
+
+      <p style="font-size: 14px; color: #6b7280;">
+        <strong>What's next?</strong>
+        <ul style="margin: 12px 0; padding-left: 20px; color: #6b7280;">
+          <li>Upload your customer list via CSV to start sending feedback requests</li>
+          <li>Make sure your Google Review link is set up in Settings</li>
+          <li>Download your QR code for in-store feedback collection</li>
+        </ul>
+      </p>
+
+      <p style="font-size: 14px; color: #6b7280;">
+        Need to manage your subscription or update payment details? Visit your <a href="${dashboardUrl}/subscription" style="color: #10B981;">subscription settings</a> or access the <a href="${dashboardUrl}/subscription/portal" style="color: #10B981;">billing portal</a>.
+      </p>
+    </div>
+    <div class="footer">
+      <p><strong>MoreStars</strong> - More Stars. More Business.</p>
+      <p>Questions? Reply to this email anytime!</p>
+    </div>
+  `;
+
+  return emailWrapper(content);
+};
+
+/**
  * Contact Form Notification Email (for support team)
  */
 const contactFormNotification = (formData) => {
@@ -884,5 +941,6 @@ module.exports = {
   abandonedCheckout30MinEmail,
   paymentFailedEmail,
   contactFormNotification,
-  businessEventAlert
+  businessEventAlert,
+  subscriptionConfirmationEmail
 };

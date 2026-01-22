@@ -8,6 +8,7 @@ const {
   generateQrCode
 } = require('../controllers/adminController');
 const emailTemplates = require('../services/emailTemplates');
+const smsLimitEventService = require('../services/smsLimitEventService');
 
 // All routes require super admin authentication
 router.use(requireSuperAdmin);
@@ -23,6 +24,201 @@ router.post('/create', createTenant);
 
 // GET /admin/qr/:userId - Generate QR code for business
 router.get('/qr/:userId', generateQrCode);
+
+// GET /admin/sms-limits - View SMS limit events and users near limits
+router.get('/sms-limits', async (req, res) => {
+  try {
+    const [stats, usersNearLimit, recentEvents] = await Promise.all([
+      smsLimitEventService.getLimitStats({ days: 30 }),
+      smsLimitEventService.getUsersNearLimit({ thresholdPercent: 50 }),
+      smsLimitEventService.getRecentLimitEvents({ days: 7, limit: 50 })
+    ]);
+
+    const baseUrl = process.env.APP_URL || 'https://morestars.io';
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>SMS Limit Monitoring - Admin</title>
+        <style>
+          * { box-sizing: border-box; }
+          body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+          }
+          h1 { color: #500B42; margin-bottom: 8px; }
+          h2 { color: #333; margin-top: 32px; border-bottom: 2px solid #A1438E; padding-bottom: 8px; }
+          .subtitle { color: #666; margin-bottom: 24px; }
+          .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+          }
+          .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          }
+          .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #500B42;
+          }
+          .stat-label { color: #666; font-size: 14px; }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          }
+          th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+          }
+          th { background: #500B42; color: white; font-weight: 500; }
+          tr:hover { background: #f9f9f9; }
+          .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+          }
+          .badge-danger { background: #fee2e2; color: #dc2626; }
+          .badge-warning { background: #fef3c7; color: #d97706; }
+          .badge-success { background: #d1fae5; color: #059669; }
+          .progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+          }
+          .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+          }
+          .progress-critical { background: #dc2626; }
+          .progress-warning { background: #d97706; }
+          .progress-normal { background: #059669; }
+          .back-link { margin-top: 30px; }
+          .back-link a { color: #A1438E; text-decoration: none; }
+          .back-link a:hover { text-decoration: underline; }
+          .empty-state { color: #666; font-style: italic; padding: 20px; text-align: center; }
+          .refresh-note { font-size: 12px; color: #999; margin-top: 8px; }
+        </style>
+      </head>
+      <body>
+        <h1>SMS Limit Monitoring</h1>
+        <p class="subtitle">Track clients approaching or hitting their SMS limits</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">${stats.limitReachedEvents}</div>
+            <div class="stat-label">Limit Reached Events (30 days)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.uniqueUsersHitLimit}</div>
+            <div class="stat-label">Unique Users Hit Limit</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.limitWarningEvents}</div>
+            <div class="stat-label">Warning Events (80%+)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${usersNearLimit.filter(u => u.atLimit).length}</div>
+            <div class="stat-label">Currently At Limit</div>
+          </div>
+        </div>
+
+        <h2>Users Near/At Limit</h2>
+        ${usersNearLimit.length > 0 ? `
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Email</th>
+              <th>Usage</th>
+              <th>Progress</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${usersNearLimit.map(u => {
+              const pct = parseFloat(u.percentUsed);
+              const progressClass = pct >= 100 ? 'progress-critical' : pct >= 80 ? 'progress-warning' : 'progress-normal';
+              const badgeClass = pct >= 100 ? 'badge-danger' : pct >= 80 ? 'badge-warning' : 'badge-success';
+              const statusText = pct >= 100 ? 'AT LIMIT' : pct >= 80 ? 'Warning' : 'OK';
+              return `
+                <tr>
+                  <td><strong>${u.businessName || 'N/A'}</strong></td>
+                  <td>${u.email}</td>
+                  <td>${u.smsUsageCount} / ${u.smsUsageLimit} (${u.remaining} left)</td>
+                  <td>
+                    <div class="progress-bar">
+                      <div class="progress-fill ${progressClass}" style="width: ${Math.min(pct, 100)}%"></div>
+                    </div>
+                  </td>
+                  <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+        ` : '<div class="empty-state">No users near their limit</div>'}
+
+        <h2>Recent Limit Events (7 days)</h2>
+        ${recentEvents.length > 0 ? `
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Business</th>
+              <th>Event</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${recentEvents.map(e => {
+              const eventClass = e.eventType === 'limit_reached' ? 'badge-danger' : 'badge-warning';
+              const eventLabel = e.eventType === 'limit_reached' ? 'BLOCKED' : 'WARNING';
+              const time = new Date(e.eventTimestamp).toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+              });
+              return `
+                <tr>
+                  <td>${time}</td>
+                  <td>${e.user?.businessName || 'Unknown'}<br><small style="color:#666">${e.user?.email || ''}</small></td>
+                  <td><span class="badge ${eventClass}">${eventLabel}</span></td>
+                  <td><small>${e.errorMessage || '-'}</small></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+        ` : '<div class="empty-state">No limit events in the last 7 days</div>'}
+
+        <p class="refresh-note">Data refreshes on page load. Alerts are sent automatically when limits are reached.</p>
+
+        <div class="back-link">
+          <a href="/admin">&larr; Back to Admin Dashboard</a>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    res.status(500).send(`Error loading SMS limit data: ${error.message}`);
+  }
+});
 
 // GET /admin/email-preview - List all email templates
 router.get('/email-preview', (req, res) => {

@@ -41,7 +41,9 @@ const SmsEvent = sequelize.define('SmsEvent', {
       'invalid',       // Invalid phone number
       'opt_out',       // Customer opted out (STOP)
       'opt_in',        // Customer opted back in (START)
-      'undelivered'    // SMS not delivered
+      'undelivered',   // SMS not delivered
+      'limit_reached', // User hit SMS limit (blocked send)
+      'limit_warning'  // User at 80%+ of SMS limit
     ),
     allowNull: false,
     field: 'event_type',

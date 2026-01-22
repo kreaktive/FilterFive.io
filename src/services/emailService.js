@@ -655,6 +655,35 @@ const sendVerificationReminderEmail = async (email, businessName, verificationTo
 };
 
 /**
+ * Send Subscription Confirmation Email (to customer after successful purchase)
+ */
+const sendSubscriptionConfirmationEmail = async (email, businessName, plan) => {
+  try {
+    const templates = require('./emailTemplates');
+    const dashboardUrl = `${process.env.APP_URL}/dashboard`;
+
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject: 'Welcome to MoreStars Pro - Subscription Confirmed!',
+      html: templates.subscriptionConfirmationEmail(businessName, plan, dashboardUrl)
+    });
+
+    if (result.error) {
+      throw new Error(`Resend API Error: ${result.error.message}`);
+    }
+
+    const emailId = result?.data?.id || result?.id;
+    logger.info('Subscription confirmation email sent', { email, plan, emailId });
+
+    return { success: true, emailId };
+  } catch (error) {
+    logger.error('Subscription confirmation email failed', { email, error: error.message });
+    throw error;
+  }
+};
+
+/**
  * Send Contact Form Notification
  */
 const sendContactNotification = async (formData) => {
@@ -710,5 +739,6 @@ module.exports = {
   sendAbandonedCheckout30MinEmail,
   sendPaymentFailedEmail,
   sendVerificationReminderEmail,
-  sendContactNotification
+  sendContactNotification,
+  sendSubscriptionConfirmationEmail
 };

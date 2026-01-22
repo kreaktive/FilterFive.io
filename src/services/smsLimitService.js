@@ -40,6 +40,7 @@
 const { sequelize } = require('../config/database');
 const { User } = require('../models');
 const logger = require('./logger');
+const smsLimitEventService = require('./smsLimitEventService');
 
 class SmsLimitService {
   /**
@@ -70,6 +71,16 @@ class SmsLimitService {
 
       if (remainingSlots < count) {
         await transaction.rollback();
+
+        // Log the limit reached event (async, don't await)
+        smsLimitEventService.logLimitReached({
+          userId,
+          currentUsage: user.smsUsageCount,
+          limit: user.smsUsageLimit,
+          attemptedAction: 'single_sms',
+          requestedCount: count
+        }).catch(err => logger.error('Failed to log limit event', { error: err.message }));
+
         return {
           canSend: false,
           error: 'SMS limit reached',
@@ -77,6 +88,15 @@ class SmsLimitService {
           transaction: null,
           remainingSlots
         };
+      }
+
+      // Check if approaching limit (80%+) and log warning
+      if (smsLimitEventService.shouldWarn(user.smsUsageCount, user.smsUsageLimit)) {
+        smsLimitEventService.logLimitWarning({
+          userId,
+          currentUsage: user.smsUsageCount,
+          limit: user.smsUsageLimit
+        }).catch(err => logger.error('Failed to log limit warning', { error: err.message }));
       }
 
       // Check subscription status
@@ -185,12 +205,31 @@ class SmsLimitService {
 
       if (availableSlots < requestedCount) {
         await transaction.rollback();
+
+        // Log the limit reached event (async, don't await)
+        smsLimitEventService.logLimitReached({
+          userId,
+          currentUsage: user.smsUsageCount,
+          limit: user.smsUsageLimit,
+          attemptedAction: 'bulk_csv_upload',
+          requestedCount
+        }).catch(err => logger.error('Failed to log limit event', { error: err.message }));
+
         return {
           canSend: false,
           error: 'Insufficient SMS capacity',
           availableSlots,
           requestedCount
         };
+      }
+
+      // Check if approaching limit (80%+) and log warning
+      if (smsLimitEventService.shouldWarn(user.smsUsageCount, user.smsUsageLimit)) {
+        smsLimitEventService.logLimitWarning({
+          userId,
+          currentUsage: user.smsUsageCount,
+          limit: user.smsUsageLimit
+        }).catch(err => logger.error('Failed to log limit warning', { error: err.message }));
       }
 
       // Return locked state for batch processing

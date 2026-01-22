@@ -7,7 +7,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { User, StripeWebhookEvent } = require('../models');
 const logger = require('./logger');
-const { sendBusinessEventAlert } = require('./emailService');
+const { sendBusinessEventAlert, sendSubscriptionConfirmationEmail } = require('./emailService');
 
 /**
  * Price IDs for MoreStars subscriptions
@@ -291,6 +291,10 @@ class StripeService {
     });
 
     logger.info('Checkout completed', { userId, plan });
+
+    // Send subscription confirmation email to customer (non-blocking)
+    sendSubscriptionConfirmationEmail(user.email, user.businessName, plan)
+      .catch(err => logger.error('Subscription confirmation email failed', { userId, error: err.message }));
 
     // Send business event alert (non-blocking)
     sendBusinessEventAlert(wasOnTrial ? 'trial_converted' : 'subscription_created', {

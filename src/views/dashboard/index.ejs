@@ -1482,12 +1482,6 @@
         <div class="stat-value"><%= analytics.totalClicked %></div>
         <div class="stat-subtext"><%= analytics.clickRate %>% click rate</div>
       </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Reviews Received</div>
-        <div class="stat-value"><%= analytics.totalRated %></div>
-        <div class="stat-subtext"><%= analytics.rateRate %>% completion rate</div>
-      </div>
     </div>
 
     <!-- Recent Activity / Pulse Feed -->
@@ -1547,79 +1541,6 @@
       </div>
     </div>
 
-    <!-- Rating Distribution -->
-    <div class="section collapsible" id="ratingDistributionSection">
-      <div class="section-header">
-        <h3>Rating Distribution</h3>
-        <span class="section-arrow">▼</span>
-      </div>
-      <div class="section-body">
-        <div class="rating-bars">
-          <% for (let i = 5; i >= 1; i--) { %>
-            <% const count = analytics.ratingCounts[i]; %>
-            <% const total = analytics.totalRated || 1; %>
-            <% const percentage = (count / total) * 100; %>
-            <div class="rating-row">
-              <div class="rating-label"><%= i %> <span class="stars">★</span></div>
-              <div class="rating-bar">
-                <div class="rating-fill" style="width: <%= percentage %>%"></div>
-              </div>
-              <div class="rating-count"><%= count %></div>
-            </div>
-          <% } %>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Feedback Requests -->
-    <div class="section collapsible" id="recentFeedbackSection">
-      <div class="section-header">
-        <h3>Recent Feedback Requests</h3>
-        <span class="section-arrow">▼</span>
-      </div>
-      <div class="section-body">
-        <% if (recentRequests.length > 0) { %>
-          <table class="recent-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Rating</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% recentRequests.forEach(request => { %>
-                <tr>
-                  <td data-label="Customer"><%= request.customerName || 'Anonymous' %></td>
-                  <td data-label="Phone"><%= request.customerPhone %></td>
-                  <td data-label="Status">
-                    <span class="status-badge status-<%= request.status %>">
-                      <%= request.status %>
-                    </span>
-                  </td>
-                  <td data-label="Rating">
-                    <% if (request.review) { %>
-                      <span class="stars"><%= '★'.repeat(request.review.rating) %></span>
-                    <% } else { %>
-                      -
-                    <% } %>
-                  </td>
-                  <td data-label="Date"><%= new Date(request.createdAt).toLocaleDateString() %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <div class="empty-state">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.4; margin-bottom: 12px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <p style="margin-bottom: 8px;">Requests will appear here after you send them</p>
-            <p class="empty-subtext">Use the test SMS form above or <a href="/dashboard/upload" style="color: var(--brand-gold);">upload a CSV</a> to send review requests</p>
-          </div>
-        <% } %>
-      </div>
-    </div>
   </main>
 
   <!-- Review Details Modal -->
