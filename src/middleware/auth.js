@@ -6,7 +6,7 @@ const cacheService = require('../services/cacheService');
 // Cache for frequently accessed user attributes (request-scoped)
 const BASIC_ATTRIBUTES = ['id', 'email', 'businessName', 'isActive', 'isVerified', 'role'];
 const SMS_ATTRIBUTES = ['smsUsageCount', 'smsUsageLimit'];
-const SUBSCRIPTION_ATTRIBUTES = ['subscriptionStatus', 'subscriptionPlan', 'stripeCustomerId', 'trialStartsAt', 'trialEndsAt'];
+const SUBSCRIPTION_ATTRIBUTES = ['subscriptionStatus', 'subscriptionPlan', 'stripeCustomerId', 'stripeSubscriptionId', 'trialStartsAt', 'trialEndsAt'];
 const SETTINGS_ATTRIBUTES = ['reviewUrl', 'smsMessageTone', 'customSmsMessage', 'reviewValueEstimate'];
 const FULL_ATTRIBUTES = [...BASIC_ATTRIBUTES, ...SMS_ATTRIBUTES, ...SUBSCRIPTION_ATTRIBUTES, ...SETTINGS_ATTRIBUTES];
 

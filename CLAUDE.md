@@ -383,3 +383,10 @@ docker compose -f docker-compose.prod.yml logs --tail=100 app
 ngrok http 3000
 # Update webhook URLs in Stripe/Square/Shopify dashboards
 ```
+
+## Active Technologies
+- Node.js 18+ (backend), Vanilla JavaScript ES6 (frontend) + Express.js, EJS templates, Stripe API (existing) (001-subscription-cancel)
+- PostgreSQL via Sequelize ORM (existing User model) (001-subscription-cancel)
+
+## Recent Changes
+- 001-subscription-cancel: Added Node.js 18+ (backend), Vanilla JavaScript ES6 (frontend) + Express.js, EJS templates, Stripe API (existing)
