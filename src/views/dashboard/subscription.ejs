@@ -261,6 +261,25 @@
       color: white;
     }
 
+    .btn-reactivate {
+      width: 100%;
+      padding: var(--space-4);
+      background: var(--bg-white);
+      color: #10b981;
+      border: 2px solid #10b981;
+      border-radius: var(--radius-lg);
+      font-size: var(--text-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      margin-top: var(--space-4);
+    }
+
+    .btn-reactivate:hover {
+      background: #10b981;
+      color: white;
+    }
+
     .btn-portal {
       width: 100%;
       padding: var(--space-4);
@@ -526,13 +545,24 @@
           Manage Billing & Payment Methods
         </a>
 
-        <button class="btn-cancel" id="btn-cancel">
-          Cancel Subscription
-        </button>
-
-        <p style="margin-top: 15px; font-size: 13px; color: #718096; text-align: center;">
-          Cancelling will disable your subscription at the end of the current billing period.
-        </p>
+        <% if (subscriptionDetails && subscriptionDetails.cancel_at_period_end) { %>
+          <!-- Subscription is pending cancellation - show reactivate button -->
+          <button class="btn-reactivate" id="btn-reactivate">
+            Reactivate Subscription
+          </button>
+          <p style="margin-top: 15px; font-size: 13px; color: #718096; text-align: center;">
+            Your subscription is scheduled to cancel on <%= new Date(subscriptionDetails.current_period_end * 1000).toLocaleDateString() %>.
+            Click above to keep your subscription active.
+          </p>
+        <% } else { %>
+          <!-- Active subscription - show cancel button -->
+          <button class="btn-cancel" id="btn-cancel" data-period-end="<%= subscriptionDetails ? new Date(subscriptionDetails.current_period_end * 1000).toLocaleDateString() : '' %>">
+            Cancel Subscription
+          </button>
+          <p style="margin-top: 15px; font-size: 13px; color: #718096; text-align: center;">
+            Cancelling will disable your subscription at the end of the current billing period.
+          </p>
+        <% } %>
       </div>
     <% } %>
 
@@ -545,6 +575,7 @@
 
   <script src="/js/subscription.min.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
   <%- include('../partials/dashboard-footer') %>
+  <%- include('../partials/modal') %>
   <script src="/js/dashboard-menu.min.js?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1.0.0' %>"></script>
 </body>
 </html>

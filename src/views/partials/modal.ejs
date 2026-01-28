@@ -1,31 +1,3 @@
-<%#
-  Accessible Modal Component
-
-  A fully accessible modal dialog with focus trapping, escape key handling,
-  and proper ARIA attributes.
-
-  Usage:
-  1. Include this partial once in your layout (before </body>):
-     <%- include('partials/modal') %>
-
-  2. Open modals via JavaScript:
-     openModal('modal-id', {
-       title: 'Confirm Action',
-       content: '<p>Are you sure?</p>',
-       actions: [
-         { text: 'Cancel', variant: 'secondary', onClick: () => closeModal() },
-         { text: 'Confirm', variant: 'primary', onClick: handleConfirm }
-       ],
-       size: 'md', // 'sm' | 'md' | 'lg' | 'full'
-       closeOnOverlay: true,
-       closeOnEscape: true
-     });
-
-  3. Close modals:
-     closeModal();
-     closeModal('specific-modal-id');
-%>
-
 <!-- Modal Container -->
 <div id="modal-root" class="modal-root" aria-hidden="true"></div>
 

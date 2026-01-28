@@ -15,6 +15,12 @@ const logger = require('../services/logger');
 const showSubscription = async (req, res) => {
   try {
     const userId = req.session.userId;
+
+    // Load subscription attributes (lazy loading from auth middleware)
+    if (req.loadUserAttributes) {
+      await req.loadUserAttributes('subscription');
+    }
+
     const user = req.user || await User.findByPk(userId);
 
     if (!user) {
