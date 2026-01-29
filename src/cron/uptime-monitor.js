@@ -7,9 +7,10 @@
  * Schedule: Every 5 minutes (cron: star-slash-5 * * * *)
  *
  * Features:
- * - Only alerts on state CHANGE (down to up or up to down)
+ * - Requires 2 consecutive failures before alerting (avoids transient false positives)
+ * - Shows actual error message (timeout, HTTP status, connection error) instead of "unknown"
  * - Tracks which specific services failed
- * - Sends recovery notification when services come back
+ * - Logs recovery when services come back (no SMS on recovery)
  *
  * @module cron/uptime-monitor
  */
@@ -71,7 +72,10 @@ async function sendAlert(message) {
  * Get failed services from preflight result
  */
 function getFailedServices(result) {
-  if (!result.checks) return ['unknown'];
+  // If no checks object, the request itself failed - show the error
+  if (!result.checks) {
+    return [result.error || 'Connection failed'];
+  }
 
   return Object.entries(result.checks)
     .filter(([_, check]) => check.status !== 'ok')
@@ -92,8 +96,8 @@ async function executeUptimeCheck() {
   if (lastStatus === 'healthy' && currentStatus !== 'healthy') {
     consecutiveFailures++;
 
-    // Alert immediately on critical, wait for 2 consecutive failures on degraded
-    if (currentStatus === 'critical' || consecutiveFailures >= 2) {
+    // Require 2 consecutive failures before alerting (avoids false positives from transient issues)
+    if (consecutiveFailures >= 2) {
       const emoji = currentStatus === 'critical' ? '🔴' : '🟡';
       const message = `${emoji} MoreStars ${currentStatus.toUpperCase()}\n\n` +
         `Failed:\n${failedServices.join('\n')}\n\n` +
@@ -110,7 +114,7 @@ async function executeUptimeCheck() {
       lastStatus = currentStatus;
       lastFailedServices = failedServices;
     } else {
-      logger.warn('Uptime check degraded - waiting for confirmation', {
+      logger.warn('Uptime check failed - waiting for confirmation', {
         status: currentStatus,
         failedServices,
         consecutiveFailures
